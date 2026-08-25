@@ -1,10 +1,11 @@
-/* Agro-Zia V3 multilingual selector — preview-only foundation */
+/* Agro-Zia V3 multilingual selector — preview */
 .language-selector{position:relative;display:inline-flex;align-items:center;z-index:1100}
-.language-selector__button{border:1px solid var(--line,#dce8e0);background:#fff;color:var(--green,#145b3b);border-radius:9px;padding:9px 11px;font-weight:800;cursor:pointer}
-.language-selector__menu{display:none;position:absolute;top:calc(100% + 8px);right:0;min-width:145px;background:#fff;border:1px solid var(--line,#dce8e0);border-radius:12px;padding:6px;box-shadow:0 12px 30px rgba(18,75,50,.12)}
-.language-selector.is-open .language-selector__menu{display:block}
-.language-selector__menu a{display:block;padding:9px 10px;border-radius:8px;font-size:13px}
-.language-selector__menu a:hover,.language-selector__menu a[aria-current="true"]{background:#edf5ef;color:#145b3b}
+.language-selector__button{border:1px solid var(--line,#dce8e0);background:#fff;color:var(--green,#145b3b);border-radius:9px;padding:9px 11px;font-weight:800;cursor:pointer;appearance:none;-webkit-appearance:none}
+.language-selector__button:focus-visible{outline:2px solid var(--green2,#1d7a50);outline-offset:2px}
+.language-selector__menu{display:none;position:absolute;top:calc(100% + 8px);right:0;min-width:145px;background:#fff;border:1px solid var(--line,#dce8e0);border-radius:12px;padding:6px;box-shadow:0 12px 30px rgba(18,75,50,.12);z-index:1200}
+.language-selector.is-open .language-selector__menu,.language-selector:focus-within .language-selector__menu,.language-selector:hover .language-selector__menu{display:block}
+.language-selector__menu a{display:block;padding:9px 10px;border-radius:8px;font-size:13px;white-space:nowrap;cursor:pointer}
+.language-selector__menu a:hover,.language-selector__menu a:focus-visible,.language-selector__menu a[aria-current="true"]{background:#edf5ef;color:#145b3b}
 html[dir="rtl"] .language-selector__menu{right:auto;left:0}
 @media(max-width:900px){.language-selector{margin-left:auto}.language-selector__menu{right:0}}
 @media(max-width:900px){html[dir="rtl"] .language-selector{margin-left:0;margin-right:auto}}
