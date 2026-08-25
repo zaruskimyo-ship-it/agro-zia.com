@@ -25,14 +25,12 @@
   function activateZarusLink() {
     const existing = document.querySelector('.zarus [data-i18n="network_link"]');
     if (!existing) return;
-
     if (existing.tagName.toLowerCase() === 'a') {
       existing.href = 'https://zarus.ir/';
       existing.target = '_blank';
       existing.rel = 'noopener noreferrer';
       return;
     }
-
     const link = document.createElement('a');
     link.className = existing.className;
     link.setAttribute('data-i18n', 'network_link');
@@ -43,13 +41,38 @@
     existing.replaceWith(link);
   }
 
+  function activateContactEmails() {
+    const emails = ['info@agro-zia.com', 'export@agro-zia.com'];
+    const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+    const nodes = [];
+    while (walker.nextNode()) nodes.push(walker.currentNode);
+    nodes.forEach((node) => {
+      const parent = node.parentElement;
+      if (!parent || parent.closest('a') || parent.closest('script') || parent.closest('style')) return;
+      const text = node.nodeValue || '';
+      const email = emails.find((value) => text.includes(value));
+      if (!email) return;
+      const index = text.indexOf(email);
+      const fragment = document.createDocumentFragment();
+      fragment.append(document.createTextNode(text.slice(0, index)));
+      const link = document.createElement('a');
+      link.href = `mailto:${email}`;
+      link.textContent = email;
+      link.setAttribute('aria-label', `Email ${email}`);
+      fragment.append(link);
+      fragment.append(document.createTextNode(text.slice(index + email.length)));
+      node.replaceWith(fragment);
+    });
+  }
+
   function init() {
     setDirection();
     activateZarusLink();
-
-    // Translation scripts may update the DOM after initialization.
-    // Re-apply the semantic CTA without replacing an existing anchor.
-    const observer = new MutationObserver(() => activateZarusLink());
+    activateContactEmails();
+    const observer = new MutationObserver(() => {
+      activateZarusLink();
+      activateContactEmails();
+    });
     observer.observe(document.body, { childList: true, subtree: true, characterData: true });
   }
 
