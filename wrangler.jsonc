@@ -3,12 +3,6 @@
   "name": "agro-zia-com",
   "compatibility_date": "2026-08-25",
   "assets": {
-    "directory": ".",
-    "exclude": [
-      ".git/**",
-      "docs/**",
-      "wrangler.jsonc",
-      "README*"
-    ]
+    "directory": "."
   }
 }
