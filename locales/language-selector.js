@@ -65,13 +65,61 @@
     });
   }
 
+  function activateSocialLinks() {
+    const footer = document.querySelector('footer .container');
+    if (!footer || footer.querySelector('[data-agrozia-social]')) return;
+
+    const wrap = document.createElement('div');
+    wrap.setAttribute('data-agrozia-social', 'true');
+    wrap.style.display = 'flex';
+    wrap.style.flexWrap = 'wrap';
+    wrap.style.gap = '10px';
+    wrap.style.marginTop = '18px';
+
+    const links = [
+      {
+        label: 'WhatsApp',
+        href: 'https://wa.me/message/C2C4CHM4DXFNO1',
+        aria: 'Contact Agro-Zia on WhatsApp'
+      },
+      {
+        label: 'Instagram @agro_zia',
+        href: 'https://www.instagram.com/agro_zia/',
+        aria: 'Agro-Zia on Instagram'
+      }
+    ];
+
+    links.forEach(({ label, href, aria }) => {
+      const link = document.createElement('a');
+      link.href = href;
+      link.target = '_blank';
+      link.rel = 'noopener noreferrer';
+      link.textContent = label;
+      link.setAttribute('aria-label', aria);
+      link.style.display = 'inline-flex';
+      link.style.alignItems = 'center';
+      link.style.padding = '7px 11px';
+      link.style.border = '1px solid rgba(255,255,255,.25)';
+      link.style.borderRadius = '999px';
+      link.style.color = '#fff';
+      link.style.fontSize = '12px';
+      link.style.fontWeight = '700';
+      link.style.textDecoration = 'none';
+      wrap.appendChild(link);
+    });
+
+    footer.appendChild(wrap);
+  }
+
   function init() {
     setDirection();
     activateZarusLink();
     activateContactEmails();
+    activateSocialLinks();
     const observer = new MutationObserver(() => {
       activateZarusLink();
       activateContactEmails();
+      activateSocialLinks();
     });
     observer.observe(document.body, { childList: true, subtree: true, characterData: true });
   }
