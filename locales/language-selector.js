@@ -77,18 +77,9 @@
     wrap.style.marginTop = '18px';
 
     const links = [
-      {
-        label: 'WhatsApp',
-        href: 'https://wa.me/message/C2C4CHM4DXFNO1',
-        aria: 'Contact Agro-Zia on WhatsApp'
-      },
-      {
-        label: 'Instagram @agro_zia',
-        href: 'https://www.instagram.com/agro_zia/',
-        aria: 'Agro-Zia on Instagram'
-      }
+      { label: 'WhatsApp', href: 'https://wa.me/message/C2C4CHM4DXFNO1', aria: 'Contact Agro-Zia on WhatsApp' },
+      { label: 'Instagram @agro_zia', href: 'https://www.instagram.com/agro_zia/', aria: 'Agro-Zia on Instagram' }
     ];
-
     links.forEach(({ label, href, aria }) => {
       const link = document.createElement('a');
       link.href = href;
@@ -107,8 +98,41 @@
       link.style.textDecoration = 'none';
       wrap.appendChild(link);
     });
-
     footer.appendChild(wrap);
+  }
+
+  function activateProductCategoryLinks() {
+    if (!/\/products\.html$/i.test(location.pathname)) return;
+    const grid = document.querySelector('#categories .grid3');
+    if (!grid || grid.querySelector('[data-agrozia-product-link]')) return;
+    const active = getActive();
+    const labels = {
+      en: 'View category →', ru: 'Открыть категорию →', fa: 'مشاهده دسته‌بندی ←', ar: 'عرض الفئة ←', uz: 'Kategoriyani ko‘rish →', tr: 'Kategoriyi görüntüle →'
+    };
+    const slugs = ['fertilizers','agricultural-products','greenhouse-products','irrigation-solutions','agricultural-equipment','custom-sourcing'];
+    grid.querySelectorAll('.card').forEach((card, index) => {
+      const slug = slugs[index];
+      if (!slug) return;
+      const link = document.createElement('a');
+      link.href = `product-detail.html?lang=${active}&product=${slug}`;
+      link.setAttribute('data-agrozia-product-link', 'true');
+      link.textContent = labels[active];
+      link.style.display = 'inline-flex';
+      link.style.marginTop = '16px';
+      link.style.padding = '9px 13px';
+      link.style.borderRadius = '8px';
+      link.style.background = '#145b3b';
+      link.style.color = '#fff';
+      link.style.fontWeight = '800';
+      link.style.fontSize = '12px';
+      link.style.textDecoration = 'none';
+      link.addEventListener('click', () => {
+        const url = new URL(link.href, location.href);
+        url.searchParams.set('lang', getActive());
+        link.href = url.toString();
+      });
+      card.appendChild(link);
+    });
   }
 
   function init() {
@@ -116,10 +140,12 @@
     activateZarusLink();
     activateContactEmails();
     activateSocialLinks();
+    activateProductCategoryLinks();
     const observer = new MutationObserver(() => {
       activateZarusLink();
       activateContactEmails();
       activateSocialLinks();
+      activateProductCategoryLinks();
     });
     observer.observe(document.body, { childList: true, subtree: true, characterData: true });
   }
