@@ -1,874 +1,154 @@
-<!DOCTYPE html>
-<html lang="en" dir="ltr">
+<!doctype html>
+<html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<meta name="description" content="Agro-Zia — Agriculture, Engineering & International Trade. Agricultural products, engineering services, projects and international business solutions.">
-
-<title>Agro-Zia | Agriculture • Engineering • Trade</title>
-
-<style>
-*{
-  box-sizing:border-box;
-  margin:0;
-  padding:0;
-}
-
-html{
-  scroll-behavior:smooth;
-}
-
-body{
-  font-family:Arial,Helvetica,sans-serif;
-  background:#f7faf7;
-  color:#173528;
-  line-height:1.7;
-}
-
-a{
-  text-decoration:none;
-  color:inherit;
-}
-
-.container{
-  width:min(1180px,92%);
-  margin:auto;
-}
-
-header{
-  position:sticky;
-  top:0;
-  z-index:1000;
-  background:rgba(255,255,255,.97);
-  border-bottom:1px solid #e1e9e3;
-}
-
-.nav{
-  min-height:76px;
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:25px;
-}
-
-.logo{
-  display:flex;
-  align-items:center;
-  gap:11px;
-}
-
-.logo-mark{
-  width:44px;
-  height:44px;
-  border-radius:11px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  background:#124b32;
-  color:#fff;
-  font-weight:bold;
-  letter-spacing:1px;
-}
-
-.logo strong{
-  display:block;
-  letter-spacing:2px;
-  font-size:18px;
-}
-
-.logo span{
-  display:block;
-  font-size:10px;
-  color:#678074;
-  letter-spacing:1px;
-}
-
-.nav-links{
-  display:flex;
-  align-items:center;
-  gap:25px;
-  font-size:14px;
-  font-weight:600;
-}
-
-.nav-links a:hover{
-  color:#2d8a5b;
-}
-
-.btn{
-  display:inline-block;
-  padding:12px 21px;
-  border-radius:8px;
-  background:#17633f;
-  color:white;
-  border:0;
-  cursor:pointer;
-  font-weight:bold;
-}
-
-.btn:hover{
-  background:#0e4b2e;
-}
-
-.btn-light{
-  background:white;
-  color:#17633f;
-  border:1px solid #cbdacf;
-}
-
-.hero{
-  padding:90px 0 80px;
-  background:
-    linear-gradient(135deg,rgba(18,75,50,.97),rgba(34,116,76,.92));
-  color:white;
-}
-
-.hero-grid{
-  display:grid;
-  grid-template-columns:1.2fr .8fr;
-  gap:60px;
-  align-items:center;
-}
-
-.eyebrow{
-  color:#6cae88;
-  font-size:12px;
-  font-weight:bold;
-  letter-spacing:2px;
-  margin-bottom:12px;
-}
-
-.hero .eyebrow{
-  color:#b7dfc6;
-}
-
-.hero h1{
-  font-size:clamp(38px,6vw,68px);
-  line-height:1.08;
-  margin-bottom:24px;
-}
-
-.hero h1 span{
-  color:#a9d9b8;
-}
-
-.hero p{
-  max-width:700px;
-  color:#e1eee5;
-  font-size:18px;
-  margin-bottom:30px;
-}
-
-.hero-actions{
-  display:flex;
-  flex-wrap:wrap;
-  gap:12px;
-}
-
-.hero-card{
-  background:rgba(255,255,255,.1);
-  border:1px solid rgba(255,255,255,.2);
-  border-radius:18px;
-  padding:30px;
-}
-
-.hero-card h3{
-  margin-bottom:15px;
-}
-
-.hero-card p{
-  font-size:15px;
-  margin-bottom:0;
-}
-
-section{
-  padding:80px 0;
-}
-
-.section-head{
-  max-width:760px;
-  margin-bottom:42px;
-}
-
-.section-head h2{
-  font-size:38px;
-  line-height:1.2;
-  margin-bottom:15px;
-}
-
-.section-text{
-  color:#60736a;
-  max-width:760px;
-}
-
-.grid-3{
-  display:grid;
-  grid-template-columns:repeat(3,1fr);
-  gap:22px;
-}
-
-.card{
-  background:white;
-  border:1px solid #e1e9e3;
-  border-radius:15px;
-  padding:28px;
-  box-shadow:0 8px 25px rgba(18,75,50,.05);
-}
-
-.card h3{
-  margin-bottom:10px;
-  color:#124b32;
-}
-
-.card p{
-  color:#64766d;
-  font-size:15px;
-}
-
-.icon{
-  width:48px;
-  height:48px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  border-radius:12px;
-  background:#e7f3eb;
-  color:#17633f;
-  font-size:22px;
-  margin-bottom:18px;
-}
-
-.products{
-  background:#edf5ef;
-}
-
-.product-card{
-  overflow:hidden;
-  padding:0;
-}
-
-.product-top{
-  height:150px;
-  background:linear-gradient(135deg,#dcecdf,#b9d8c1);
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-size:50px;
-}
-
-.product-body{
-  padding:24px;
-}
-
-.product-body h3{
-  margin-bottom:8px;
-}
-
-.product-body p{
-  margin-bottom:18px;
-}
-
-.projects{
-  background:white;
-}
-
-.project-list{
-  display:grid;
-  grid-template-columns:repeat(2,1fr);
-  gap:22px;
-}
-
-.project{
-  border:1px solid #e1e9e3;
-  border-radius:15px;
-  padding:28px;
-}
-
-.project strong{
-  color:#17633f;
-  font-size:13px;
-  letter-spacing:1px;
-}
-
-.project h3{
-  margin:10px 0;
-}
-
-.project p{
-  color:#64766d;
-}
-
-.team{
-  background:#f7faf7;
-}
-
-.team-box{
-  background:#124b32;
-  color:white;
-  border-radius:20px;
-  padding:45px;
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:40px;
-}
-
-.team-box p{
-  color:#d9e9df;
-}
-
-.market-section{
-  background:white;
-}
-
-.market-grid{
-  display:grid;
-  grid-template-columns:repeat(4,1fr);
-  gap:16px;
-}
-
-.market{
-  border:1px solid #dce7df;
-  border-radius:12px;
-  padding:22px;
-  text-align:center;
-  font-weight:bold;
-  background:#fafcfb;
-}
-
-.contact{
-  background:#edf5ef;
-}
-
-.contact-grid{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:55px;
-  align-items:start;
-}
-
-form{
-  background:white;
-  padding:30px;
-  border-radius:15px;
-  border:1px solid #dce7df;
-}
-
-label{
-  display:block;
-  font-weight:bold;
-  font-size:14px;
-  margin-bottom:18px;
-}
-
-input,
-textarea{
-  width:100%;
-  margin-top:7px;
-  padding:13px;
-  border:1px solid #ccdacf;
-  border-radius:8px;
-  font:inherit;
-}
-
-textarea{
-  resize:vertical;
-}
-
-footer{
-  background:#0d2c1e;
-  color:white;
-  padding:55px 0 25px;
-}
-
-.footer-grid{
-  display:grid;
-  grid-template-columns:2fr 1fr 1fr 1fr;
-  gap:35px;
-}
-
-.footer-grid h4{
-  margin-bottom:15px;
-}
-
-.footer-grid a{
-  display:block;
-  color:#b9c9c0;
-  margin:7px 0;
-  font-size:14px;
-}
-
-.footer-grid a:hover{
-  color:white;
-}
-
-.footer-description{
-  color:#9fb2a7;
-  margin-top:20px;
-  max-width:400px;
-}
-
-.bottom{
-  border-top:1px solid rgba(255,255,255,.12);
-  margin-top:40px;
-  padding-top:20px;
-  display:flex;
-  justify-content:space-between;
-  gap:20px;
-  color:#8ea398;
-  font-size:12px;
-}
-
-@media(max-width:850px){
-  .nav-links{
-    display:none;
-  }
-
-  .hero-grid,
-  .contact-grid,
-  .team-box{
-    grid-template-columns:1fr;
-  }
-
-  .grid-3,
-  .market-grid{
-    grid-template-columns:repeat(2,1fr);
-  }
-
-  .project-list{
-    grid-template-columns:1fr;
-  }
-
-  .footer-grid{
-    grid-template-columns:1fr 1fr;
-  }
-}
-
-@media(max-width:560px){
-  section{
-    padding:60px 0;
-  }
-
-  .grid-3,
-  .market-grid,
-  .footer-grid{
-    grid-template-columns:1fr;
-  }
-
-  .hero{
-    padding:65px 0;
-  }
-
-  .hero h1{
-    font-size:42px;
-  }
-
-  .section-head h2{
-    font-size:30px;
-  }
-
-  .bottom{
-    flex-direction:column;
-  }
-}
-</style>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Agro-Zia connects agricultural products, engineering expertise and international trade solutions across producers, suppliers and markets.">
+  <meta name="robots" content="index,follow">
+  <meta property="og:title" content="Agro-Zia | Agricultural Solutions Beyond Borders">
+  <meta property="og:description" content="Agriculture, engineering and international trade solutions for professional partners and agricultural markets.">
+  <meta property="og:type" content="website">
+  <meta name="theme-color" content="#123d2b">
+  <title>Agro-Zia | Agricultural Solutions Beyond Borders</title>
+  <style>
+    :root{--ink:#17362a;--muted:#60766b;--green:#145b3b;--green-2:#1d7a50;--soft:#edf5ef;--line:#dce8e0;--white:#fff;--dark:#0c291d;--max:1180px;--radius:18px}
+    *{box-sizing:border-box;margin:0;padding:0}
+    html{scroll-behavior:smooth}
+    body{font-family:Arial,Helvetica,sans-serif;background:#f8fbf9;color:var(--ink);line-height:1.7}
+    a{text-decoration:none;color:inherit}
+    button,input,select,textarea{font:inherit}
+    .container{width:min(var(--max),92%);margin:auto}
+    .skip{position:absolute;left:-9999px}.skip:focus{left:12px;top:12px;z-index:3000;background:#fff;padding:10px;border-radius:8px}
+    header{position:sticky;top:0;z-index:1000;background:rgba(255,255,255,.96);backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
+    .nav{min-height:76px;display:flex;align-items:center;justify-content:space-between;gap:28px}
+    .brand{display:flex;align-items:center;gap:12px}.mark{width:44px;height:44px;border-radius:12px;background:var(--green);color:#fff;display:grid;place-items:center;font-weight:800;letter-spacing:1px}.brand strong{display:block;letter-spacing:2px;font-size:18px}.brand small{display:block;color:#6d8077;font-size:10px;letter-spacing:1px}
+    .links{display:flex;align-items:center;gap:22px;font-size:14px;font-weight:700}.links a:hover{color:var(--green-2)}
+    .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:12px 19px;border-radius:9px;background:var(--green);color:#fff;font-weight:800;border:1px solid var(--green);transition:.2s}.btn:hover{background:#0f492f}.btn.secondary{background:#fff;color:var(--green);border-color:#bcd0c4}.btn.small{padding:9px 14px;font-size:13px}
+    .menu{display:none;border:1px solid var(--line);background:#fff;border-radius:9px;padding:9px 11px;color:var(--green);font-size:20px}
+    .hero{background:linear-gradient(135deg,#103d2a 0%,#1a6744 70%,#237b52 100%);color:#fff;padding:92px 0 84px}.hero-grid{display:grid;grid-template-columns:1.25fr .75fr;gap:60px;align-items:center}.eyebrow{text-transform:uppercase;letter-spacing:2px;font-size:12px;font-weight:800;color:#6aab86;margin-bottom:13px}.hero .eyebrow{color:#bfe0cc}.hero h1{font-size:clamp(42px,6vw,70px);line-height:1.05;max-width:760px;margin-bottom:24px}.hero h1 span{color:#b9e0c7}.hero p.lead{font-size:18px;color:#e2eee7;max-width:720px;margin-bottom:30px}.actions{display:flex;flex-wrap:wrap;gap:12px}.hero-card{border:1px solid rgba(255,255,255,.22);background:rgba(255,255,255,.09);border-radius:20px;padding:30px}.hero-card h2{font-size:21px;margin-bottom:13px}.hero-card p{color:#dbece2;font-size:15px}.proof{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:24px}.proof div{border:1px solid rgba(255,255,255,.15);padding:13px;border-radius:12px;font-size:13px;color:#d9e9df}
+    section{padding:82px 0}.section-head{max-width:760px;margin-bottom:42px}.section-head h2{font-size:38px;line-height:1.2;margin-bottom:14px}.section-text{color:var(--muted);max-width:760px}.grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:18px}.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}.card{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:27px;box-shadow:0 8px 26px rgba(18,75,50,.045)}.card h3{margin-bottom:9px;color:#123f2c}.card p{color:var(--muted);font-size:15px}.icon{width:48px;height:48px;border-radius:12px;background:#e5f2e9;color:var(--green);display:grid;place-items:center;font-weight:900;margin-bottom:17px}
+    .pillars .card{min-height:220px}.pillar-num{font-size:12px;letter-spacing:1.5px;color:var(--green-2);font-weight:800;margin-bottom:10px}.arrow{display:inline-block;margin-top:18px;color:var(--green);font-weight:800;font-size:14px}
+    .products{background:var(--soft)}.product-card{padding:0;overflow:hidden}.product-top{height:112px;background:linear-gradient(135deg,#dcecdf,#bddbc7);display:grid;place-items:center;font-size:42px}.product-body{padding:24px}.product-body p{margin-bottom:18px}
+    .engineering{background:#fff}.service-list{list-style:none;margin-top:18px}.service-list li{padding:7px 0;border-bottom:1px solid #edf2ee;color:#50675c;font-size:14px}.service-list li::before{content:'✓';color:var(--green-2);font-weight:800;margin-right:9px}
+    .projects{background:#f8fbf9}.project{min-height:245px}.tag{display:inline-block;color:var(--green);font-size:12px;font-weight:800;letter-spacing:1px}.project h3{margin:9px 0}.project p{color:var(--muted)}
+    .trade{background:#fff}.markets{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:28px}.market{padding:20px;border:1px solid var(--line);border-radius:14px;text-align:center;background:#fbfdfb}.market strong{display:block;margin-top:5px}.note{font-size:13px;color:#718179;margin-top:18px}
+    .zarus{background:linear-gradient(135deg,#eff7f1,#e6f2eb)}.zarus-box{display:grid;grid-template-columns:1.1fr .9fr;gap:35px;align-items:center}.zarus-card{background:#fff;border:1px solid #cfe0d4;border-radius:20px;padding:30px}.flow{display:flex;align-items:center;justify-content:center;gap:9px;flex-wrap:wrap;margin-top:20px}.flow span{padding:9px 12px;border-radius:9px;background:#eef6f0;color:#20533a;font-size:13px;font-weight:800}.flow b{color:#789085}
+    .knowledge{background:#fff}.knowledge .card{min-height:180px}
+    .about{background:#123d2b;color:#fff}.about-grid{display:grid;grid-template-columns:1fr 1fr;gap:50px;align-items:center}.about .section-text,.about p{color:#d7e8de}.about-list{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:25px}.about-list div{padding:15px;border:1px solid rgba(255,255,255,.14);border-radius:12px}.about-list strong{display:block;margin-bottom:4px}
+    .contact{background:var(--soft)}.contact-grid{display:grid;grid-template-columns:.85fr 1.15fr;gap:50px;align-items:start}.contact-points{margin-top:25px}.contact-points div{margin:12px 0}.contact-points strong{display:block}.contact-points a{color:var(--green-2)}form{background:#fff;border:1px solid var(--line);border-radius:18px;padding:30px}.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}label{display:block;font-weight:800;font-size:13px;color:#355247}input,select,textarea{width:100%;margin-top:7px;padding:12px 13px;border:1px solid #cbdacf;border-radius:9px;background:#fff;color:var(--ink);outline:none}input:focus,select:focus,textarea:focus{border-color:#559777;box-shadow:0 0 0 3px rgba(45,138,91,.12)}textarea{min-height:125px;resize:vertical}.full{grid-column:1/-1}.form-note{font-size:12px;color:#75867e;margin-top:10px}
+    footer{background:var(--dark);color:#fff;padding:58px 0 24px}.footer-grid{display:grid;grid-template-columns:2fr 1fr 1fr 1.2fr;gap:35px}.footer-grid h3,.footer-grid h4{margin-bottom:14px}.footer-grid a{display:block;color:#b8c9bf;margin:7px 0;font-size:14px}.footer-grid a:hover{color:#fff}.footer-desc{color:#9fb2a7;max-width:410px}.bottom{border-top:1px solid rgba(255,255,255,.12);margin-top:38px;padding-top:19px;display:flex;justify-content:space-between;color:#8fa399;font-size:12px}
+    @media(max-width:900px){.links{display:none}.menu{display:block}.hero-grid,.zarus-box,.about-grid,.contact-grid{grid-template-columns:1fr}.grid-4{grid-template-columns:repeat(2,1fr)}.grid-3{grid-template-columns:repeat(2,1fr)}.markets{grid-template-columns:repeat(2,1fr)}.footer-grid{grid-template-columns:1fr 1fr}}
+    @media(max-width:600px){section{padding:62px 0}.hero{padding:68px 0}.hero h1{font-size:43px}.grid-4,.grid-3,.markets,.footer-grid,.form-grid,.about-list{grid-template-columns:1fr}.full{grid-column:auto}.bottom{flex-direction:column}.hero-card{padding:24px}.section-head h2{font-size:30px}}
+  </style>
 </head>
-
 <body>
-
+<a class="skip" href="#main">Skip to content</a>
 <header>
   <div class="container nav">
-
-    <a href="#home" class="logo">
-      <div class="logo-mark">AZ</div>
-      <div>
-        <strong>AGRO-ZIA</strong>
-        <span>AGRICULTURE • ENGINEERING • TRADE</span>
-      </div>
-    </a>
-
-    <nav class="nav-links">
-      <a href="#products">Products</a>
-      <a href="#services">Services</a>
-      <a href="#projects">Projects</a>
-      <a href="#trade">Trade</a>
-      <a href="https://zarus.ir" target="_blank">Zarus Store ↗</a>
-      <a href="#contact" class="btn">Contact</a>
+    <a class="brand" href="#home" aria-label="Agro-Zia home"><span class="mark">AZ</span><span><strong>AGRO-ZIA</strong><small>AGRICULTURE • ENGINEERING • TRADE</small></span></a>
+    <nav class="links" aria-label="Primary navigation">
+      <a href="#home">Home</a><a href="#about">About</a><a href="#products">Products</a><a href="#engineering">Engineering</a><a href="#projects">Projects</a><a href="#trade">Trade</a><a href="#knowledge">Knowledge</a><a href="#contact">Contact</a>
     </nav>
-
+    <button class="menu" type="button" aria-label="Open navigation" aria-expanded="false" onclick="toggleMenu()">☰</button>
   </div>
+  <nav id="mobileNav" class="mobile-nav" aria-label="Mobile navigation"></nav>
 </header>
-
-<main>
-
+<main id="main">
 <section class="hero" id="home">
   <div class="container hero-grid">
-
     <div>
       <p class="eyebrow">AGRICULTURE • ENGINEERING • INTERNATIONAL TRADE</p>
-
-      <h1>
-        Building practical solutions for
-        <span>modern agriculture.</span>
-      </h1>
-
-      <p>
-        Agro-Zia connects agricultural products, technical expertise,
-        project development and international markets through a professional
-        network of experienced specialists and commercial partners.
-      </p>
-
-      <div class="hero-actions">
-        <a href="#services" class="btn">Explore Services</a>
-        <a href="#contact" class="btn btn-light">Start a Project</a>
-      </div>
+      <h1>Agricultural Solutions <span>Beyond Borders.</span></h1>
+      <p class="lead">Agricultural products, engineering expertise and international trade solutions connecting producers, suppliers and markets.</p>
+      <div class="actions"><a class="btn" href="#pillars">Explore Our Solutions</a><a class="btn secondary" href="#contact">Start a Business Inquiry</a></div>
     </div>
-
-    <div class="hero-card">
-      <h3>Our approach</h3>
-      <p>
-        We do not depend on a single individual. Agro-Zia develops projects
-        through collaboration with experienced engineers, agricultural experts,
-        technical specialists and commercial partners selected according to
-        each client's requirements.
-      </p>
-    </div>
-
+    <aside class="hero-card">
+      <h2>Connecting products, expertise and markets.</h2>
+      <p>Agro-Zia is being developed as a professional B2B platform for agricultural products, technical services, projects and international business connections.</p>
+      <div class="proof"><div>Products &amp; Inputs</div><div>Engineering Expertise</div><div>Project Development</div><div>International Trade</div></div>
+    </aside>
   </div>
 </section>
-
-<section id="services">
+<section class="pillars" id="pillars">
   <div class="container">
-
-    <div class="section-head">
-      <p class="eyebrow">WHAT WE DO</p>
-      <h2>Professional services built around real agricultural needs.</h2>
-      <p class="section-text">
-        From technical studies and project management to agricultural products
-        and international trade, we coordinate the right expertise for each
-        project.
-      </p>
+    <div class="section-head"><p class="eyebrow">OUR BUSINESS</p><h2>Four capabilities. One agricultural business platform.</h2><p class="section-text">We connect products, technical expertise, project development and market opportunities around practical agricultural needs.</p></div>
+    <div class="grid-4">
+      <article class="card"><div class="pillar-num">01 / PRODUCTS</div><div class="icon">▦</div><h3>Agricultural Products</h3><p>Fertilizers, agricultural inputs, production products and selected supply categories for professional buyers.</p><a class="arrow" href="#products">Explore products →</a></article>
+      <article class="card"><div class="pillar-num">02 / ENGINEERING</div><div class="icon">⚙</div><h3>Engineering</h3><p>Technical assessment, planning, irrigation, greenhouse and agricultural production solutions.</p><a class="arrow" href="#engineering">View expertise →</a></article>
+      <article class="card"><div class="pillar-num">03 / PROJECTS</div><div class="icon">⌂</div><h3>Projects</h3><p>Project planning, technical coordination and supervision supported by appropriate specialists and partners.</p><a class="arrow" href="#projects">See projects →</a></article>
+      <article class="card"><div class="pillar-num">04 / TRADE</div><div class="icon">↗</div><h3>International Trade</h3><p>Sourcing, supplier–buyer connections and market development across regional and international opportunities.</p><a class="arrow" href="#trade">Explore trade →</a></article>
     </div>
-
-    <div class="grid-3">
-
-      <div class="card">
-        <div class="icon">⌂</div>
-        <h3>Agricultural Projects</h3>
-        <p>
-          Feasibility studies, development planning, technical supervision,
-          implementation and project management for agricultural investments.
-        </p>
-      </div>
-
-      <div class="card">
-        <div class="icon">⚙</div>
-        <h3>Engineering Solutions</h3>
-        <p>
-          Engineering and technical solutions delivered through cooperation
-          with experienced specialists and professional project teams.
-        </p>
-      </div>
-
-      <div class="card">
-        <div class="icon">↗</div>
-        <h3>International Trade</h3>
-        <p>
-          Connecting agricultural products, suppliers, buyers and business
-          opportunities across regional and international markets.
-        </p>
-      </div>
-
-    </div>
-
   </div>
 </section>
-
 <section class="products" id="products">
   <div class="container">
-
-    <div class="section-head">
-      <p class="eyebrow">AGRICULTURAL PRODUCTS</p>
-      <h2>Selected products for professional buyers.</h2>
-      <p class="section-text">
-        Agro-Zia is developing a specialized agricultural product portfolio
-        with an emphasis on quality, technical suitability and export markets.
-      </p>
-    </div>
-
+    <div class="section-head"><p class="eyebrow">PRODUCTS</p><h2>Selected supply categories for professional buyers.</h2><p class="section-text">V3 does not publish public pricing. Product information and quotations are handled through business inquiries and verified supply details.</p></div>
     <div class="grid-3">
-
-      <div class="card product-card">
-        <div class="product-top">🌱</div>
-        <div class="product-body">
-          <h3>Fertilizers & Inputs</h3>
-          <p>
-            Agricultural fertilizers and production inputs selected according
-            to crop, soil and market requirements.
-          </p>
-          <a href="#contact" class="btn">Request Information</a>
-        </div>
-      </div>
-
-      <div class="card product-card">
-        <div class="product-top">🥜</div>
-        <div class="product-body">
-          <h3>Pistachio & Dry Fruits</h3>
-          <p>
-            Selected agricultural and dry-fruit products with a focus on
-            quality, processing and export opportunities.
-          </p>
-          <a href="#contact" class="btn">Request Information</a>
-        </div>
-      </div>
-
-      <div class="card product-card">
-        <div class="product-top">🌾</div>
-        <div class="product-body">
-          <h3>Agricultural Products</h3>
-          <p>
-            A growing portfolio of agricultural products for domestic and
-            international commercial partners.
-          </p>
-          <a href="#contact" class="btn">Request Information</a>
-        </div>
-      </div>
-
+      <article class="card product-card"><div class="product-top">🌱</div><div class="product-body"><h3>Fertilizers</h3><p>Fertilizer categories and formulations selected according to crop, soil and market requirements.</p><a class="btn small" href="#contact">Request a Quote</a></div></article>
+      <article class="card product-card"><div class="product-top">🧪</div><div class="product-body"><h3>Agricultural Inputs</h3><p>Production inputs for agricultural operations, subject to product verification and availability.</p><a class="btn small" href="#contact">Request Information</a></div></article>
+      <article class="card product-card"><div class="product-top">🌾</div><div class="product-body"><h3>Agricultural Products</h3><p>A growing portfolio of agricultural products for domestic and international commercial partners.</p><a class="btn small" href="#contact">Request a Quote</a></div></article>
+      <article class="card product-card"><div class="product-top">🏡</div><div class="product-body"><h3>Greenhouse Products</h3><p>Selected greenhouse-related products and solutions for protected agriculture.</p><a class="btn small" href="#contact">Request Information</a></div></article>
+      <article class="card product-card"><div class="product-top">💧</div><div class="product-body"><h3>Irrigation &amp; Equipment</h3><p>Equipment and irrigation-related supply opportunities matched to project requirements.</p><a class="btn small" href="#contact">Discuss Requirements</a></div></article>
+      <article class="card"><div class="icon">+</div><h3>Need a specific product?</h3><p>Tell us what you need, where it should be delivered and the approximate quantity. We can assess the inquiry with relevant suppliers.</p><a class="arrow" href="#contact">Start an inquiry →</a></article>
     </div>
-
   </div>
 </section>
-
+<section class="engineering" id="engineering">
+  <div class="container">
+    <div class="section-head"><p class="eyebrow">ENGINEERING</p><h2>Technical expertise around real agricultural requirements.</h2><p class="section-text">Agro-Zia coordinates engineering and agricultural specialists according to the technical scope of each assignment.</p></div>
+    <div class="grid-3">
+      <article class="card"><div class="icon">⌂</div><h3>Greenhouse Development</h3><p>Planning, technical assessment and development support for protected agriculture projects.</p><ul class="service-list"><li>Technical assessment</li><li>Planning support</li><li>Project coordination</li></ul></article>
+      <article class="card"><div class="icon">◫</div><h3>Agricultural Systems</h3><p>Practical solutions for irrigation, production systems and agricultural infrastructure.</p><ul class="service-list"><li>Irrigation solutions</li><li>Production systems</li><li>Technical consulting</li></ul></article>
+      <article class="card"><div class="icon">✓</div><h3>Project Supervision</h3><p>Technical supervision and coordination based on defined project scope, requirements and available expertise.</p><ul class="service-list"><li>Site assessment</li><li>Technical coordination</li><li>Implementation support</li></ul></article>
+    </div>
+  </div>
+</section>
 <section class="projects" id="projects">
   <div class="container">
-
-    <div class="section-head">
-      <p class="eyebrow">PROJECT EXPERIENCE</p>
-      <h2>Experience supporting agricultural development projects.</h2>
-      <p class="section-text">
-        Our project network brings together engineering, agricultural,
-        management and commercial expertise according to project requirements.
-      </p>
+    <div class="section-head"><p class="eyebrow">PROJECTS</p><h2>From agricultural ideas to structured projects.</h2><p class="section-text">Selected projects will become detailed case studies as verified information, partners and results are approved for publication.</p></div>
+    <div class="grid-3">
+      <article class="card project"><span class="tag">CASE STUDY FORMAT</span><h3>Greenhouse Development</h3><p>Future case study: location, challenge, technical scope, solution, results and project gallery.</p></article>
+      <article class="card project"><span class="tag">CASE STUDY FORMAT</span><h3>Agricultural Production</h3><p>Future case study covering production planning, technical assessment and implementation experience.</p></article>
+      <article class="card project"><span class="tag">CASE STUDY FORMAT</span><h3>Trade &amp; Supply</h3><p>Future case study showing a verified supplier–buyer or international sourcing process.</p></article>
     </div>
-
-    <div class="project-list">
-
-      <div class="project">
-        <strong>PISTACHIO DEVELOPMENT</strong>
-        <h3>Mechanized Pistachio Orchards & Processing</h3>
-        <p>
-          Technical consulting and executive supervision for the development
-          of mechanized pistachio orchards and a processing, sorting,
-          shelling, drying and packaging facility in Semnan and Damghan.
-        </p>
-      </div>
-
-      <div class="project">
-        <strong>AGRICULTURAL STUDIES</strong>
-        <h3>Provincial Agricultural Land Studies</h3>
-        <p>
-          Climate and geographic feasibility studies using GIS methods across
-          approximately 40,000 hectares within Semnan Province for
-          agricultural development planning.
-        </p>
-      </div>
-
-      <div class="project">
-        <strong>PROJECT MANAGEMENT</strong>
-        <h3>Technical & Executive Supervision</h3>
-        <p>
-          Coordination of technical specialists, field teams and project
-          stakeholders to support practical implementation and quality control.
-        </p>
-      </div>
-
-      <div class="project">
-        <strong>BUSINESS DEVELOPMENT</strong>
-        <h3>Agriculture & International Markets</h3>
-        <p>
-          Supporting commercial cooperation between agricultural suppliers,
-          investors, technical partners and international buyers.
-        </p>
-      </div>
-
-    </div>
-
   </div>
 </section>
-
-<section class="team" id="team">
+<section class="trade" id="trade">
   <div class="container">
-
-    <div class="team-box">
-
-      <div>
-        <p class="eyebrow">PROFESSIONAL NETWORK</p>
-        <h2>One company. A network of experienced specialists.</h2>
-      </div>
-
-      <div>
-        <p>
-          Agro-Zia is designed as a team-based professional platform.
-          Projects are delivered through cooperation with experienced
-          engineers, agricultural experts, technical consultants, managers
-          and commercial partners.
-        </p>
-        <br>
-        <p>
-          This approach creates scalability, reduces dependency on one person
-          and allows each client to receive a project team matched to the
-          technical and commercial requirements.
-        </p>
-      </div>
-
-    </div>
-
+    <div class="section-head"><p class="eyebrow">INTERNATIONAL TRADE</p><h2>Connecting agricultural opportunities across markets.</h2><p class="section-text">We focus on practical sourcing, supplier–buyer connections and market development. Country references below represent target markets or markets we connect, not automatic claims of legal or operational presence.</p></div>
+    <div class="markets"><div class="market">🇮🇷<strong>Iran</strong></div><div class="market">🇺🇿<strong>Uzbekistan</strong></div><div class="market">🇹🇷<strong>Türkiye</strong></div><div class="market">🇮🇶<strong>Iraq</strong></div></div>
+    <p class="note">Target markets may expand as commercial relationships and verified opportunities develop.</p>
   </div>
 </section>
-
-<section class="market-section" id="trade">
-  <div class="container">
-
-    <div class="section-head">
-      <p class="eyebrow">INTERNATIONAL MARKETS</p>
-      <h2>Connecting agricultural markets.</h2>
-      <p class="section-text">
-        Developing commercial relationships between agricultural businesses
-        and markets in Iran, Central Asia, neighboring countries and beyond.
-      </p>
-    </div>
-
-    <div class="market-grid">
-      <div class="market">🇮🇷 Iran</div>
-      <div class="market">🇺🇿 Uzbekistan</div>
-      <div class="market">🇹🇷 Türkiye</div>
-      <div class="market">🇮🇶 Iraq</div>
-    </div>
-
+<section class="zarus" id="zarus">
+  <div class="container zarus-box">
+    <div><p class="eyebrow">SUPPLY NETWORK</p><h2>Zarus — Agricultural Supply Network</h2><p class="section-text">Zarus complements Agro-Zia by helping connect agricultural suppliers with professional customers. The long-term concept is a focused supply-chain platform rather than a generic online store.</p><div class="flow"><span>Suppliers</span><b>→</b><span>Zarus</span><b>→</b><span>Agricultural Customers</span></div></div>
+    <div class="zarus-card"><h3>Explore Zarus</h3><p class="section-text">Visit the Zarus platform to explore its developing agricultural supply network.</p><br><a class="btn" href="https://zarus.ir" target="_blank" rel="noopener">Visit Zarus ↗</a></div>
   </div>
 </section>
-
+<section class="knowledge" id="knowledge">
+  <div class="container"><div class="section-head"><p class="eyebrow">KNOWLEDGE</p><h2>Practical agricultural knowledge and market insight.</h2><p class="section-text">A lightweight knowledge center today, designed to grow into an SEO-focused resource for agricultural technology, products and markets.</p></div><div class="grid-3"><article class="card"><h3>Agricultural Technology</h3><p>Practical notes on modern agricultural systems, engineering and production technologies.</p></article><article class="card"><h3>Fertilizers</h3><p>Educational content on fertilizer selection, application and technical considerations.</p></article><article class="card"><h3>Market Insights</h3><p>Future analysis of agricultural markets, trade opportunities and regional developments.</p></article></div></div>
+</section>
+<section class="about" id="about">
+  <div class="container about-grid"><div><p class="eyebrow">ABOUT AGRO-ZIA</p><h2>Technical knowledge with an international business perspective.</h2><p class="section-text">Agro-Zia brings together agricultural knowledge, engineering capability, international perspective and business partnerships to address practical needs across the agricultural value chain.</p></div><div class="about-list"><div><strong>Technical Experience</strong><span>Engineering-led problem solving.</span></div><div><strong>Agricultural Knowledge</strong><span>Practical understanding of production.</span></div><div><strong>International Perspective</strong><span>Regional and cross-border opportunities.</span></div><div><strong>Business Partnerships</strong><span>Connecting suppliers, experts and buyers.</span></div></div></div>
+</section>
 <section class="contact" id="contact">
   <div class="container contact-grid">
-
-    <div>
-      <p class="eyebrow">LET'S WORK TOGETHER</p>
-
-      <h2>Have a product, project or business opportunity?</h2>
-
-      <p class="section-text">
-        Tell us what you need. We will evaluate your requirement and identify
-        the appropriate technical and commercial path.
-      </p>
-
-      <br>
-
-      <p class="section-text">
-        Email:
-        <strong>info@agro-zia.com</strong>
-      </p>
-    </div>
-
-    <form onsubmit="sendRequest(event)">
-
-      <label>
-        Name
-        <input type="text" required placeholder="Your name">
-      </label>
-
-      <label>
-        Email
-        <input type="email" required placeholder="you@company.com">
-      </label>
-
-      <label>
-        Request
-        <textarea rows="6" required placeholder="Tell us about your product, project or requirement"></textarea>
-      </label>
-
-      <button class="btn" type="submit">
-        Send Request
-      </button>
-
-    </form>
-
+    <div><p class="eyebrow">BUSINESS INQUIRY</p><h2>Tell us what you are looking for.</h2><p class="section-text">For products, engineering services, agricultural projects, import-export opportunities or partnerships, send a business inquiry and we will review the requirement.</p><div class="contact-points"><div><strong>General</strong><a href="mailto:info@agro-zia.com">info@agro-zia.com</a></div><div><strong>Export &amp; Trade</strong><a href="mailto:export@agro-zia.com">export@agro-zia.com</a></div></div></div>
+    <form action="mailto:info@agro-zia.com" method="post" enctype="text/plain"><div class="form-grid"><label>Inquiry Type<select name="inquiry_type" required><option value="">Select one</option><option>Product</option><option>Engineering Service</option><option>Agricultural Project</option><option>Import / Export</option><option>Partnership</option><option>Other</option></select></label><label>Country<input name="country" autocomplete="country-name" required></label><label>Name<input name="name" autocomplete="name" required></label><label>Company<input name="company" autocomplete="organization"></label><label>Email<input type="email" name="email" autocomplete="email" required></label><label>WhatsApp / Phone<input name="phone" autocomplete="tel"></label><label class="full">Message<textarea name="message" required placeholder="Tell us about your requirement, quantity, destination or project scope."></textarea></label><div class="full"><button class="btn" type="submit">Submit Business Inquiry</button><p class="form-note">This static form opens your email client. A secure server-side lead form can be added later without changing the information architecture.</p></div></div></form>
   </div>
 </section>
-
 </main>
-
-<footer>
-
-  <div class="container footer-grid">
-
-    <div>
-      <a href="#home" class="logo">
-        <div class="logo-mark">AZ</div>
-        <div>
-          <strong style="color:#fff">AGRO-ZIA</strong>
-          <span style="color:#9fb2a7">AGRICULTURE • ENGINEERING • TRADE</span>
-        </div>
-      </a>
-
-      <p class="footer-description">
-        Agricultural products, engineering expertise, project solutions
-        and international trade.
-      </p>
-    </div>
-
-    <div>
-      <h4>Agro-Zia</h4>
-      <a href="#products">Products</a>
-      <a href="#services">Services</a>
-      <a href="#projects">Projects</a>
-      <a href="#trade">Trade</a>
-    </div>
-
-    <div>
-      <h4>Platforms</h4>
-      <a href="https://zarus.ir" target="_blank">Zarus Store ↗</a>
-      <a href="#team">Professional Network</a>
-    </div>
-
-    <div>
-      <h4>Contact</h4>
-      <a href="mailto:info@agro-zia.com">info@agro-zia.com</a>
-      <a href="mailto:export@agro-zia.com">export@agro-zia.com</a>
-      <a href="#contact">Start a Project</a>
-    </div>
-
-  </div>
-
-  <div class="container bottom">
-    <div>© 2026 Agro-Zia. All rights reserved.</div>
-    <div>Agriculture • Engineering • Trade</div>
-  </div>
-
-</footer>
-
+<footer><div class="container"><div class="footer-grid"><div><h3>AGRO-ZIA</h3><p class="footer-desc">Agriculture • Engineering • Trade<br><br>Connecting agricultural products, expertise and markets.</p></div><div><h4>Business</h4><a href="#products">Products</a><a href="#engineering">Engineering</a><a href="#projects">Projects</a><a href="#trade">International Trade</a><a href="#knowledge">Knowledge</a></div><div><h4>Markets</h4><a href="#trade">Iran</a><a href="#trade">Uzbekistan</a><a href="#trade">Türkiye</a><a href="#trade">Iraq</a><a href="#zarus">Zarus Network</a></div><div><h4>Contact</h4><a href="mailto:info@agro-zia.com">info@agro-zia.com</a><a href="mailto:export@agro-zia.com">export@agro-zia.com</a><a href="#contact">Business Inquiry</a></div></div><div class="bottom"><span>© 2026 Agro-Zia. All rights reserved.</span><span>Agriculture • Engineering • Trade</span></div></div></footer>
 <script>
-function sendRequest(event){
-  event.preventDefault();
-
-  const form = event.target;
-  const name = form.querySelector('input[type="text"]').value;
-  const email = form.querySelector('input[type="email"]').value;
-  const request = form.querySelector('textarea').value;
-
-  const subject = encodeURIComponent(
-    "Agro-Zia Website Inquiry"
-  );
-
-  const body = encodeURIComponent(
-    "Name: " + name + "\n" +
-    "Email: " + email + "\n\n" +
-    "Request:\n" + request
-  );
-
-  window.location.href =
-    "mailto:info@agro-zia.com?subject=" + subject + "&body=" + body;
-}
+  function toggleMenu(){
+    const nav=document.querySelector('.links');
+    const btn=document.querySelector('.menu');
+    const open=nav.dataset.mobile==='open';
+    if(open){nav.removeAttribute('data-mobile');nav.removeAttribute('style');btn.setAttribute('aria-expanded','false');return}
+    nav.dataset.mobile='open';nav.style.cssText='display:flex;position:absolute;top:76px;left:0;right:0;background:#fff;padding:18px 4%;flex-direction:column;align-items:flex-start;border-bottom:1px solid #dce8e0;box-shadow:0 10px 25px rgba(0,0,0,.06)';btn.setAttribute('aria-expanded','true');
+  }
+  document.querySelectorAll('.links a').forEach(a=>a.addEventListener('click',()=>{if(window.innerWidth<=900){document.querySelector('.menu').click()}}));
 </script>
-
 </body>
 </html>
