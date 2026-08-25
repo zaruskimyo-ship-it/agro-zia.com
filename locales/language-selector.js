@@ -43,25 +43,25 @@
 
   function activateContactEmails() {
     const emails = ['info@agro-zia.com', 'export@agro-zia.com'];
-    const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
-    const nodes = [];
-    while (walker.nextNode()) nodes.push(walker.currentNode);
-    nodes.forEach((node) => {
-      const parent = node.parentElement;
-      if (!parent || parent.closest('a') || parent.closest('script') || parent.closest('style')) return;
-      const text = node.nodeValue || '';
-      const email = emails.find((value) => text.includes(value));
-      if (!email) return;
-      const index = text.indexOf(email);
-      const fragment = document.createDocumentFragment();
-      fragment.append(document.createTextNode(text.slice(0, index)));
+    document.querySelectorAll('strong').forEach((element) => {
+      const text = (element.textContent || '').trim();
+      const email = emails.find((value) => text === value);
+      if (!email || element.closest('a')) return;
       const link = document.createElement('a');
       link.href = `mailto:${email}`;
       link.textContent = email;
       link.setAttribute('aria-label', `Email ${email}`);
-      fragment.append(link);
-      fragment.append(document.createTextNode(text.slice(index + email.length)));
-      node.replaceWith(fragment);
+      link.style.cursor = 'pointer';
+      link.style.textDecoration = 'underline';
+      link.style.fontWeight = 'inherit';
+      element.replaceWith(link);
+    });
+
+    document.querySelectorAll('a[href^="mailto:"]').forEach((link) => {
+      link.style.cursor = 'pointer';
+      link.addEventListener('click', () => {
+        window.location.href = link.href;
+      }, { once: true });
     });
   }
 
