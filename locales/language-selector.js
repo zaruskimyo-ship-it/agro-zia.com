@@ -25,14 +25,12 @@
   function activateZarusLink() {
     const existing = document.querySelector('.zarus [data-i18n="network_link"]');
     if (!existing) return;
-
     if (existing.tagName.toLowerCase() === 'a') {
       existing.href = 'https://zarus.ir/';
       existing.target = '_blank';
       existing.rel = 'noopener noreferrer';
       return;
     }
-
     const link = document.createElement('a');
     link.className = existing.className;
     link.setAttribute('data-i18n', 'network_link');
@@ -43,13 +41,38 @@
     existing.replaceWith(link);
   }
 
+  function activateContactEmails() {
+    const emails = ['info@agro-zia.com', 'export@agro-zia.com'];
+    document.querySelectorAll('strong').forEach((element) => {
+      const text = (element.textContent || '').trim();
+      const email = emails.find((value) => text === value);
+      if (!email || element.closest('a')) return;
+      const link = document.createElement('a');
+      link.href = `mailto:${email}`;
+      link.textContent = email;
+      link.setAttribute('aria-label', `Email ${email}`);
+      link.style.cursor = 'pointer';
+      link.style.textDecoration = 'underline';
+      link.style.fontWeight = 'inherit';
+      element.replaceWith(link);
+    });
+
+    document.querySelectorAll('a[href^="mailto:"]').forEach((link) => {
+      link.style.cursor = 'pointer';
+      link.addEventListener('click', () => {
+        window.location.href = link.href;
+      }, { once: true });
+    });
+  }
+
   function init() {
     setDirection();
     activateZarusLink();
-
-    // Translation scripts may update the DOM after initialization.
-    // Re-apply the semantic CTA without replacing an existing anchor.
-    const observer = new MutationObserver(() => activateZarusLink());
+    activateContactEmails();
+    const observer = new MutationObserver(() => {
+      activateZarusLink();
+      activateContactEmails();
+    });
     observer.observe(document.body, { childList: true, subtree: true, characterData: true });
   }
 
