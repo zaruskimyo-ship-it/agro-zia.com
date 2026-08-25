@@ -101,6 +101,36 @@
     footer.appendChild(wrap);
   }
 
+  function activateFooterEmails() {
+    const footer = document.querySelector('footer .container');
+    if (!footer || footer.querySelector('[data-agrozia-footer-emails]')) return;
+
+    const wrap = document.createElement('div');
+    wrap.setAttribute('data-agrozia-footer-emails', 'true');
+    wrap.style.display = 'flex';
+    wrap.style.flexWrap = 'wrap';
+    wrap.style.gap = '10px';
+    wrap.style.marginTop = '10px';
+
+    [
+      { label: 'info@agro-zia.com', aria: 'Email Agro-Zia information' },
+      { label: 'export@agro-zia.com', aria: 'Email Agro-Zia export team' }
+    ].forEach(({ label, aria }) => {
+      const link = document.createElement('a');
+      link.href = `mailto:${label}`;
+      link.textContent = label;
+      link.setAttribute('aria-label', aria);
+      link.style.color = '#fff';
+      link.style.textDecoration = 'underline';
+      link.style.textUnderlineOffset = '3px';
+      link.style.fontSize = '12px';
+      link.style.fontWeight = '700';
+      link.style.cursor = 'pointer';
+      wrap.appendChild(link);
+    });
+    footer.appendChild(wrap);
+  }
+
   function activateProductCategoryLinks() {
     if (!/\/products\.html$/i.test(location.pathname)) return;
     const grid = document.querySelector('#categories .grid3');
@@ -140,11 +170,13 @@
     activateZarusLink();
     activateContactEmails();
     activateSocialLinks();
+    activateFooterEmails();
     activateProductCategoryLinks();
     const observer = new MutationObserver(() => {
       activateZarusLink();
       activateContactEmails();
       activateSocialLinks();
+      activateFooterEmails();
       activateProductCategoryLinks();
     });
     observer.observe(document.body, { childList: true, subtree: true, characterData: true });
