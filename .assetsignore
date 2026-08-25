@@ -1,0 +1,6 @@
+.git/
+.git/**
+docs/
+docs/**
+wrangler.jsonc
+README*
