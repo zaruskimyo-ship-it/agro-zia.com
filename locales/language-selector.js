@@ -165,6 +165,92 @@
     });
   }
 
+  function activateInquiryApi() {
+    if (!/\/inquiry\.html$/i.test(location.pathname)) return;
+    const form = document.getElementById('rfq');
+    if (!form || form.dataset.apiActivated === 'true') return;
+    form.dataset.apiActivated = 'true';
+
+    document.addEventListener('submit', async (event) => {
+      if (event.target !== form) return;
+      event.preventDefault();
+      event.stopImmediatePropagation();
+
+      const value = (id) => (document.getElementById(id)?.value || '').trim();
+      const payload = {
+        language: getActive(),
+        product: value('product'),
+        company: value('company'),
+        specification: value('spec'),
+        quantity: value('quantity'),
+        destination: value('destination'),
+        timing: value('timing'),
+        email: value('email'),
+        phone: value('phone'),
+        message: value('message')
+      };
+      const success = document.getElementById('success');
+      const submit = form.querySelector('button[type="submit"]');
+      const originalText = submit?.textContent || '';
+      if (submit) {
+        submit.disabled = true;
+        submit.textContent = 'Sending…';
+      }
+
+      try {
+        const response = await fetch('/api/inquiries', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const data = await response.json().catch(() => ({}));
+
+        if (response.ok && data.ok) {
+          if (success) {
+            success.textContent = `Inquiry received. Request number: ${data.request_number}`;
+            success.classList.add('show');
+          }
+          form.reset();
+          return;
+        }
+
+        // Until D1 is connected, preserve the existing email fallback.
+        if (response.status === 503) {
+          const subject = `Agro-Zia B2B Inquiry — ${payload.product}`;
+          const body = [
+            `Product / category: ${payload.product}`,
+            `Company: ${payload.company}`,
+            `Specification: ${payload.specification}`,
+            `Quantity: ${payload.quantity}`,
+            `Destination: ${payload.destination}`,
+            `Preferred timing: ${payload.timing}`,
+            `Email: ${payload.email}`,
+            `Phone / WhatsApp: ${payload.phone}`,
+            `Additional requirements: ${payload.message}`
+          ].join('\n');
+          if (success) {
+            success.textContent = 'The inquiry database is not connected yet. Your email inquiry is being prepared as a secure fallback.';
+            success.classList.add('show');
+          }
+          window.location.href = `mailto:export@agro-zia.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+          return;
+        }
+
+        throw new Error(data.error || 'request_failed');
+      } catch (error) {
+        if (success) {
+          success.textContent = 'The inquiry could not be submitted. Please try again or continue on WhatsApp.';
+          success.classList.add('show');
+        }
+      } finally {
+        if (submit) {
+          submit.disabled = false;
+          submit.textContent = originalText;
+        }
+      }
+    }, true);
+  }
+
   function init() {
     setDirection();
     activateZarusLink();
@@ -172,6 +258,7 @@
     activateSocialLinks();
     activateFooterEmails();
     activateProductCategoryLinks();
+    activateInquiryApi();
     const observer = new MutationObserver(() => {
       activateZarusLink();
       activateContactEmails();
