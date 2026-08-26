@@ -8,19 +8,21 @@
 .language-selector__menu a:hover,.language-selector__menu a:focus-visible,.language-selector__menu a[aria-current="true"]{background:#edf5ef;color:#145b3b}
 html[dir="rtl"] .language-selector__menu{right:auto;left:0}
 
-/* Strong RTL typography override: the main preview has inline CSS loaded after this file. */
-html[dir="rtl"] body{font-family:Tahoma,"Noto Sans Arabic","Segoe UI",Arial,sans-serif!important;font-size:17px!important;line-height:1.9!important}
-html[dir="rtl"] body *{font-family:inherit}
-html[dir="rtl"] .hero h1{font-size:clamp(42px,6vw,68px)!important;line-height:1.2!important}
-html[dir="rtl"] .hero p,html[dir="rtl"] .section-text{font-size:16px!important;line-height:1.9!important}
-html[dir="rtl"] .section-head h2{font-size:36px!important;line-height:1.35!important}
-html[dir="rtl"] .card p{font-size:16px!important;line-height:1.9!important}
-html[dir="rtl"] .card h3{font-size:20px!important;line-height:1.5!important}
-html[dir="rtl"] label{font-size:14px!important;line-height:1.7!important}
-html[dir="rtl"] input,html[dir="rtl"] select,html[dir="rtl"] textarea{font-size:17px!important;line-height:1.7!important}
-html[dir="rtl"] .links{font-size:14px!important;line-height:1.7!important}
-html[dir="rtl"] .links a{font-size:14px!important}
-html[dir="rtl"] .language-selector__button{font-size:15px!important}
+/* Robust RTL typography: target both direction and language so it applies immediately on iOS/Android. */
+html[dir="rtl"],html[lang="fa"],html[lang="ar"]{font-synthesis:none;-webkit-text-size-adjust:100%}
+html[dir="rtl"] body,html[lang="fa"] body,html[lang="ar"] body{font-family:-apple-system,BlinkMacSystemFont,"SF Arabic","Noto Sans Arabic","Segoe UI",Arial,sans-serif!important;font-size:17px!important;line-height:1.9!important}
+html[dir="rtl"] body *,html[lang="fa"] body *,html[lang="ar"] body *{font-family:inherit}
+html[dir="rtl"] p,html[dir="rtl"] li,html[dir="rtl"] label,html[dir="rtl"] input,html[dir="rtl"] select,html[dir="rtl"] textarea,html[lang="fa"] p,html[lang="fa"] li,html[lang="fa"] label,html[lang="fa"] input,html[lang="fa"] select,html[lang="fa"] textarea,html[lang="ar"] p,html[lang="ar"] li,html[lang="ar"] label,html[lang="ar"] input,html[lang="ar"] select,html[lang="ar"] textarea{font-size:17px!important;line-height:1.9!important}
+html[dir="rtl"] .hero h1,html[lang="fa"] .hero h1,html[lang="ar"] .hero h1{font-size:clamp(42px,6vw,68px)!important;line-height:1.2!important}
+html[dir="rtl"] .hero p,html[dir="rtl"] .section-text,html[lang="fa"] .hero p,html[lang="fa"] .section-text,html[lang="ar"] .hero p,html[lang="ar"] .section-text{font-size:17px!important;line-height:1.9!important}
+html[dir="rtl"] .section-head h2,html[lang="fa"] .section-head h2,html[lang="ar"] .section-head h2{font-size:36px!important;line-height:1.35!important}
+html[dir="rtl"] .card p,html[lang="fa"] .card p,html[lang="ar"] .card p{font-size:17px!important;line-height:1.9!important}
+html[dir="rtl"] .card h3,html[lang="fa"] .card h3,html[lang="ar"] .card h3{font-size:21px!important;line-height:1.5!important}
+html[dir="rtl"] label,html[lang="fa"] label,html[lang="ar"] label{font-size:15px!important;line-height:1.8!important}
+html[dir="rtl"] input,html[dir="rtl"] select,html[dir="rtl"] textarea,html[lang="fa"] input,html[lang="fa"] select,html[lang="fa"] textarea,html[lang="ar"] input,html[lang="ar"] select,html[lang="ar"] textarea{font-size:17px!important;line-height:1.8!important}
+html[dir="rtl"] .links,html[lang="fa"] .links,html[lang="ar"] .links{font-size:15px!important;line-height:1.8!important}
+html[dir="rtl"] .links a,html[lang="fa"] .links a,html[lang="ar"] .links a{font-size:15px!important}
+html[dir="rtl"] .language-selector__button,html[lang="fa"] .language-selector__button,html[lang="ar"] .language-selector__button{font-size:15px!important}
 
 @media(max-width:900px){
   .language-selector{margin-left:auto}
@@ -28,13 +30,13 @@ html[dir="rtl"] .language-selector__button{font-size:15px!important}
   header .nav{flex-wrap:wrap;row-gap:8px;padding-top:10px;padding-bottom:10px}
   header .links{display:flex!important;flex:1 0 100%;order:3;justify-content:center;flex-wrap:wrap;gap:6px 12px;font-size:12px;line-height:1.4;padding:4px 0 2px}
   header .links a{padding:4px 2px;white-space:nowrap}
-  html[dir="rtl"] .links{font-size:14px!important;line-height:1.7!important}
-  html[dir="rtl"] .links a{font-size:14px!important}
+  html[dir="rtl"] .links,html[lang="fa"] .links,html[lang="ar"] .links{font-size:15px!important;line-height:1.8!important}
+  html[dir="rtl"] .links a,html[lang="fa"] .links a,html[lang="ar"] .links a{font-size:15px!important}
 }
 @media(max-width:600px){
   header .links{gap:5px 10px;font-size:11px}
   header .links a{padding:3px 1px}
-  html[dir="rtl"] .links{gap:6px 11px;font-size:13.5px!important;line-height:1.7!important}
-  html[dir="rtl"] .links a{font-size:13.5px!important}
+  html[dir="rtl"] .links,html[lang="fa"] .links,html[lang="ar"] .links{gap:7px 12px;font-size:14.5px!important;line-height:1.8!important}
+  html[dir="rtl"] .links a,html[lang="fa"] .links a,html[lang="ar"] .links a{font-size:14.5px!important}
 }
-@media(max-width:900px){html[dir="rtl"] .language-selector{margin-left:0;margin-right:auto}}
+@media(max-width:900px){html[dir="rtl"] .language-selector,html[lang="fa"] .language-selector,html[lang="ar"] .language-selector{margin-left:0;margin-right:auto}}
