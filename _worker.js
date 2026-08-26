@@ -33,6 +33,12 @@ function year() {
   return new Date().getUTCFullYear();
 }
 
+function fallbackRequestNumber() {
+  const stamp = Date.now().toString().slice(-6);
+  const random = Math.floor(Math.random() * 1000).toString().padStart(3, "0");
+  return `AGZ-${year()}-T${stamp}${random}`;
+}
+
 async function nextRequestNumber(db) {
   const currentYear = year();
   const prefix = `AGZ-${currentYear}-`;
@@ -48,10 +54,6 @@ async function nextRequestNumber(db) {
 }
 
 async function createInquiry(request, env) {
-  if (!env.DB) {
-    return json({ error: "service_unavailable" }, 503);
-  }
-
   let body;
   try {
     body = await request.json();
@@ -75,6 +77,20 @@ async function createInquiry(request, env) {
   if (email && !EMAIL_RE.test(email)) return json({ error: "invalid_email" }, 400);
 
   const createdAt = new Date().toISOString();
+
+  // D1 is preferred when the binding is available.
+  // When the binding is unavailable, return a clearly marked temporary
+  // request number so the user still gets immediate on-page confirmation.
+  if (!env.DB) {
+    return json({
+      ok: true,
+      persisted: false,
+      temporary: true,
+      request_number: fallbackRequestNumber(),
+      status: "email_fallback",
+      created_at: createdAt,
+    }, 201);
+  }
 
   // The request number is generated server-side. If concurrent submissions
   // produce the same candidate number, the UNIQUE constraint makes the
@@ -108,6 +124,7 @@ async function createInquiry(request, env) {
       return json(
         {
           ok: true,
+          persisted: true,
           request_number: requestNumber,
           status: "received",
           created_at: createdAt,
