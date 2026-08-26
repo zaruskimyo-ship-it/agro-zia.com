@@ -1,4 +1,6 @@
 /* Agro-Zia V3 multilingual selector — preview */
+@import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700;800;900&display=swap');
+
 .language-selector{position:relative;display:inline-flex;align-items:center;z-index:1100}
 .language-selector__button{border:1px solid var(--line,#dce8e0);background:#fff;color:var(--green,#145b3b);border-radius:9px;padding:9px 11px;font-weight:800;cursor:pointer;appearance:none;-webkit-appearance:none}
 .language-selector__button:focus-visible{outline:2px solid var(--green2,#1d7a50);outline-offset:2px}
@@ -9,3 +11,16 @@
 html[dir="rtl"] .language-selector__menu{right:auto;left:0}
 @media(max-width:900px){.language-selector{margin-left:auto}.language-selector__menu{right:0}}
 @media(max-width:900px){html[dir="rtl"] .language-selector{margin-left:0;margin-right:auto}}
+
+/* Persian/Arabic typography: Vazirmatn is optimized for modern RTL web reading. */
+html[lang="fa"] body,html[lang="ar"] body,
+html[lang="fa"] button,html[lang="ar"] button,
+html[lang="fa"] input,html[lang="ar"] input,html[lang="fa"] textarea,html[lang="ar"] textarea,html[lang="fa"] select,html[lang="ar"] select{font-family:"Vazirmatn",Tahoma,Arial,sans-serif!important}
+
+/* Mobile readability: slightly larger body text and more comfortable line spacing. */
+@media(max-width:760px){
+  body{font-size:17px!important;line-height:1.85!important}
+  .hero p,.card p,.note,footer p{font-size:16px!important;line-height:1.85!important}
+  .card h2{line-height:1.35}
+  .btn{font-size:16px}
+}
