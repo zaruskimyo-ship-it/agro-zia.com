@@ -35,27 +35,16 @@ function year() {
 
 async function nextRequestNumber(db) {
   const currentYear = year();
+  const prefix = `AGZ-${currentYear}-`;
+  const row = await db
+    .prepare(
+      "SELECT MAX(CAST(SUBSTR(request_number, 10) AS INTEGER)) AS sequence FROM inquiries WHERE request_number LIKE ?",
+    )
+    .bind(`${prefix}%`)
+    .first();
 
-  for (let attempt = 0; attempt < 6; attempt += 1) {
-    const prefix = `AGZ-${currentYear}-`;
-    const row = await db
-      .prepare(
-        "SELECT MAX(CAST(SUBSTR(request_number, 10) AS INTEGER)) AS sequence FROM inquiries WHERE request_number LIKE ?",
-      )
-      .bind(`${prefix}%`)
-      .first();
-
-    const next = Number(row?.sequence || 0) + 1;
-    const requestNumber = `${prefix}${String(next).padStart(6, "0")}`;
-
-    try {
-      return requestNumber;
-    } catch (_) {
-      // Reserved for future database-specific retry handling.
-    }
-  }
-
-  throw new Error("REQUEST_NUMBER_GENERATION_FAILED");
+  const next = Number(row?.sequence || 0) + 1;
+  return `${prefix}${String(next).padStart(6, "0")}`;
 }
 
 async function createInquiry(request, env) {
@@ -85,49 +74,55 @@ async function createInquiry(request, env) {
   if (!email && !phone) return json({ error: "contact_required" }, 400);
   if (email && !EMAIL_RE.test(email)) return json({ error: "invalid_email" }, 400);
 
-  const requestNumber = await nextRequestNumber(env.DB);
   const createdAt = new Date().toISOString();
 
-  try {
-    await env.DB.prepare(
-      `INSERT INTO inquiries
-        (request_number, created_at, language, product, company, specification,
-         quantity, destination, timing, email, phone, message, status)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'received')`,
-    )
-      .bind(
-        requestNumber,
-        createdAt,
-        language,
-        product,
-        company || null,
-        specification || null,
-        quantity || null,
-        destination || null,
-        timing || null,
-        email || null,
-        phone || null,
-        message || null,
+  // The request number is generated server-side. If concurrent submissions
+  // produce the same candidate number, the UNIQUE constraint makes the
+  // collision explicit and we retry with the next observed sequence.
+  for (let attempt = 0; attempt < 6; attempt += 1) {
+    let requestNumber;
+    try {
+      requestNumber = await nextRequestNumber(env.DB);
+      await env.DB.prepare(
+        `INSERT INTO inquiries
+          (request_number, created_at, language, product, company, specification,
+           quantity, destination, timing, email, phone, message, status)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'received')`,
       )
-      .run();
-  } catch (error) {
-    // A unique request-number collision can occur under concurrent submissions.
-    // Return a retryable response rather than exposing database details.
-    if (String(error?.message || "").toLowerCase().includes("unique")) {
-      return json({ error: "please_retry" }, 409);
+        .bind(
+          requestNumber,
+          createdAt,
+          language,
+          product,
+          company || null,
+          specification || null,
+          quantity || null,
+          destination || null,
+          timing || null,
+          email || null,
+          phone || null,
+          message || null,
+        )
+        .run();
+
+      return json(
+        {
+          ok: true,
+          request_number: requestNumber,
+          status: "received",
+          created_at: createdAt,
+        },
+        201,
+      );
+    } catch (error) {
+      const messageText = String(error?.message || "").toLowerCase();
+      if (messageText.includes("unique") && attempt < 5) continue;
+      if (messageText.includes("unique")) return json({ error: "please_retry" }, 409);
+      return json({ error: "request_not_saved" }, 500);
     }
-    return json({ error: "request_not_saved" }, 500);
   }
 
-  return json(
-    {
-      ok: true,
-      request_number: requestNumber,
-      status: "received",
-      created_at: createdAt,
-    },
-    201,
-  );
+  return json({ error: "please_retry" }, 409);
 }
 
 export default {
