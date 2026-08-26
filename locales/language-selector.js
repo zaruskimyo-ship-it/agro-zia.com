@@ -10,12 +10,12 @@
   };
 
   const inquiryMessages = {
-    en: { sending:'Sending…', received:'Inquiry received successfully.', request:'Request number', detail:'Please keep this number for future communication.', fallback:'Your email inquiry is being prepared. Please review it before sending.', failed:'The inquiry could not be submitted. Please try again or continue on WhatsApp.' },
-    ru: { sending:'Отправка…', received:'Запрос успешно получен.', request:'Номер запроса', detail:'Сохраните этот номер для дальнейшей связи.', fallback:'Ваш запрос готовится к отправке по email. Проверьте его перед отправкой.', failed:'Не удалось отправить запрос. Попробуйте ещё раз или продолжите в WhatsApp.' },
-    fa: { sending:'در حال ارسال…', received:'درخواست شما با موفقیت دریافت شد.', request:'شماره درخواست', detail:'لطفاً این شماره را برای پیگیری‌های بعدی نگه دارید.', fallback:'درخواست شما برای ارسال از طریق ایمیل آماده می‌شود. لطفاً پیش از ارسال آن را بررسی کنید.', failed:'ارسال درخواست انجام نشد. لطفاً دوباره تلاش کنید یا از طریق واتساپ ادامه دهید.' },
-    ar: { sending:'جارٍ الإرسال…', received:'تم استلام طلبكم بنجاح.', request:'رقم الطلب', detail:'يرجى الاحتفاظ بهذا الرقم للمتابعة لاحقاً.', fallback:'جارٍ تجهيز طلبكم للإرسال عبر البريد الإلكتروني. يرجى مراجعته قبل الإرسال.', failed:'تعذر إرسال الطلب. يرجى المحاولة مرة أخرى أو المتابعة عبر واتساب.' },
-    uz: { sending:'Yuborilmoqda…', received:'So‘rovingiz muvaffaqiyatli qabul qilindi.', request:'So‘rov raqami', detail:'Keyingi aloqa uchun ushbu raqamni saqlang.', fallback:'So‘rovingiz email orqali yuborish uchun tayyorlanmoqda. Yuborishdan oldin tekshiring.', failed:'So‘rov yuborilmadi. Qayta urinib ko‘ring yoki WhatsApp orqali davom eting.' },
-    tr: { sending:'Gönderiliyor…', received:'Talebiniz başarıyla alındı.', request:'Talep numarası', detail:'Sonraki iletişim için bu numarayı saklayın.', fallback:'Talebiniz e-posta ile gönderilmek üzere hazırlanıyor. Göndermeden önce kontrol edin.', failed:'Talep gönderilemedi. Lütfen tekrar deneyin veya WhatsApp üzerinden devam edin.' }
+    en: { sending:'Sending…', received:'Inquiry received successfully.', request:'Request number', detail:'Please keep this number for future communication.', fallback:'Your email inquiry is being prepared. Please review it before sending.', temporary:'Temporary reference number (email fallback)', failed:'The inquiry could not be submitted. Please try again or continue on WhatsApp.' },
+    ru: { sending:'Отправка…', received:'Запрос успешно получен.', request:'Номер запроса', detail:'Сохраните этот номер для дальнейшей связи.', fallback:'Ваш запрос готовится к отправке по email. Проверьте его перед отправкой.', temporary:'Временный номер обращения (email fallback)', failed:'Не удалось отправить запрос. Попробуйте ещё раз или продолжите в WhatsApp.' },
+    fa: { sending:'در حال ارسال…', received:'درخواست شما با موفقیت دریافت شد.', request:'شماره درخواست', detail:'لطفاً این شماره را برای پیگیری‌های بعدی نگه دارید.', fallback:'درخواست شما برای ارسال از طریق ایمیل آماده می‌شود. لطفاً پیش از ارسال آن را بررسی کنید.', temporary:'شماره پیگیری موقت (ارسال از طریق ایمیل)', failed:'ارسال درخواست انجام نشد. لطفاً دوباره تلاش کنید یا از طریق واتساپ ادامه دهید.' },
+    ar: { sending:'جارٍ الإرسال…', received:'تم استلام طلبكم بنجاح.', request:'رقم الطلب', detail:'يرجى الاحتفاظ بهذا الرقم للمتابعة لاحقاً.', fallback:'جارٍ تجهيز طلبكم للإرسال عبر البريد الإلكتروني. يرجى مراجعته قبل الإرسال.', temporary:'رقم مرجعي مؤقت (الإرسال عبر البريد الإلكتروني)', failed:'تعذر إرسال الطلب. يرجى المحاولة مرة أخرى أو المتابعة عبر واتساب.' },
+    uz: { sending:'Yuborilmoqda…', received:'So‘rovingiz muvaffaqiyatli qabul qilindi.', request:'So‘rov raqami', detail:'Keyingi aloqa uchun ushbu raqamni saqlang.', fallback:'So‘rovingiz email orqali yuborish uchun tayyorlanmoqda. Yuborishdan oldin tekshiring.', temporary:'Vaqtinchalik murojaat raqami (email orqali yuborish)', failed:'So‘rov yuborilmadi. Qayta urinib ko‘ring yoki WhatsApp orqali davom eting.' },
+    tr: { sending:'Gönderiliyor…', received:'Talebiniz başarıyla alındı.', request:'Talep numarası', detail:'Sonraki iletişim için bu numarayı saklayın.', fallback:'Talebiniz e-posta ile gönderilmek üzere hazırlanıyor. Göndermeden önce kontrol edin.', temporary:'Geçici talep numarası (e-posta gönderimi)', failed:'Talep gönderilemedi. Lütfen tekrar deneyin veya WhatsApp üzerinden devam edin.' }
   };
 
   const getActive = () => {
@@ -128,11 +128,18 @@
     if (!success) return;
     const active = getActive();
     const m = inquiryMessages[active] || inquiryMessages.en;
-    success.innerHTML = `<strong>${m.received}</strong><br><span>${m.request}: <b>${data.request_number}</b></span><br><small>${m.detail}</small>`;
+    const temporary = data.temporary === true;
+    success.innerHTML = `<strong>${m.received}</strong><br><span>${temporary ? m.temporary : m.request}: <b>${data.request_number}</b></span><br><small>${temporary ? m.fallback : m.detail}</small>`;
     success.classList.add('show');
     success.setAttribute('role', 'status');
     success.setAttribute('aria-live', 'polite');
     success.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+
+  function buildFallbackMail(payload) {
+    const subject = `Agro-Zia B2B Inquiry — ${payload.product}`;
+    const body = [`Product / category: ${payload.product}`,`Company: ${payload.company}`,`Specification: ${payload.specification}`,`Quantity: ${payload.quantity}`,`Destination: ${payload.destination}`,`Preferred timing: ${payload.timing}`,`Email: ${payload.email}`,`Phone / WhatsApp: ${payload.phone}`,`Additional requirements: ${payload.message}`].join('\n');
+    return `mailto:export@agro-zia.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
   }
 
   function activateInquiryApi() {
@@ -157,13 +164,15 @@
         if (response.ok && data.ok) {
           showInquirySuccess(success, data);
           form.reset();
+          if (data.temporary === true) {
+            window.setTimeout(() => { window.location.href = buildFallbackMail(payload); }, 350);
+          }
           return;
         }
         if (response.status === 503) {
-          const subject = `Agro-Zia B2B Inquiry — ${payload.product}`;
-          const body = [`Product / category: ${payload.product}`,`Company: ${payload.company}`,`Specification: ${payload.specification}`,`Quantity: ${payload.quantity}`,`Destination: ${payload.destination}`,`Preferred timing: ${payload.timing}`,`Email: ${payload.email}`,`Phone / WhatsApp: ${payload.phone}`,`Additional requirements: ${payload.message}`].join('\n');
-          if (success) { success.textContent = m.fallback; success.classList.add('show'); success.setAttribute('role','status'); }
-          window.location.href = `mailto:export@agro-zia.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+          const temporaryNumber = data.request_number || `AGZ-${new Date().getUTCFullYear()}-T${Date.now().toString().slice(-9)}`;
+          showInquirySuccess(success, { request_number: temporaryNumber, temporary: true });
+          window.setTimeout(() => { window.location.href = buildFallbackMail(payload); }, 350);
           return;
         }
         throw new Error(data.error || 'request_failed');
