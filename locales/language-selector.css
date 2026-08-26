@@ -7,6 +7,13 @@
 .language-selector__menu a{display:block;padding:9px 10px;border-radius:8px;font-size:13px;white-space:nowrap;cursor:pointer}
 .language-selector__menu a:hover,.language-selector__menu a:focus-visible,.language-selector__menu a[aria-current="true"]{background:#edf5ef;color:#145b3b}
 html[dir="rtl"] .language-selector__menu{right:auto;left:0}
+
+/* Restore comfortable Arabic/Persian reading size and font rendering. */
+html[dir="rtl"] body{font-family:Tahoma,Arial,"Noto Sans Arabic",sans-serif;font-size:16px;line-height:1.85}
+html[dir="rtl"] .links{font-size:13px}
+html[dir="rtl"] .card p{font-size:15px}
+html[dir="rtl"] input,html[dir="rtl"] select,html[dir="rtl"] textarea{font-size:16px}
+
 @media(max-width:900px){
   .language-selector{margin-left:auto}
   .language-selector__menu{right:0}
@@ -16,9 +23,11 @@ html[dir="rtl"] .language-selector__menu{right:auto;left:0}
   header .nav{flex-wrap:wrap;row-gap:8px;padding-top:10px;padding-bottom:10px}
   header .links{display:flex!important;flex:1 0 100%;order:3;justify-content:center;flex-wrap:wrap;gap:6px 12px;font-size:12px;line-height:1.4;padding:4px 0 2px}
   header .links a{padding:4px 2px;white-space:nowrap}
+  html[dir="rtl"] .links{font-size:13px!important;line-height:1.6}
 }
 @media(max-width:600px){
   header .links{gap:5px 10px;font-size:11px}
   header .links a{padding:3px 1px}
+  html[dir="rtl"] .links{gap:6px 11px;font-size:12.5px!important}
 }
 @media(max-width:900px){html[dir="rtl"] .language-selector{margin-left:0;margin-right:auto}}
