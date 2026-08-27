@@ -5,4 +5,5 @@
 docs/
 docs/**
 wrangler.jsonc
+_worker.js
 README*
