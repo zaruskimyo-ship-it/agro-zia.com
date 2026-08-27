@@ -125,12 +125,36 @@ async function createInquiry(request, env) {
     } catch (error) {
       const messageText = String(error?.message || "").toLowerCase();
       if (messageText.includes("unique") && attempt < 5) continue;
-      if (messageText.includes("unique")) return json({ error: "please_retry" }, 409);
-      return json({ error: "request_not_saved" }, 500);
+      if (messageText.includes("unique")) {
+        return json({
+          ok: true,
+          persisted: false,
+          temporary: true,
+          request_number: fallbackRequestNumber(),
+          status: "email_fallback",
+          created_at: createdAt,
+        }, 201);
+      }
+      console.error("D1 inquiry persistence failed; continuing with temporary reference:", error);
+      return json({
+        ok: true,
+        persisted: false,
+        temporary: true,
+        request_number: fallbackRequestNumber(),
+        status: "email_fallback",
+        created_at: createdAt,
+      }, 201);
     }
   }
 
-  return json({ error: "please_retry" }, 409);
+  return json({
+    ok: true,
+    persisted: false,
+    temporary: true,
+    request_number: fallbackRequestNumber(),
+    status: "email_fallback",
+    created_at: createdAt,
+  }, 201);
 }
 
 export default {
