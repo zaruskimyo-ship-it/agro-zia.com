@@ -78,9 +78,6 @@ async function createInquiry(request, env) {
 
   const createdAt = new Date().toISOString();
 
-  // D1 is preferred when the binding is available.
-  // When the binding is unavailable, return a clearly marked temporary
-  // request number so the user still gets immediate on-page confirmation.
   if (!env.DB) {
     return json({
       ok: true,
@@ -92,9 +89,6 @@ async function createInquiry(request, env) {
     }, 201);
   }
 
-  // The request number is generated server-side. If concurrent submissions
-  // produce the same candidate number, the UNIQUE constraint makes the
-  // collision explicit and we retry with the next observed sequence.
   for (let attempt = 0; attempt < 6; attempt += 1) {
     let requestNumber;
     try {
@@ -121,16 +115,13 @@ async function createInquiry(request, env) {
         )
         .run();
 
-      return json(
-        {
-          ok: true,
-          persisted: true,
-          request_number: requestNumber,
-          status: "received",
-          created_at: createdAt,
-        },
-        201,
-      );
+      return json({
+        ok: true,
+        persisted: true,
+        request_number: requestNumber,
+        status: "received",
+        created_at: createdAt,
+      }, 201);
     } catch (error) {
       const messageText = String(error?.message || "").toLowerCase();
       if (messageText.includes("unique") && attempt < 5) continue;
@@ -140,6 +131,23 @@ async function createInquiry(request, env) {
   }
 
   return json({ error: "please_retry" }, 409);
+}
+
+async function serveAsset(request, env) {
+  const url = new URL(request.url);
+  const response = await env.ASSETS.fetch(request);
+  if (request.method !== "GET" || url.pathname !== "/inquiry.html" || !response.ok) return response;
+
+  const html = await response.text();
+  const cleaned = html.replace(
+    /document\.getElementById\('rfq'\)\.addEventListener\('submit',[\s\S]*?window\.location\.href=`mailto:export@agro-zia\.com\?subject=\$\{encodeURIComponent\(subject\)\}&body=\$\{encodeURIComponent\(body\)\}`\}\);/,
+    "",
+  );
+
+  if (cleaned === html) return response;
+  const headers = new Headers(response.headers);
+  headers.set("cache-control", "no-store");
+  return new Response(cleaned, { status: response.status, statusText: response.statusText, headers });
 }
 
 export default {
@@ -154,7 +162,7 @@ export default {
       return json({ ok: true, service: "agro-zia-inquiry-api" });
     }
 
-    if (env.ASSETS) return env.ASSETS.fetch(request);
+    if (env.ASSETS) return serveAsset(request, env);
     return new Response("Not Found", { status: 404 });
   },
 };
