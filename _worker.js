@@ -169,11 +169,16 @@ async function createInquiry(request, env) {
   }, 201);
 }
 
+function adminAuthorized(request, env) {
+  const configured = env.ADMIN_TOKEN;
+  if (!configured) return false;
+  const authorization = request.headers.get("Authorization") || "";
+  return authorization === `Bearer ${configured}`;
+}
+
 async function listAdminInquiries(request, env) {
   if (!env.AGROZIA_DB) return json({ error: "database_unavailable" }, 503);
-
-  const accessEmail = request.headers.get("Cf-Access-Authenticated-User-Email");
-  if (!accessEmail) return json({ error: "admin_auth_required" }, 401);
+  if (!adminAuthorized(request, env)) return json({ error: "admin_auth_required" }, 401);
 
   const url = new URL(request.url);
   const q = clean(url.searchParams.get("q"), 120);
@@ -201,7 +206,7 @@ async function listAdminInquiries(request, env) {
   ).bind(...values, limit);
 
   const result = await stmt.all();
-  return json({ ok: true, viewer: accessEmail, count: result.results?.length || 0, inquiries: result.results || [] });
+  return json({ ok: true, count: result.results?.length || 0, inquiries: result.results || [] });
 }
 
 export default {
