@@ -279,3 +279,7 @@ The first screen should make clear:
 5. How a B2B customer can start an inquiry.
 
 The site should feel credible, restrained and international rather than like a generic ecommerce template.
+
+## 19. Admin Preview QA
+
+The protected B2B inquiry dashboard is validated in a non-production preview before any production promotion. Runtime secrets must never be committed to the repository or exposed in logs, responses, or client-visible source.
