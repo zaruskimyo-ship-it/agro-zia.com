@@ -29,6 +29,11 @@ function clean(value, max) {
   return String(value).trim().slice(0, max);
 }
 
+function exceedsMaxLength(value, max) {
+  if (value === undefined || value === null) return false;
+  return String(value).trim().length > max;
+}
+
 function year() {
   return new Date().getUTCFullYear();
 }
@@ -59,6 +64,13 @@ async function createInquiry(request, env) {
     body = await request.json();
   } catch (_) {
     return json({ error: "invalid_json" }, 400);
+  }
+
+  const lengthFields = Object.keys(MAX_LENGTHS);
+  for (const field of lengthFields) {
+    if (exceedsMaxLength(body?.[field], MAX_LENGTHS[field])) {
+      return json({ error: "field_too_long", field, max_length: MAX_LENGTHS[field] }, 400);
+    }
   }
 
   const language = ALLOWED_LANGUAGES.has(body?.language) ? body.language : "en";
