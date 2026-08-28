@@ -169,12 +169,51 @@ async function createInquiry(request, env) {
   }, 201);
 }
 
+async function listAdminInquiries(request, env) {
+  if (!env.AGROZIA_DB) return json({ error: "database_unavailable" }, 503);
+
+  const accessEmail = request.headers.get("Cf-Access-Authenticated-User-Email");
+  if (!accessEmail) return json({ error: "admin_auth_required" }, 401);
+
+  const url = new URL(request.url);
+  const q = clean(url.searchParams.get("q"), 120);
+  const status = clean(url.searchParams.get("status"), 30);
+  const limit = Math.min(Math.max(Number(url.searchParams.get("limit") || 50), 1), 100);
+
+  const conditions = [];
+  const values = [];
+  if (q) {
+    const pattern = `%${q}%`;
+    conditions.push("(request_number LIKE ? OR company LIKE ? OR product LIKE ? OR destination LIKE ? OR email LIKE ?)");
+    values.push(pattern, pattern, pattern, pattern, pattern);
+  }
+  if (status) {
+    conditions.push("status = ?");
+    values.push(status);
+  }
+
+  const where = conditions.length ? `WHERE ${conditions.join(" AND ")}` : "";
+  const stmt = env.AGROZIA_DB.prepare(
+    `SELECT id, request_number, created_at, language, product, company, specification,
+            quantity, destination, timing, email, phone, message, status
+     FROM inquiries ${where}
+     ORDER BY id DESC LIMIT ?`,
+  ).bind(...values, limit);
+
+  const result = await stmt.all();
+  return json({ ok: true, viewer: accessEmail, count: result.results?.length || 0, inquiries: result.results || [] });
+}
+
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
 
     if (url.pathname === "/api/inquiries" && request.method === "POST") {
       return createInquiry(request, env);
+    }
+
+    if (url.pathname === "/api/admin/inquiries" && request.method === "GET") {
+      return listAdminInquiries(request, env);
     }
 
     if (url.pathname === "/api/health" && request.method === "GET") {
