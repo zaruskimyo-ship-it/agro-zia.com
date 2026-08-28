@@ -78,7 +78,7 @@ async function createInquiry(request, env) {
 
   const createdAt = new Date().toISOString();
 
-  if (!env.DB) {
+  if (!env.AGROZIA_DB) {
     return json({
       ok: true,
       persisted: false,
@@ -92,8 +92,8 @@ async function createInquiry(request, env) {
   for (let attempt = 0; attempt < 6; attempt += 1) {
     let requestNumber;
     try {
-      requestNumber = await nextRequestNumber(env.DB);
-      await env.DB.prepare(
+      requestNumber = await nextRequestNumber(env.AGROZIA_DB);
+      await env.AGROZIA_DB.prepare(
         `INSERT INTO inquiries
           (request_number, created_at, language, product, company, specification,
            quantity, destination, timing, email, phone, message, status)
