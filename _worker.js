@@ -38,12 +38,6 @@ function year() {
   return new Date().getUTCFullYear();
 }
 
-function fallbackRequestNumber() {
-  const stamp = Date.now().toString().slice(-6);
-  const random = Math.floor(Math.random() * 1000).toString().padStart(3, "0");
-  return `AGZ-${year()}-T${stamp}${random}`;
-}
-
 async function nextRequestNumber(db) {
   const currentYear = year();
   const prefix = `AGZ-${currentYear}-`;
@@ -87,24 +81,13 @@ async function createInquiry(request, env) {
   if (!product) return json({ error: "product_required" }, 400);
   if (!email && !phone) return json({ error: "contact_required" }, 400);
   if (email && !EMAIL_RE.test(email)) return json({ error: "invalid_email" }, 400);
+  if (!env.AGROZIA_DB) return json({ error: "d1_unavailable" }, 503);
 
   const createdAt = new Date().toISOString();
 
-  if (!env.AGROZIA_DB) {
-    return json({
-      ok: true,
-      persisted: false,
-      temporary: true,
-      request_number: fallbackRequestNumber(),
-      status: "email_fallback",
-      created_at: createdAt,
-    }, 201);
-  }
-
   for (let attempt = 0; attempt < 6; attempt += 1) {
-    let requestNumber;
     try {
-      requestNumber = await nextRequestNumber(env.AGROZIA_DB);
+      const requestNumber = await nextRequestNumber(env.AGROZIA_DB);
       await env.AGROZIA_DB.prepare(
         `INSERT INTO inquiries
           (request_number, created_at, language, product, company, specification,
@@ -137,36 +120,12 @@ async function createInquiry(request, env) {
     } catch (error) {
       const messageText = String(error?.message || "").toLowerCase();
       if (messageText.includes("unique") && attempt < 5) continue;
-      if (messageText.includes("unique")) {
-        return json({
-          ok: true,
-          persisted: false,
-          temporary: true,
-          request_number: fallbackRequestNumber(),
-          status: "email_fallback",
-          created_at: createdAt,
-        }, 201);
-      }
-      console.error("D1 inquiry persistence failed; continuing with temporary reference:", error);
-      return json({
-        ok: true,
-        persisted: false,
-        temporary: true,
-        request_number: fallbackRequestNumber(),
-        status: "email_fallback",
-        created_at: createdAt,
-      }, 201);
+      console.error("D1 inquiry persistence failed:", error);
+      return json({ error: "d1_persistence_failed" }, 503);
     }
   }
 
-  return json({
-    ok: true,
-    persisted: false,
-    temporary: true,
-    request_number: fallbackRequestNumber(),
-    status: "email_fallback",
-    created_at: createdAt,
-  }, 201);
+  return json({ error: "d1_persistence_failed" }, 503);
 }
 
 export default {
@@ -178,7 +137,7 @@ export default {
     }
 
     if (url.pathname === "/api/health" && request.method === "GET") {
-      return json({ ok: true, service: "agro-zia-inquiry-api" });
+      return json({ ok: true, service: "agro-zia-inquiry-api", d1_bound: Boolean(env.AGROZIA_DB) });
     }
 
     if (env.ASSETS) return env.ASSETS.fetch(request);
