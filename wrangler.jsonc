@@ -11,7 +11,7 @@
   "d1_databases": [
     {
       "binding": "AGROZIA_DB",
-      "database_name": "agro-zia-db11",
+      "database_name": "agrozia-db11",
       "database_id": "e81f6625-99f4-4d52-a5a4-780cd82f4977"
     }
   ],
