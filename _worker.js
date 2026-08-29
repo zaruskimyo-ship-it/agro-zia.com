@@ -171,14 +171,17 @@ async function createInquiry(request, env) {
 
 function adminAuthorized(request, env) {
   const configured = env.ADMIN_TOKEN;
-  if (!configured) return false;
+  if (!configured) return { ok: false, error: "admin_auth_unconfigured" };
   const authorization = request.headers.get("Authorization") || "";
-  return authorization === `Bearer ${configured}`;
+  if (authorization !== `Bearer ${configured}`) return { ok: false, error: "admin_auth_required" };
+  return { ok: true };
 }
 
 async function listAdminInquiries(request, env) {
   if (!env.AGROZIA_DB) return json({ error: "database_unavailable" }, 503);
-  if (!adminAuthorized(request, env)) return json({ error: "admin_auth_required" }, 401);
+
+  const auth = adminAuthorized(request, env);
+  if (!auth.ok) return json({ error: auth.error }, auth.error === "admin_auth_unconfigured" ? 503 : 401);
 
   const url = new URL(request.url);
   const q = clean(url.searchParams.get("q"), 120);
