@@ -60,8 +60,7 @@ async function createInquiry(request, env) {
     return json({ error: "invalid_json" }, 400);
   }
 
-  const lengthFields = Object.keys(MAX_LENGTHS);
-  for (const field of lengthFields) {
+  for (const field of Object.keys(MAX_LENGTHS)) {
     if (exceedsMaxLength(body?.[field], MAX_LENGTHS[field])) {
       return json({ error: "field_too_long", field, max_length: MAX_LENGTHS[field] }, 400);
     }
@@ -128,6 +127,23 @@ async function createInquiry(request, env) {
   return json({ error: "d1_persistence_failed" }, 503);
 }
 
+async function serveHomepage(request, env) {
+  const response = await env.ASSETS.fetch(request);
+  const contentType = response.headers.get("content-type") || "";
+  if (!contentType.includes("text/html")) return response;
+
+  const url = new URL(request.url);
+  if (url.pathname !== "/" && url.pathname !== "/multilingual-preview" && url.pathname !== "/multilingual-preview.html") {
+    return response;
+  }
+
+  const html = await response.text();
+  const injected = html.replace("</body>", '<script src="/inquiry-integration.js"></script>\n</body>');
+  const headers = new Headers(response.headers);
+  headers.delete("content-length");
+  return new Response(injected, { status: response.status, statusText: response.statusText, headers });
+}
+
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
@@ -140,7 +156,7 @@ export default {
       return json({ ok: true, service: "agro-zia-inquiry-api", d1_bound: Boolean(env.AGROZIA_DB) });
     }
 
-    if (env.ASSETS) return env.ASSETS.fetch(request);
+    if (env.ASSETS) return serveHomepage(request, env);
     return new Response("Not Found", { status: 404 });
   },
 };
