@@ -1,0 +1,20 @@
+name: Inquiry Localization QA
+
+on:
+  push:
+    branches:
+      - qa/inquiry-localization-fix
+  pull_request:
+    branches:
+      - qa/inquiry-localization-fix
+      - release/inquiry-production-candidate
+
+jobs:
+  localization:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: node qa/check-inquiry-localization.mjs
