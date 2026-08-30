@@ -189,7 +189,7 @@ const MULTILINGUAL_INQUIRY_SCRIPT = `<script>
       timing: String(data.get('timing') || '').trim(),
       email: String(data.get('email') || '').trim(),
       phone: String(data.get('phone') || '').trim(),
-      message: [String(data.get('company_contact_name') || '').trim() ? `Contact name: ${String(data.get('company_contact_name')).trim()}` : '', String(data.get('message') || '').trim()].filter(Boolean).join('\n')
+      message: [String(data.get('company_contact_name') || '').trim() ? 'Contact name: ' + String(data.get('company_contact_name')).trim() : '', String(data.get('message') || '').trim()].filter(Boolean).join('\n')
     };
     try {
       const response = await fetch('/api/inquiries', {method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(payload)});
@@ -198,24 +198,24 @@ const MULTILINGUAL_INQUIRY_SCRIPT = `<script>
       const ref = body.request_number;
       const date = formatDate(body.created_at);
       const emailBody = [
-        `Request Reference: ${ref}`,
-        `Request Date & Time: ${body.created_at}`,
-        `Product / category: ${payload.product}`,
-        `Company: ${payload.company}`,
-        `Specification: ${payload.specification}`,
-        `Quantity: ${payload.quantity}`,
-        `Destination: ${payload.destination}`,
-        `Preferred timing: ${payload.timing}`,
-        `Email: ${payload.email}`,
-        `Phone / WhatsApp: ${payload.phone}`,
-        `Additional requirements: ${payload.message}`
+        'Request Reference: ' + ref,
+        'Request Date & Time: ' + body.created_at,
+        'Product / category: ' + payload.product,
+        'Company: ' + payload.company,
+        'Specification: ' + payload.specification,
+        'Quantity: ' + payload.quantity,
+        'Destination: ' + payload.destination,
+        'Preferred timing: ' + payload.timing,
+        'Email: ' + payload.email,
+        'Phone / WhatsApp: ' + payload.phone,
+        'Additional requirements: ' + payload.message
       ].join('\n');
-      const mailto = `mailto:export@agro-zia.com?subject=${encodeURIComponent(`Agro-Zia B2B Inquiry — ${payload.product}`)}&body=${encodeURIComponent(emailBody)}`;
-      setResult(`<strong>${t.success}</strong><p><strong>${t.reference}:</strong><br><span class="ref">${ref}</span></p><p><strong>${t.date}:</strong><br><span class="date">${date}</span></p><p>${t.received}</p><div class="actions"><button class="btn alt" type="button" id="copy-inquiry-ref">${t.copy}</button><a class="btn" href="${mailto}">${t.email_btn}</a></div>`);
+      const mailto = 'mailto:export@agro-zia.com?subject=' + encodeURIComponent('Agro-Zia B2B Inquiry — ' + payload.product) + '&body=' + encodeURIComponent(emailBody);
+      setResult('<strong>' + t.success + '</strong><p><strong>' + t.reference + ':</strong><br><span class="ref">' + ref + '</span></p><p><strong>' + t.date + ':</strong><br><span class="date">' + date + '</span></p><p>' + t.received + '</p><div class="actions"><button class="btn alt" type="button" id="copy-inquiry-ref">' + t.copy + '</button><a class="btn" href="' + mailto + '">' + t.email_btn + '</a></div>');
       document.getElementById('copy-inquiry-ref')?.addEventListener('click', async () => { await navigator.clipboard?.writeText(ref); });
     } catch (error) {
       const message = errorMap[error.message] || error.message || 'submission_failed';
-      setResult(`<strong>${t.error}${message}</strong>`, true);
+      setResult('<strong>' + t.error + message + '</strong>', true);
     } finally {
       button.disabled = false;
       button.textContent = t.submit;
