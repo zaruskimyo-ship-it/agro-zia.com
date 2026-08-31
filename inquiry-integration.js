@@ -1,5 +1,5 @@
 (() => {
-  const form = document.querySelector('form[action^="mailto:"]');
+  const form = document.querySelector('#contact form, form[action^="mailto:"]');
   if (!form) return;
 
   const T = {
