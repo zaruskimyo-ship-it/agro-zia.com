@@ -1,4 +1,4 @@
-/* Agro-Zia Stage 1 guard: keep the approved multilingual selector, but suppress its legacy inquiry submit handler. */
+/* Agro-Zia Stage 1 guard: keep the approved multilingual selector and suppress the legacy inquiry submit handler. */
 (() => {
   const originalAddEventListener = HTMLFormElement.prototype.addEventListener;
   HTMLFormElement.prototype.addEventListener = function (type, listener, options) {
@@ -9,8 +9,13 @@
     return originalAddEventListener.call(this, type, listener, options);
   };
 
-  const script = document.createElement('script');
-  script.src = 'locales/language-selector-core.js';
-  script.async = false;
-  document.head.appendChild(script);
+  const core = document.createElement('script');
+  core.src = 'locales/language-selector-core.js';
+  core.async = false;
+  document.head.appendChild(core);
+
+  const fix = document.createElement('script');
+  fix.src = 'locales/stage1-inquiry-root-fix.js';
+  fix.async = false;
+  document.head.appendChild(fix);
 })();
