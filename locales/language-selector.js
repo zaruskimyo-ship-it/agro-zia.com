@@ -50,6 +50,65 @@
   function activateSocialLinks() { const footer=document.querySelector('footer .container'); if(!footer||footer.querySelector('[data-agrozia-social]'))return; const wrap=document.createElement('div'); wrap.setAttribute('data-agrozia-social','true'); wrap.style.display='flex'; wrap.style.flexWrap='wrap'; wrap.style.gap='10px'; wrap.style.marginTop='18px'; [{label:'WhatsApp',href:'https://wa.me/message/C2C4CHM4DXFNO1',aria:'Contact Agro-Zia on WhatsApp'},{label:'Instagram @agro_zia',href:'https://www.instagram.com/agro_zia/',aria:'Agro-Zia on Instagram'}].forEach(({label,href,aria})=>{const link=document.createElement('a'); link.href=href; link.target='_blank'; link.rel='noopener noreferrer'; link.textContent=label; link.setAttribute('aria-label',aria); link.style.display='inline-flex'; link.style.alignItems='center'; link.style.padding='7px 11px'; link.style.border='1px solid rgba(255,255,255,.25)'; link.style.borderRadius='999px'; link.style.color='#fff'; link.style.fontSize='12px'; link.style.fontWeight='700'; link.style.textDecoration='none'; wrap.appendChild(link);}); footer.appendChild(wrap); }
   function activateFooterEmails() { const footer=document.querySelector('footer .container'); if(!footer||footer.querySelector('[data-agrozia-footer-emails]'))return; const wrap=document.createElement('div'); wrap.setAttribute('data-agrozia-footer-emails','true'); wrap.style.display='flex'; wrap.style.flexWrap='wrap'; wrap.style.gap='10px'; wrap.style.marginTop='10px'; ['info@agro-zia.com','export@agro-zia.com'].forEach(label=>{const link=document.createElement('a'); link.href=`mailto:${label}`; link.textContent=label; link.style.color='#fff'; link.style.textDecoration='underline'; link.style.fontSize='12px'; link.style.fontWeight='700'; wrap.appendChild(link);}); footer.appendChild(wrap); }
   function activateProductCategoryLinks() { if(!/\/products\.html$/i.test(location.pathname))return; const grid=document.querySelector('#categories .grid3'); if(!grid||grid.querySelector('[data-agrozia-product-link]'))return; const active=getActive(); const labels={en:'View category →',ru:'Открыть категорию →',fa:'مشاهده دسته‌بندی ←',ar:'عرض الفئة ←',uz:'Kategoriyani ko‘rish →',tr:'Kategoriyi görüntüle →'}; const slugs=['fertilizers','agricultural-products','greenhouse-products','irrigation-solutions','agricultural-equipment','custom-sourcing']; grid.querySelectorAll('.card').forEach((card,index)=>{const slug=slugs[index]; if(!slug)return; const link=document.createElement('a'); link.href=`product-detail.html?lang=${active}&product=${slug}`; link.setAttribute('data-agrozia-product-link','true'); link.textContent=labels[active]; link.style.display='inline-flex'; link.style.marginTop='16px'; link.style.padding='9px 13px'; link.style.borderRadius='8px'; link.style.background='#145b3b'; link.style.color='#fff'; link.style.fontWeight='800'; link.style.fontSize='12px'; link.style.textDecoration='none'; card.appendChild(link);}); }
-  function init() { setDirection(); applyPhase4Translations(); activateZarusLink(); activateContactEmails(); activateSocialLinks(); activateFooterEmails(); activateProductCategoryLinks(); }
+
+  function activateServerInquiry() {
+    const form = document.querySelector('#contact form');
+    if (!form || form.dataset.serverInquiry === 'true') return;
+    form.dataset.serverInquiry = 'true';
+    const active = getActive();
+    const copy = {
+      en:{note:'Your inquiry is submitted securely to Agro-Zia, assigned a server-generated reference, and stored before any email draft is opened.',sending:'Submitting inquiry…',success:'Inquiry submitted successfully',reference:'Request Reference',date:'Request Date & Time',received:'Your inquiry has been received. Please keep this reference number.',email:'Open Email Draft',copy:'Copy Reference',error:'Unable to submit: ',required:'Please provide a product/category and at least an email or phone number.'},
+      ru:{note:'Ваш запрос отправляется в Agro-Zia, получает номер на сервере и сохраняется до открытия черновика Email.',sending:'Отправка запроса…',success:'Запрос успешно отправлен',reference:'Номер заявки',date:'Дата и время заявки',received:'Ваш запрос получен. Сохраните этот номер.',email:'Открыть Email',copy:'Копировать номер',error:'Не удалось отправить: ',required:'Укажите продукт/категорию и Email или телефон.'},
+      fa:{note:'درخواست شما در سرور Agro-Zia ثبت، شماره پیگیری دریافت و پیش از بازکردن پیش‌نویس ایمیل در D1 ذخیره می‌شود.',sending:'در حال ثبت درخواست…',success:'درخواست با موفقیت ثبت شد',reference:'شماره پیگیری',date:'تاریخ و زمان درخواست',received:'درخواست شما دریافت شد. لطفاً این شماره را نگهداری کنید.',email:'باز کردن پیش‌نویس ایمیل',copy:'کپی شماره',error:'ثبت درخواست انجام نشد: ',required:'محصول/دسته و حداقل ایمیل یا شماره تلفن را وارد کنید.'},
+      ar:{note:'يتم إرسال طلبك إلى Agro-Zia وإنشاء رقم مرجعي وحفظه قبل فتح مسودة البريد الإلكتروني.',sending:'جارٍ إرسال الطلب…',success:'تم إرسال الطلب بنجاح',reference:'رقم المرجع',date:'تاريخ ووقت الطلب',received:'تم استلام طلبك. يرجى الاحتفاظ بهذا الرقم.',email:'فتح مسودة البريد',copy:'نسخ الرقم',error:'تعذر إرسال الطلب: ',required:'يرجى إدخال المنتج/الفئة والبريد الإلكتروني أو الهاتف.'},
+      uz:{note:'So‘rovingiz Agro-Zia serveriga yuboriladi, server raqami beriladi va email qoralamasi ochilishidan oldin saqlanadi.',sending:'So‘rov yuborilmoqda…',success:'So‘rov muvaffaqiyatli yuborildi',reference:'So‘rov raqami',date:'So‘rov sanasi va vaqti',received:'So‘rovingiz qabul qilindi. Ushbu raqamni saqlang.',email:'Email qoralamasini ochish',copy:'Raqamni nusxalash',error:'So‘rov yuborilmadi: ',required:'Mahsulot/kategoriya va email yoki telefon kiriting.'},
+      tr:{note:'Talebiniz Agro-Zia sunucusuna gönderilir, sunucu tarafından referans numarası atanır ve e-posta taslağı açılmadan önce kaydedilir.',sending:'Talep gönderiliyor…',success:'Talep başarıyla gönderildi',reference:'Talep Referansı',date:'Talep Tarihi ve Saati',received:'Talebiniz alındı. Bu numarayı saklayın.',email:'E-posta Taslağını Aç',copy:'Referansı Kopyala',error:'Talep gönderilemedi: ',required:'Ürün/kategori ve e-posta veya telefon girin.'}
+    }[active] || null;
+    if (!copy) return;
+    const note = form.querySelector('[data-i18n="form_note"]');
+    if (note) note.textContent = copy.note;
+    let result = form.querySelector('[data-agrozia-inquiry-result]');
+    if (!result) { result = document.createElement('div'); result.setAttribute('data-agrozia-inquiry-result','true'); result.setAttribute('aria-live','polite'); result.style.marginTop='14px'; result.style.fontWeight='700'; form.appendChild(result); }
+    form.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      const button = form.querySelector('button[type="submit"]');
+      if (button) { button.disabled=true; button.textContent=copy.sending; }
+      result.textContent='';
+      const fd = new FormData(form);
+      const product = String(fd.get('interest') || '').trim();
+      const email = String(fd.get('email') || '').trim();
+      const phone = String(fd.get('phone') || '').trim();
+      if (!product || (!email && !phone)) {
+        result.textContent=copy.required;
+        if (button) { button.disabled=false; button.textContent=copy.en; }
+        return;
+      }
+      const payload = {
+        language: active,
+        product,
+        company: String(fd.get('company') || '').trim(),
+        destination: String(fd.get('country') || '').trim(),
+        email,
+        phone,
+        message: [String(fd.get('name') || '').trim() ? `Contact name: ${String(fd.get('name')).trim()}` : '', String(fd.get('message') || '').trim()].filter(Boolean).join('\n')
+      };
+      try {
+        const response = await fetch('/api/inquiries', {method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(payload),credentials:'same-origin'});
+        const data = await response.json().catch(()=>({}));
+        if (!response.ok || !data.ok || data.persisted !== true || !data.request_number) throw new Error(data.error || `HTTP ${response.status}`);
+        const when = data.created_at ? new Intl.DateTimeFormat(active==='fa'?'fa-IR':active==='ar'?'ar':active==='tr'?'tr-TR':active==='ru'?'ru-RU':active==='uz'?'uz-UZ':'en-US',{dateStyle:'medium',timeStyle:'short'}).format(new Date(data.created_at)) : '';
+        result.innerHTML = `<div>${copy.success}</div><div style="margin-top:8px">${copy.reference}: <strong>${data.request_number}</strong></div>${when?`<div style="margin-top:4px">${copy.date}: ${when}</div>`:''}<div style="margin-top:8px">${copy.received}</div><div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px"><button type="button" data-email-draft style="padding:8px 12px;border-radius:8px;border:1px solid #145b3b;background:#145b3b;color:#fff;font-weight:800">${copy.email}</button><button type="button" data-copy-ref style="padding:8px 12px;border-radius:8px;border:1px solid #145b3b;background:#fff;color:#145b3b;font-weight:800">${copy.copy}</button></div>`;
+        result.querySelector('[data-email-draft]').addEventListener('click',()=>{ const subject=encodeURIComponent(`Agro-Zia Business Inquiry ${data.request_number}`); const body=encodeURIComponent(`Request Reference: ${data.request_number}\nRequest Date & Time: ${when}\n\nCompany: ${payload.company}\nCountry: ${payload.destination}\nProduct / Interest: ${payload.product}\nEmail: ${payload.email}\nPhone: ${payload.phone}\n\n${payload.message}`); location.href=`mailto:export@agro-zia.com?subject=${subject}&body=${body}`; });
+        result.querySelector('[data-copy-ref]').addEventListener('click',async()=>{ try{await navigator.clipboard.writeText(data.request_number); result.dataset.copied='true';}catch(_){ result.dataset.copied='true'; } });
+        form.reset();
+      } catch (error) {
+        result.textContent = copy.error + (error?.message || 'unknown_error');
+      } finally {
+        if (button) { button.disabled=false; button.textContent = (window.AgroZiaI18n?.t?.[active]?.submit) || 'Submit Business Inquiry'; }
+      }
+    });
+  }
+
+  function init() { setDirection(); applyPhase4Translations(); activateZarusLink(); activateContactEmails(); activateSocialLinks(); activateFooterEmails(); activateProductCategoryLinks(); activateServerInquiry(); }
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',init,{once:true}); else init();
 })();
