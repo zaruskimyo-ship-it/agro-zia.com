@@ -61,6 +61,7 @@
           getValue(replacement, ['message'])
         ].filter(Boolean).join('\n')
       };
+      const attachment = data.get('attachment');
 
       if (!payload.product || (!payload.email && !payload.phone)) {
         setResult(t.required, true);
@@ -70,10 +71,13 @@
       }
 
       try {
+        const requestBody = new FormData();
+        Object.entries(payload).forEach(([key, value]) => requestBody.append(key, value == null ? '' : String(value)));
+        if (attachment instanceof File && attachment.size > 0) requestBody.append('attachment', attachment, attachment.name);
+
         const response = await fetch('/api/inquiries', {
           method: 'POST',
-          headers: { 'content-type': 'application/json' },
-          body: JSON.stringify(payload),
+          body: requestBody,
           credentials: 'same-origin'
         });
         const dataResponse = await response.json().catch(() => ({}));
@@ -88,8 +92,9 @@
             ).format(new Date(dataResponse.created_at))
           : '';
 
+        const attachmentNote = dataResponse.attachment?.name ? `<div style="margin-top:4px">Attachment: ${dataResponse.attachment.name}</div>` : '';
         result.className = 'result show';
-        result.innerHTML = `<div>${t.success}</div><div style="margin-top:8px">${t.reference}: <strong>${dataResponse.request_number}</strong></div>${when ? `<div style="margin-top:4px">${t.date}: ${when}</div>` : ''}<div style="margin-top:8px">${t.received}</div><div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px"><button type="button" data-stage1-email style="padding:8px 12px;border-radius:8px;border:1px solid #145b3b;background:#145b3b;color:#fff;font-weight:800">${t.email}</button><button type="button" data-stage1-copy style="padding:8px 12px;border-radius:8px;border:1px solid #145b3b;background:#fff;color:#145b3b;font-weight:800">${t.copy}</button></div>`;
+        result.innerHTML = `<div>${t.success}</div><div style="margin-top:8px">${t.reference}: <strong>${dataResponse.request_number}</strong></div>${when ? `<div style="margin-top:4px">${t.date}: ${when}</div>` : ''}${attachmentNote}<div style="margin-top:8px">${t.received}</div><div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px"><button type="button" data-stage1-email style="padding:8px 12px;border-radius:8px;border:1px solid #145b3b;background:#145b3b;color:#fff;font-weight:800">${t.email}</button><button type="button" data-stage1-copy style="padding:8px 12px;border-radius:8px;border:1px solid #145b3b;background:#fff;color:#145b3b;font-weight:800">${t.copy}</button></div>`;
 
         result.querySelector('[data-stage1-email]').addEventListener('click', () => {
           const subject = encodeURIComponent(`Agro-Zia Business Inquiry ${dataResponse.request_number}`);
