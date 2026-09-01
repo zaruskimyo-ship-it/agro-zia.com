@@ -18,4 +18,9 @@
   fix.src = 'locales/stage1-inquiry-root-fix.js';
   fix.async = false;
   document.head.appendChild(fix);
+
+  const attachment = document.createElement('script');
+  attachment.src = 'locales/stage4-attachment.js';
+  attachment.async = false;
+  document.head.appendChild(attachment);
 })();
