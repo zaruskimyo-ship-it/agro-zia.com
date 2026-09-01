@@ -17,10 +17,11 @@
   function install() {
     const form = document.getElementById('canonical-inquiry-form');
     if (!form || form.dataset.stage4Attachment === 'true') return Boolean(form);
-    form.dataset.stage4Attachment = 'true';
 
     const grid = form.querySelector('.form-grid');
     if (!grid) return false;
+
+    form.dataset.stage4Attachment = 'true';
     const label = document.createElement('label');
     label.className = 'full';
     label.innerHTML = `<span>${t.label}</span><input id="agz-attachment" name="attachment" type="file" accept="application/pdf,.pdf,image/jpeg,image/jpg,.jpg,.jpeg"><small style="display:block;margin-top:6px;opacity:.72">${t.help}</small>`;
