@@ -44,30 +44,6 @@
     return true;
   }
 
-  const originalFetch = window.fetch.bind(window);
-  window.fetch = async (input, init = {}) => {
-    const url = typeof input === 'string' ? input : input?.url || '';
-    const method = String(init?.method || (typeof input !== 'string' ? input?.method : 'GET')).toUpperCase();
-    if (!url.endsWith('/api/inquiries') || method !== 'POST') return originalFetch(input, init);
-
-    const fileInput = document.getElementById('agz-attachment');
-    const file = fileInput?.files?.[0];
-    if (!file) return originalFetch(input, init);
-
-    if ((!TYPES.has(file.type) && !/\.(pdf|jpe?g)$/i.test(file.name)) || file.size > MAX_BYTES) {
-      throw new Error(file.size > MAX_BYTES ? 'attachment_too_large' : 'attachment_invalid_type');
-    }
-
-    let payload = {};
-    try { payload = JSON.parse(String(init.body || '{}')); } catch (_) {}
-    const formData = new FormData();
-    Object.entries(payload).forEach(([key, value]) => formData.append(key, value == null ? '' : String(value)));
-    formData.append('attachment', file, file.name);
-
-    const nextInit = { ...init, headers: undefined, body: formData };
-    return originalFetch(input, nextInit);
-  };
-
   function wait() {
     if (install()) return;
     const observer = new MutationObserver(() => { if (install()) observer.disconnect(); });
