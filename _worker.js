@@ -15,6 +15,8 @@ const ALLOWED_LANGUAGES = new Set(["en", "ru", "fa", "ar", "uz", "tr"]);
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const MAX_ATTACHMENT_BYTES = 1024 * 1024;
 const ALLOWED_ATTACHMENT_TYPES = new Set(["application/pdf", "image/jpeg", "image/jpg"]);
+const INQUIRY_EMAIL_TO = "export@agro-zia.com";
+const INQUIRY_EMAIL_FROM = "export@agro-zia.com";
 
 function json(data, status = 200) {
   return new Response(JSON.stringify(data), {
@@ -56,6 +58,58 @@ async function parseInquiry(request) {
   }
   try { return { body: await request.json(), attachment: null }; }
   catch (_) { throw new Error("invalid_json"); }
+}
+
+function inquiryEmailText({ requestNumber, createdAt, language, product, company, specification, quantity, destination, timing, email, phone, message, attachment }) {
+  return [
+    "AGRO-ZIA BUSINESS INQUIRY",
+    "",
+    `Request Reference: ${requestNumber}`,
+    `Request Date & Time: ${createdAt}`,
+    `Language: ${language}`,
+    "",
+    `Company: ${company || ""}`,
+    `Country: ${destination || ""}`,
+    `Product / Interest: ${product || ""}`,
+    `Required specification: ${specification || ""}`,
+    `Quantity: ${quantity || ""}`,
+    `Preferred timing: ${timing || ""}`,
+    `Email: ${email || ""}`,
+    `Phone: ${phone || ""}`,
+    "",
+    message || "",
+    "",
+    attachment ? `Attachment: ${attachment.name} (${attachment.type || "unknown"}, ${attachment.size} bytes)` : "Attachment: none",
+  ].join("\n");
+}
+
+async function sendInquiryEmail(env, data) {
+  if (!env.EMAIL) return { status: "unconfigured" };
+
+  const attachments = [];
+  if (data.attachmentKey) {
+    const object = await env.AGROZIA_ATTACHMENTS.get(data.attachmentKey);
+    if (!object) throw new Error("attachment_not_found_after_persistence");
+    attachments.push({
+      content: await object.arrayBuffer(),
+      filename: data.attachmentName,
+      type: data.attachmentType || "application/octet-stream",
+      disposition: "attachment",
+    });
+  }
+
+  const text = inquiryEmailText(data);
+  const subject = `Agro-Zia Business Inquiry ${data.requestNumber}`;
+  const result = await env.EMAIL.send({
+    to: INQUIRY_EMAIL_TO,
+    from: INQUIRY_EMAIL_FROM,
+    replyTo: data.email || undefined,
+    subject,
+    text,
+    attachments,
+  });
+
+  return { status: "sent", message_id: result?.messageId || null };
 }
 
 async function createInquiry(request, env) {
@@ -123,6 +177,31 @@ async function createInquiry(request, env) {
         attachment?.size || null, storedObject?.httpEtag || storedObject?.etag || null,
       ).run();
 
+      let emailNotification = { status: "unconfigured" };
+      try {
+        emailNotification = await sendInquiryEmail(env, {
+          requestNumber,
+          createdAt,
+          language,
+          product,
+          company,
+          specification,
+          quantity,
+          destination,
+          timing,
+          email,
+          phone,
+          message,
+          attachmentKey,
+          attachmentName: attachment?.name || null,
+          attachmentType: attachment?.type || null,
+          attachment: attachment ? { name: attachment.name, type: attachment.type, size: attachment.size } : null,
+        });
+      } catch (emailError) {
+        console.error("Inquiry email notification failed:", emailError);
+        emailNotification = { status: "failed" };
+      }
+
       return json({
         ok: true,
         persisted: true,
@@ -130,6 +209,7 @@ async function createInquiry(request, env) {
         status: "received",
         created_at: createdAt,
         attachment: attachment ? { name: attachment.name, type: attachment.type, size: attachment.size } : null,
+        email_notification: emailNotification.status,
       }, 201);
     } catch (error) {
       if (attachmentKey && env.AGROZIA_ATTACHMENTS) {
@@ -182,7 +262,7 @@ export default {
     const url = new URL(request.url);
     if (url.pathname === "/api/inquiries" && request.method === "POST") return createInquiry(request, env);
     if (url.pathname === "/api/health" && request.method === "GET") {
-      return json({ ok: true, service: "agro-zia-inquiry-api", d1_bound: Boolean(env.AGROZIA_DB), attachment_storage_bound: Boolean(env.AGROZIA_ATTACHMENTS) });
+      return json({ ok: true, service: "agro-zia-inquiry-api", d1_bound: Boolean(env.AGROZIA_DB), attachment_storage_bound: Boolean(env.AGROZIA_ATTACHMENTS), email_bound: Boolean(env.EMAIL) });
     }
     const assetResponse = env.ASSETS ? await env.ASSETS.fetch(request) : new Response("Not Found", { status: 404 });
     if ((url.pathname === "/multilingual-preview" || url.pathname === "/multilingual-preview.html") && request.method === "GET") return transformMultilingualPreview(assetResponse);
