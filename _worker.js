@@ -17,6 +17,7 @@ const MAX_ATTACHMENT_BYTES = 1024 * 1024;
 const ALLOWED_ATTACHMENT_TYPES = new Set(["application/pdf", "image/jpeg", "image/jpg"]);
 const INQUIRY_EMAIL_TO = "export@agro-zia.com";
 const INQUIRY_EMAIL_FROM = "export@agro-zia.com";
+const TELEGRAM_API_BASE = "https://api.telegram.org";
 
 function json(data, status = 200) {
   return new Response(JSON.stringify(data), {
@@ -112,6 +113,59 @@ async function sendInquiryEmail(env, data) {
   return { status: "sent", message_id: result?.messageId || null };
 }
 
+function telegramCaption(data) {
+  return [
+    "AGRO-ZIA BUSINESS INQUIRY",
+    `Reference: ${data.requestNumber}`,
+    `Date: ${data.createdAt}`,
+    `Company: ${data.company || "-"}`,
+    `Country: ${data.destination || "-"}`,
+    `Product / Interest: ${data.product || "-"}`,
+    `Specification: ${data.specification || "-"}`,
+    `Quantity: ${data.quantity || "-"}`,
+    `Timing: ${data.timing || "-"}`,
+    `Email: ${data.email || "-"}`,
+    `Phone: ${data.phone || "-"}`,
+    data.message ? `Message: ${data.message}` : "Message: -",
+  ].join("\n").slice(0, 1024);
+}
+
+async function telegramRequest(env, method, formData) {
+  const token = env.TELEGRAM_BOT_TOKEN;
+  const chatId = env.TELEGRAM_CHAT_ID;
+  if (!token || !chatId) return { status: "unconfigured" };
+
+  const response = await fetch(`${TELEGRAM_API_BASE}/bot${token}/${method}`, {
+    method: "POST",
+    body: formData,
+  });
+  const payload = await response.json().catch(() => ({}));
+  if (!response.ok || !payload.ok) {
+    throw new Error(`telegram_${method}_failed`);
+  }
+  return { status: "sent", message_id: payload.result?.message_id || null };
+}
+
+async function sendInquiryTelegram(env, data) {
+  if (!env.TELEGRAM_BOT_TOKEN || !env.TELEGRAM_CHAT_ID) return { status: "unconfigured" };
+
+  if (data.attachmentKey) {
+    const object = await env.AGROZIA_ATTACHMENTS.get(data.attachmentKey);
+    if (!object) throw new Error("attachment_not_found_after_persistence");
+    const bytes = await object.arrayBuffer();
+    const form = new FormData();
+    form.append("chat_id", String(env.TELEGRAM_CHAT_ID));
+    form.append("caption", telegramCaption(data));
+    form.append("document", new Blob([bytes], { type: data.attachmentType || "application/octet-stream" }), data.attachmentName || "attachment");
+    return telegramRequest(env, "sendDocument", form);
+  }
+
+  const form = new FormData();
+  form.append("chat_id", String(env.TELEGRAM_CHAT_ID));
+  form.append("text", telegramCaption(data));
+  return telegramRequest(env, "sendMessage", form);
+}
+
 async function createInquiry(request, env) {
   let parsed;
   try { parsed = await parseInquiry(request); }
@@ -177,29 +231,39 @@ async function createInquiry(request, env) {
         attachment?.size || null, storedObject?.httpEtag || storedObject?.etag || null,
       ).run();
 
+      const notificationData = {
+        requestNumber,
+        createdAt,
+        language,
+        product,
+        company,
+        specification,
+        quantity,
+        destination,
+        timing,
+        email,
+        phone,
+        message,
+        attachmentKey,
+        attachmentName: attachment?.name || null,
+        attachmentType: attachment?.type || null,
+        attachment: attachment ? { name: attachment.name, type: attachment.type, size: attachment.size } : null,
+      };
+
       let emailNotification = { status: "unconfigured" };
       try {
-        emailNotification = await sendInquiryEmail(env, {
-          requestNumber,
-          createdAt,
-          language,
-          product,
-          company,
-          specification,
-          quantity,
-          destination,
-          timing,
-          email,
-          phone,
-          message,
-          attachmentKey,
-          attachmentName: attachment?.name || null,
-          attachmentType: attachment?.type || null,
-          attachment: attachment ? { name: attachment.name, type: attachment.type, size: attachment.size } : null,
-        });
+        emailNotification = await sendInquiryEmail(env, notificationData);
       } catch (emailError) {
         console.error("Inquiry email notification failed:", emailError);
         emailNotification = { status: "failed" };
+      }
+
+      let telegramNotification = { status: "unconfigured" };
+      try {
+        telegramNotification = await sendInquiryTelegram(env, notificationData);
+      } catch (telegramError) {
+        console.error("Inquiry Telegram notification failed:", telegramError);
+        telegramNotification = { status: "failed" };
       }
 
       return json({
@@ -210,6 +274,7 @@ async function createInquiry(request, env) {
         created_at: createdAt,
         attachment: attachment ? { name: attachment.name, type: attachment.type, size: attachment.size } : null,
         email_notification: emailNotification.status,
+        telegram_notification: telegramNotification.status,
       }, 201);
     } catch (error) {
       if (attachmentKey && env.AGROZIA_ATTACHMENTS) {
@@ -262,7 +327,14 @@ export default {
     const url = new URL(request.url);
     if (url.pathname === "/api/inquiries" && request.method === "POST") return createInquiry(request, env);
     if (url.pathname === "/api/health" && request.method === "GET") {
-      return json({ ok: true, service: "agro-zia-inquiry-api", d1_bound: Boolean(env.AGROZIA_DB), attachment_storage_bound: Boolean(env.AGROZIA_ATTACHMENTS), email_bound: Boolean(env.EMAIL) });
+      return json({
+        ok: true,
+        service: "agro-zia-inquiry-api",
+        d1_bound: Boolean(env.AGROZIA_DB),
+        attachment_storage_bound: Boolean(env.AGROZIA_ATTACHMENTS),
+        email_bound: Boolean(env.EMAIL),
+        telegram_configured: Boolean(env.TELEGRAM_BOT_TOKEN && env.TELEGRAM_CHAT_ID),
+      });
     }
     const assetResponse = env.ASSETS ? await env.ASSETS.fetch(request) : new Response("Not Found", { status: 404 });
     if ((url.pathname === "/multilingual-preview" || url.pathname === "/multilingual-preview.html") && request.method === "GET") return transformMultilingualPreview(assetResponse);
