@@ -6,6 +6,15 @@
   "assets": {
     "directory": ".",
     "binding": "ASSETS",
+    "exclude": [
+      "**/.git/**",
+      "**/.env",
+      "**/.env.*",
+      "wrangler.json",
+      "wrangler.jsonc",
+      "wrangler.toml",
+      ".npmrc"
+    ],
     "run_worker_first": ["/api/*", "/multilingual-preview", "/multilingual-preview.html"]
   },
   "d1_databases": [
