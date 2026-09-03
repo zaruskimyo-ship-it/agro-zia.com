@@ -362,9 +362,23 @@ function transformMultilingualPreview(response) {
   }).transform(response);
 }
 
+function isSensitivePath(pathname) {
+  let normalized = pathname;
+  try { normalized = decodeURIComponent(pathname); } catch (_) {}
+  normalized = normalized.replace(/\\+/g, "/").replace(/\/+/g, "/");
+  const lower = normalized.toLowerCase();
+  return (
+    lower === "/.git" || lower.startsWith("/.git/") ||
+    lower === "/.env" || lower.startsWith("/.env.") ||
+    lower === "/wrangler.json" || lower === "/wrangler.jsonc" || lower === "/wrangler.toml" ||
+    lower === "/.npmrc"
+  );
+}
+
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
+    if (isSensitivePath(url.pathname)) return new Response("Not Found", { status: 404 });
     if (url.pathname === "/api/inquiries" && request.method === "POST") return createInquiry(request, env);
     if (url.pathname === "/api/health" && request.method === "GET") {
       return json({
