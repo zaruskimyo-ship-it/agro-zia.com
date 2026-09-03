@@ -143,6 +143,12 @@ async function telegramRequest(env, method, formData, context = {}) {
       body: formData,
     });
     payload = await response.json().catch(() => ({}));
+    console.info("Telegram API response received", {
+      request_reference: context.requestNumber || null,
+      method,
+      http_status: response.status,
+      telegram_ok: Boolean(payload.ok),
+    });
   } catch (error) {
     console.error("Telegram API network failure", {
       request_reference: context.requestNumber || null,
@@ -183,21 +189,47 @@ async function sendInquiryTelegram(env, data) {
     attachmentPresent: Boolean(data.attachmentKey),
     attachmentSize: data.attachment?.size || 0,
   };
+  console.info("Telegram notification started", {
+    request_reference: data.requestNumber,
+    attachment_present: Boolean(data.attachmentKey),
+    attachment_size: data.attachment?.size || 0,
+  });
 
   if (data.attachmentKey) {
-    const object = await env.AGROZIA_ATTACHMENTS.get(data.attachmentKey);
-    if (!object) throw new Error("attachment_not_found_after_persistence");
-    const bytes = await object.arrayBuffer();
+    let object;
+    let bytes;
+    try {
+      object = await env.AGROZIA_ATTACHMENTS.get(data.attachmentKey);
+      if (!object) throw new Error("attachment_not_found_after_persistence");
+      console.info("Telegram attachment loaded", {
+        request_reference: data.requestNumber,
+        attachment_size: object.size || 0,
+      });
+      bytes = await object.arrayBuffer();
+    } catch (error) {
+      console.error("Telegram attachment preparation failed", {
+        request_reference: data.requestNumber,
+        error_name: error?.name || "Error",
+        error_message: String(error?.message || "attachment_read_failed").slice(0, 300),
+      });
+      throw error;
+    }
     const form = new FormData();
     form.append("chat_id", String(env.TELEGRAM_CHAT_ID));
     form.append("caption", telegramCaption(data));
     form.append("document", new Blob([bytes], { type: data.attachmentType || "application/octet-stream" }), data.attachmentName || "attachment");
+    console.info("Telegram sendDocument prepared", {
+      request_reference: data.requestNumber,
+      attachment_size: bytes.byteLength,
+      attachment_type: data.attachmentType || "application/octet-stream",
+    });
     return telegramRequest(env, "sendDocument", form, context);
   }
 
   const form = new FormData();
   form.append("chat_id", String(env.TELEGRAM_CHAT_ID));
   form.append("text", telegramCaption(data));
+  console.info("Telegram sendMessage prepared", { request_reference: data.requestNumber });
   return telegramRequest(env, "sendMessage", form, context);
 }
 
