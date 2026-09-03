@@ -14,7 +14,17 @@ const MAX_LENGTHS = {
 const ALLOWED_LANGUAGES = new Set(["en", "ru", "fa", "ar", "uz", "tr"]);
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const MAX_ATTACHMENT_BYTES = 1024 * 1024;
-const ALLOWED_ATTACHMENT_TYPES = new Set(["application/pdf", "image/jpeg", "image/jpg"]);
+const ALLOWED_ATTACHMENT_TYPES = new Set([
+  "application/pdf",
+  "application/msword",
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+  "text/plain",
+  "image/jpeg",
+  "image/jpg",
+  "image/png",
+  "image/webp",
+]);
+const ALLOWED_ATTACHMENT_EXTENSIONS = /\.(pdf|doc|docx|txt|jpe?g|png|webp)$/i;
 const INQUIRY_EMAIL_TO = "export@agro-zia.com";
 const INQUIRY_EMAIL_FROM = "export@agro-zia.com";
 
@@ -45,7 +55,7 @@ async function nextRequestNumber(db) {
 }
 
 function attachmentTypeAllowed(file) {
-  return Boolean(file && (ALLOWED_ATTACHMENT_TYPES.has(file.type) || /\.(pdf|jpe?g)$/i.test(file.name || "")));
+  return Boolean(file && ALLOWED_ATTACHMENT_EXTENSIONS.test(file.name || "") && (ALLOWED_ATTACHMENT_TYPES.has(file.type) || !file.type));
 }
 
 async function parseInquiry(request) {
