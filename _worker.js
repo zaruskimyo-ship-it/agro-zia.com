@@ -25,7 +25,7 @@ const ALLOWED_ATTACHMENT_TYPES = new Set([
   "image/webp",
 ]);
 const ALLOWED_ATTACHMENT_EXTENSIONS = /\.(pdf|doc|docx|txt|jpe?g|png|webp)$/i;
-const INQUIRY_EMAIL_TO = "export@agro-zia.com";
+const INQUIRY_EMAIL_TO = "agrozia1@gmail.com";
 const INQUIRY_EMAIL_FROM = "export@agro-zia.com";
 
 function json(data, status = 200) {
@@ -104,10 +104,7 @@ async function sendInquiryEmail(env, data) {
   const text = inquiryEmailText(data);
   const subject = `Agro-Zia Business Inquiry ${data.requestNumber}`;
   const result = await env.EMAIL.send({
-    // The binding is intentionally restricted to the verified destination
-    // agrozia1@gmail.com in wrangler.jsonc. Leaving `to` undefined makes the
-    // binding select that configured destination instead of passing the
-    // routing alias export@agro-zia.com as the outbound recipient.
+    to: INQUIRY_EMAIL_TO,
     from: INQUIRY_EMAIL_FROM,
     subject,
     text,
@@ -121,8 +118,8 @@ function inquiryTelegramText({ requestNumber, createdAt, language, product, comp
   return [
     "AGRO-ZIA BUSINESS INQUIRY",
     "",
-    `Request Reference: ${requestNumber}`,
-    `Request Date & Time: ${createdAt}`,
+    `Reference: ${requestNumber}`,
+    `Date: ${createdAt}`,
     `Language: ${language}`,
     `Company: ${company || ""}`,
     `Country: ${destination || ""}`,
