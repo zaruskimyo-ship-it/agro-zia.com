@@ -104,11 +104,14 @@ async function sendInquiryEmail(env, data) {
   const text = inquiryEmailText(data);
   const subject = `Agro-Zia Business Inquiry ${data.requestNumber}`;
   const result = await env.EMAIL.send({
-    to: INQUIRY_EMAIL_TO,
+    // The binding is intentionally restricted to the verified destination
+    // agrozia1@gmail.com in wrangler.jsonc. Leaving `to` undefined makes the
+    // binding select that configured destination instead of passing the
+    // routing alias export@agro-zia.com as the outbound recipient.
     from: INQUIRY_EMAIL_FROM,
-    replyTo: data.email || undefined,
     subject,
     text,
+    replyTo: data.email || undefined,
   });
 
   return { status: "sent", message_id: result?.messageId || null };
