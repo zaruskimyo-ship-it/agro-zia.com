@@ -93,6 +93,11 @@ function inquiryEmailText({ requestNumber, createdAt, language, product, company
   ].join("\n");
 }
 
+function safeEmailErrorCode(error) {
+  const code = typeof error?.code === "string" ? error.code : "";
+  return /^[A-Z0-9_]{3,80}$/.test(code) ? code : "EMAIL_SEND_ERROR";
+}
+
 async function sendInquiryEmail(env, data) {
   if (!env.EMAIL) return { status: "unconfigured" };
 
@@ -259,6 +264,7 @@ async function createInquiry(request, env) {
       ).run();
 
       let emailNotification = { status: "unconfigured" };
+      let emailNotificationError = null;
       try {
         emailNotification = await sendInquiryEmail(env, {
           requestNumber,
@@ -279,7 +285,11 @@ async function createInquiry(request, env) {
           attachment: attachment ? { name: attachment.name, type: attachment.type, size: attachment.size } : null,
         });
       } catch (emailError) {
-        console.error("Inquiry email notification failed:", emailError);
+        emailNotificationError = safeEmailErrorCode(emailError);
+        console.error("Inquiry email notification failed", {
+          code: emailNotificationError,
+          name: String(emailError?.name || "Error").slice(0, 40),
+        });
         emailNotification = { status: "failed" };
       }
 
@@ -316,6 +326,7 @@ async function createInquiry(request, env) {
         created_at: createdAt,
         attachment: attachment ? { name: attachment.name, type: attachment.type, size: attachment.size } : null,
         email_notification: emailNotification.status,
+        email_notification_error: emailNotificationError,
         telegram_notification: telegramNotification.status,
       }, 201);
     } catch (error) {
