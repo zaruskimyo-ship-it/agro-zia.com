@@ -1,14 +1,24 @@
-/* Agro-Zia Stage 4: canonical multilingual inquiry attachment UI. */
+/* Agro-Zia Stage 11: canonical multilingual inquiry attachment UI and validation. */
 (() => {
   const MAX_BYTES = 1024 * 1024;
-  const TYPES = new Set(['application/pdf', 'image/jpeg', 'image/jpg']);
+  const TYPES = new Set([
+    'application/pdf',
+    'application/msword',
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    'text/plain',
+    'image/jpeg',
+    'image/jpg',
+    'image/png',
+    'image/webp'
+  ]);
+  const EXTENSIONS = /\.(pdf|doc|docx|txt|jpe?g|png|webp)$/i;
   const copy = {
-    en: { label:'Attachment (optional)', help:'PDF or JPG/JPEG, max 1 MB', invalidType:'Please attach a PDF or JPG/JPEG file.', invalidSize:'Attachment must be 1 MB or smaller.' },
-    ru: { label:'Вложение (необязательно)', help:'PDF или JPG/JPEG, максимум 1 МБ', invalidType:'Прикрепите файл PDF или JPG/JPEG.', invalidSize:'Размер вложения не должен превышать 1 МБ.' },
-    fa: { label:'پیوست (اختیاری)', help:'PDF یا JPG/JPEG، حداکثر ۱ مگابایت', invalidType:'لطفاً فایل PDF یا JPG/JPEG انتخاب کنید.', invalidSize:'حجم فایل پیوست باید حداکثر ۱ مگابایت باشد.' },
-    ar: { label:'مرفق (اختياري)', help:'PDF أو JPG/JPEG، بحد أقصى 1 ميغابايت', invalidType:'يرجى إرفاق ملف PDF أو JPG/JPEG.', invalidSize:'يجب ألا يتجاوز حجم المرفق 1 ميغابايت.' },
-    uz: { label:'Ilova (ixtiyoriy)', help:'PDF yoki JPG/JPEG, maksimal 1 MB', invalidType:'PDF yoki JPG/JPEG faylini tanlang.', invalidSize:'Ilova hajmi 1 MB yoki undan kichik bo‘lishi kerak.' },
-    tr: { label:'Ek (isteğe bağlı)', help:'PDF veya JPG/JPEG, en fazla 1 MB', invalidType:'Lütfen PDF veya JPG/JPEG dosyası ekleyin.', invalidSize:'Ek dosya 1 MB veya daha küçük olmalıdır.' }
+    en: { label:'Attachment (optional)', help:'PDF, DOC, DOCX, TXT, JPG/JPEG, PNG or WEBP, max 1 MB', invalidType:'Please attach a PDF, DOC, DOCX, TXT, JPG/JPEG, PNG or WEBP file.', invalidSize:'Attachment must be 1 MB or smaller.' },
+    ru: { label:'Вложение (необязательно)', help:'PDF, DOC, DOCX, TXT, JPG/JPEG, PNG или WEBP, максимум 1 МБ', invalidType:'Прикрепите файл PDF, DOC, DOCX, TXT, JPG/JPEG, PNG или WEBP.', invalidSize:'Размер вложения не должен превышать 1 МБ.' },
+    fa: { label:'پیوست (اختیاری)', help:'PDF، DOC، DOCX، TXT، JPG/JPEG، PNG یا WEBP، حداکثر ۱ مگابایت', invalidType:'لطفاً فایل PDF، DOC، DOCX، TXT، JPG/JPEG، PNG یا WEBP انتخاب کنید.', invalidSize:'حجم فایل پیوست باید حداکثر ۱ مگابایت باشد.' },
+    ar: { label:'مرفق (اختياري)', help:'PDF أو DOC أو DOCX أو TXT أو JPG/JPEG أو PNG أو WEBP، بحد أقصى 1 ميغابايت', invalidType:'يرجى إرفاق ملف PDF أو DOC أو DOCX أو TXT أو JPG/JPEG أو PNG أو WEBP.', invalidSize:'يجب ألا يتجاوز حجم المرفق 1 ميغابايت.' },
+    uz: { label:'Ilova (ixtiyoriy)', help:'PDF, DOC, DOCX, TXT, JPG/JPEG, PNG yoki WEBP, maksimal 1 MB', invalidType:'PDF, DOC, DOCX, TXT, JPG/JPEG, PNG yoki WEBP faylini tanlang.', invalidSize:'Ilova hajmi 1 MB yoki undan kichik bo‘lishi kerak.' },
+    tr: { label:'Ek (isteğe bağlı)', help:'PDF, DOC, DOCX, TXT, JPG/JPEG, PNG veya WEBP, en fazla 1 MB', invalidType:'Lütfen PDF, DOC, DOCX, TXT, JPG/JPEG, PNG veya WEBP dosyası ekleyin.', invalidSize:'Ek dosya 1 MB veya daha küçük olmalıdır.' }
   };
 
   const active = window.AgroZiaActiveLanguage || new URLSearchParams(location.search).get('lang') || 'en';
@@ -24,14 +34,14 @@
     form.dataset.stage4Attachment = 'true';
     const label = document.createElement('label');
     label.className = 'full';
-    label.innerHTML = `<span>${t.label}</span><input id="agz-attachment" name="attachment" type="file" accept="application/pdf,.pdf,image/jpeg,image/jpg,.jpg,.jpeg"><small style="display:block;margin-top:6px;opacity:.72">${t.help}</small>`;
+    label.innerHTML = `<span>${t.label}</span><input id="agz-attachment" name="attachment" type="file" accept="application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain,image/jpeg,image/png,image/webp,.pdf,.doc,.docx,.txt,.jpg,.jpeg,.png,.webp"><small style="display:block;margin-top:6px;opacity:.72">${t.help}</small>`;
     grid.appendChild(label);
 
     const input = label.querySelector('input[type="file"]');
     input.addEventListener('change', () => {
       const file = input.files?.[0];
       if (!file) return;
-      if (!TYPES.has(file.type) && !/\.(pdf|jpe?g)$/i.test(file.name)) {
+      if ((!TYPES.has(file.type) && file.type) || !EXTENSIONS.test(file.name || '')) {
         input.value = '';
         window.alert(t.invalidType);
         return;
