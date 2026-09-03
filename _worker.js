@@ -112,6 +112,54 @@ async function sendInquiryEmail(env, data) {
   return { status: "sent", message_id: result?.messageId || null };
 }
 
+function inquiryTelegramText({ requestNumber, createdAt, language, product, company, specification, quantity, destination, timing, email, phone, message, attachment }) {
+  return [
+    "AGRO-ZIA BUSINESS INQUIRY",
+    "",
+    `Request Reference: ${requestNumber}`,
+    `Request Date & Time: ${createdAt}`,
+    `Language: ${language}`,
+    `Company: ${company || ""}`,
+    `Country: ${destination || ""}`,
+    `Product / Interest: ${product || ""}`,
+    `Required specification: ${specification || ""}`,
+    `Quantity: ${quantity || ""}`,
+    `Preferred timing: ${timing || ""}`,
+    `Email: ${email || ""}`,
+    `Phone: ${phone || ""}`,
+    "",
+    message || "",
+    "",
+    attachment ? `Attachment saved: ${attachment.name} (${attachment.type || "unknown"}, ${attachment.size} bytes)` : "Attachment: none",
+  ].join("\n");
+}
+
+async function sendInquiryTelegram(env, data) {
+  if (!env.TELEGRAM_BOT_TOKEN_V2 || !env.TELEGRAM_CHAT_ID_V2) return { status: "unconfigured" };
+
+  const response = await fetch("https://api.telegram.org/bot" + env.TELEGRAM_BOT_TOKEN_V2 + "/sendMessage", {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({
+      chat_id: env.TELEGRAM_CHAT_ID_V2,
+      text: inquiryTelegramText(data),
+      disable_web_page_preview: true,
+    }),
+  });
+
+  if (!response.ok) {
+    console.error("Inquiry Telegram notification failed:", { status: response.status });
+    return { status: "failed" };
+  }
+
+  const result = await response.json().catch(() => null);
+  if (!result?.ok) {
+    console.error("Inquiry Telegram notification failed:", { status: response.status, error_code: result?.error_code || null });
+    return { status: "failed" };
+  }
+  return { status: "sent" };
+}
+
 async function createInquiry(request, env) {
   let parsed;
   try { parsed = await parseInquiry(request); }
@@ -202,6 +250,28 @@ async function createInquiry(request, env) {
         emailNotification = { status: "failed" };
       }
 
+      let telegramNotification = { status: "unconfigured" };
+      try {
+        telegramNotification = await sendInquiryTelegram(env, {
+          requestNumber,
+          createdAt,
+          language,
+          product,
+          company,
+          specification,
+          quantity,
+          destination,
+          timing,
+          email,
+          phone,
+          message,
+          attachment: attachment ? { name: attachment.name, type: attachment.type, size: attachment.size } : null,
+        });
+      } catch (telegramError) {
+        console.error("Inquiry Telegram notification failed:", telegramError);
+        telegramNotification = { status: "failed" };
+      }
+
       return json({
         ok: true,
         persisted: true,
@@ -210,6 +280,7 @@ async function createInquiry(request, env) {
         created_at: createdAt,
         attachment: attachment ? { name: attachment.name, type: attachment.type, size: attachment.size } : null,
         email_notification: emailNotification.status,
+        telegram_notification: telegramNotification.status,
       }, 201);
     } catch (error) {
       if (attachmentKey && env.AGROZIA_ATTACHMENTS) {
