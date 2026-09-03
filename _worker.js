@@ -134,30 +134,66 @@ function inquiryTelegramText({ requestNumber, createdAt, language, product, comp
   ].join("\n");
 }
 
+function telegramText(value, maximumLength) {
+  const text = String(value || "");
+  return text.length <= maximumLength ? text : `${text.slice(0, Math.max(0, maximumLength - 1))}…`;
+}
+
 async function sendInquiryTelegram(env, data) {
   if (!env.TELEGRAM_BOT_TOKEN_V2 || !env.TELEGRAM_CHAT_ID_V2) return { status: "unconfigured" };
 
-  const response = await fetch("https://api.telegram.org/bot" + env.TELEGRAM_BOT_TOKEN_V2 + "/sendMessage", {
-    method: "POST",
-    headers: { "content-type": "application/json" },
-    body: JSON.stringify({
-      chat_id: env.TELEGRAM_CHAT_ID_V2,
-      text: inquiryTelegramText(data),
-      disable_web_page_preview: true,
-    }),
-  });
+  const apiBase = "https://api.telegram.org/bot" + env.TELEGRAM_BOT_TOKEN_V2;
+  const hasAttachment = Boolean(data.attachmentKey);
+  console.log("Telegram notification started", { has_attachment: hasAttachment });
 
-  if (!response.ok) {
-    console.error("Inquiry Telegram notification failed:", { status: response.status });
-    return { status: "failed" };
+  let operation = "sendMessage";
+  let response;
+
+  if (hasAttachment) {
+    operation = "sendDocument";
+    console.log("Telegram attachment load started");
+
+    const attachmentObject = await env.AGROZIA_ATTACHMENTS.get(data.attachmentKey);
+    if (!attachmentObject) {
+      console.error("Telegram attachment load failed", { reason: "not_found" });
+      return { status: "failed" };
+    }
+
+    const attachmentType = data.attachmentType || attachmentObject.httpMetadata?.contentType || "application/octet-stream";
+    const attachmentName = data.attachmentName || "attachment";
+    const attachmentBuffer = await attachmentObject.arrayBuffer();
+    console.log("Telegram attachment loaded", { size: attachmentBuffer.byteLength, content_type: attachmentType });
+
+    const form = new FormData();
+    form.append("chat_id", env.TELEGRAM_CHAT_ID_V2);
+    form.append("caption", telegramText(inquiryTelegramText(data), 1000));
+    form.append("document", new Blob([attachmentBuffer], { type: attachmentType }), attachmentName);
+    console.log("Telegram document prepared", { size: attachmentBuffer.byteLength, content_type: attachmentType });
+    console.log("Telegram API request prepared", { operation });
+
+    response = await fetch(apiBase + "/sendDocument", { method: "POST", body: form });
+  } else {
+    console.log("Telegram API request prepared", { operation });
+    response = await fetch(apiBase + "/sendMessage", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        chat_id: env.TELEGRAM_CHAT_ID_V2,
+        text: telegramText(inquiryTelegramText(data), 4000),
+        disable_web_page_preview: true,
+      }),
+    });
   }
 
   const result = await response.json().catch(() => null);
-  if (!result?.ok) {
-    console.error("Inquiry Telegram notification failed:", { status: response.status, error_code: result?.error_code || null });
-    return { status: "failed" };
-  }
-  return { status: "sent" };
+  console.log("Telegram API response received", {
+    operation,
+    status: response.status,
+    ok: Boolean(result?.ok),
+    error_code: result?.error_code || null,
+  });
+
+  return response.ok && result?.ok ? { status: "sent" } : { status: "failed" };
 }
 
 async function createInquiry(request, env) {
@@ -265,10 +301,13 @@ async function createInquiry(request, env) {
           email,
           phone,
           message,
+          attachmentKey,
+          attachmentName: attachment?.name || null,
+          attachmentType: attachment?.type || null,
           attachment: attachment ? { name: attachment.name, type: attachment.type, size: attachment.size } : null,
         });
-      } catch (telegramError) {
-        console.error("Inquiry Telegram notification failed:", telegramError);
+      } catch (_) {
+        console.error("Inquiry Telegram notification failed", { reason: "request_error" });
         telegramNotification = { status: "failed" };
       }
 
