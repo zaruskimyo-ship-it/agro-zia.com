@@ -24,8 +24,7 @@
   "send_email": [
     {
       "name": "EMAIL",
-      "remote": true,
-      "destination_address": "agrozia1@gmail.com"
+      "remote": true
     }
   ]
 }
