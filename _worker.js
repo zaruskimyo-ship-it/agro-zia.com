@@ -89,24 +89,12 @@ function inquiryEmailText({ requestNumber, createdAt, language, product, company
     "",
     message || "",
     "",
-    attachment ? `Attachment: ${attachment.name} (${attachment.type || "unknown"}, ${attachment.size} bytes)` : "Attachment: none",
+    attachment ? `Attachment: ${attachment.name} (${attachment.type || "unknown"}, ${attachment.size} bytes) — sent separately via Telegram.` : "Attachment: none",
   ].join("\n");
 }
 
 async function sendInquiryEmail(env, data) {
   if (!env.EMAIL) return { status: "unconfigured" };
-
-  const attachments = [];
-  if (data.attachmentKey) {
-    const object = await env.AGROZIA_ATTACHMENTS.get(data.attachmentKey);
-    if (!object) throw new Error("attachment_not_found_after_persistence");
-    attachments.push({
-      content: await object.arrayBuffer(),
-      filename: data.attachmentName,
-      type: data.attachmentType || "application/octet-stream",
-      disposition: "attachment",
-    });
-  }
 
   const text = inquiryEmailText(data);
   const subject = `Agro-Zia Business Inquiry ${data.requestNumber}`;
@@ -116,7 +104,6 @@ async function sendInquiryEmail(env, data) {
     replyTo: data.email || undefined,
     subject,
     text,
-    attachments,
   });
 
   return { status: "sent", message_id: result?.messageId || null };
