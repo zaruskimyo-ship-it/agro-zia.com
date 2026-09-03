@@ -130,24 +130,59 @@ function telegramCaption(data) {
   ].join("\n").slice(0, 1024);
 }
 
-async function telegramRequest(env, method, formData) {
+async function telegramRequest(env, method, formData, context = {}) {
   const token = env.TELEGRAM_BOT_TOKEN;
   const chatId = env.TELEGRAM_CHAT_ID;
   if (!token || !chatId) return { status: "unconfigured" };
 
-  const response = await fetch(`${TELEGRAM_API_BASE}/bot${token}/${method}`, {
-    method: "POST",
-    body: formData,
-  });
-  const payload = await response.json().catch(() => ({}));
+  let response;
+  let payload = {};
+  try {
+    response = await fetch(`${TELEGRAM_API_BASE}/bot${token}/${method}`, {
+      method: "POST",
+      body: formData,
+    });
+    payload = await response.json().catch(() => ({}));
+  } catch (error) {
+    console.error("Telegram API network failure", {
+      request_reference: context.requestNumber || null,
+      method,
+      error_name: error?.name || "Error",
+      error_message: String(error?.message || "fetch_failed").slice(0, 300),
+    });
+    throw error;
+  }
+
   if (!response.ok || !payload.ok) {
-    throw new Error(`telegram_${method}_failed`);
+    const diagnostic = {
+      status: "failed",
+      http_status: response.status,
+      telegram_ok: Boolean(payload.ok),
+      telegram_error_code: payload.error_code ?? null,
+      telegram_description: String(payload.description || "unknown_telegram_error").slice(0, 500),
+    };
+    console.error("Telegram API rejected inquiry notification", {
+      request_reference: context.requestNumber || null,
+      method,
+      ...diagnostic,
+      attachment_present: Boolean(context.attachmentPresent),
+      attachment_size: context.attachmentSize || 0,
+    });
+    const error = new Error(`telegram_${method}_failed`);
+    error.telegram = diagnostic;
+    throw error;
   }
   return { status: "sent", message_id: payload.result?.message_id || null };
 }
 
 async function sendInquiryTelegram(env, data) {
   if (!env.TELEGRAM_BOT_TOKEN || !env.TELEGRAM_CHAT_ID) return { status: "unconfigured" };
+
+  const context = {
+    requestNumber: data.requestNumber,
+    attachmentPresent: Boolean(data.attachmentKey),
+    attachmentSize: data.attachment?.size || 0,
+  };
 
   if (data.attachmentKey) {
     const object = await env.AGROZIA_ATTACHMENTS.get(data.attachmentKey);
@@ -157,13 +192,13 @@ async function sendInquiryTelegram(env, data) {
     form.append("chat_id", String(env.TELEGRAM_CHAT_ID));
     form.append("caption", telegramCaption(data));
     form.append("document", new Blob([bytes], { type: data.attachmentType || "application/octet-stream" }), data.attachmentName || "attachment");
-    return telegramRequest(env, "sendDocument", form);
+    return telegramRequest(env, "sendDocument", form, context);
   }
 
   const form = new FormData();
   form.append("chat_id", String(env.TELEGRAM_CHAT_ID));
   form.append("text", telegramCaption(data));
-  return telegramRequest(env, "sendMessage", form);
+  return telegramRequest(env, "sendMessage", form, context);
 }
 
 async function createInquiry(request, env) {
@@ -262,7 +297,12 @@ async function createInquiry(request, env) {
       try {
         telegramNotification = await sendInquiryTelegram(env, notificationData);
       } catch (telegramError) {
-        console.error("Inquiry Telegram notification failed:", telegramError);
+        console.error("Inquiry Telegram notification failed:", {
+          request_reference: requestNumber,
+          error_name: telegramError?.name || "Error",
+          error_message: String(telegramError?.message || "telegram_notification_failed").slice(0, 300),
+          telegram: telegramError?.telegram || null,
+        });
         telegramNotification = { status: "failed" };
       }
 
