@@ -30,12 +30,6 @@
       "bucket_name": "agrozia-attachments"
     }
   ],
-  "send_email": [
-    {
-      "name": "EMAIL",
-      "remote": true
-    }
-  ],
   "observability": {
     "logs": {
       "enabled": true,
