@@ -28,6 +28,8 @@ const ALLOWED_ATTACHMENT_EXTENSIONS = /\.(pdf|doc|docx|txt|jpe?g|png|webp)$/i;
 const INQUIRY_EMAIL_TO = "agrozia1@gmail.com";
 const INQUIRY_EMAIL_FROM = "export@agro-zia.com";
 
+import { dispatchAdminRoute } from "./src/admin/admin-router.js";
+
 function json(data, status = 200) {
   return new Response(JSON.stringify(data), {
     status,
@@ -378,6 +380,10 @@ function transformMultilingualPreview(response) {
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
+    if (url.pathname.startsWith("/api/admin/")) {
+      const adminResponse = await dispatchAdminRoute(request, env);
+      if (adminResponse) return adminResponse;
+    }
     if (url.pathname === "/api/inquiries" && request.method === "POST") return createInquiry(request, env);
     if (url.pathname === "/api/health" && request.method === "GET") {
       return json({ ok: true, service: "agro-zia-inquiry-api", d1_bound: Boolean(env.AGROZIA_DB), attachment_storage_bound: Boolean(env.AGROZIA_ATTACHMENTS), email_bound: Boolean(env.EMAIL) });
