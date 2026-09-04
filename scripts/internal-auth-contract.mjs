@@ -28,13 +28,16 @@ const adminRequired = [
   ["search validation", /MAX_SEARCH_LENGTH/],
   ["reference validation", /AGZ-\\d\{4\}-\\d\{6\}/],
   ["no-store", /cache-control.*no-store/],
-  ["no R2 object bytes", /attachment_key/],
+  ["attachment metadata only", /attachment:\s*row\.attachment_name/],
 ];
 for (const [name, pattern] of adminRequired) if (!pattern.test(admin)) throw new Error(`FAIL: ${name}`);
-if (/attachment_key\s*[,}]/.test(admin)) throw new Error("FAIL: attachment_key appears in admin response surface");
+if (/attachment_key/.test(admin)) throw new Error("FAIL: attachment_key appears anywhere in admin API source");
+if (/AGROZIA_ATTACHMENTS/.test(admin)) throw new Error("FAIL: admin API directly accesses R2 attachment storage");
+if (!/attachment_name\s*,\s*attachment_type\s*,\s*attachment_size/.test(admin)) throw new Error("FAIL: attachment metadata query contract missing");
 if (!/\/api\/inquiries/.test(worker)) throw new Error("FAIL: public inquiry route reference not found");
 console.log("PASS: internal auth source contract");
 console.log("PASS: no hard-coded admin secrets detected");
 console.log("PASS: authenticated admin API module contract");
+console.log("PASS: attachment metadata only; no R2 key/bytes surface");
 console.log("PASS: public inquiry route reference retained");
 console.log("NOTE: static contract only; live Preview/authentication is not executed here.");
