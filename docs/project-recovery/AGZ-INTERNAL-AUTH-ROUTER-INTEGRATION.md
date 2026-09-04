@@ -1,29 +1,26 @@
-# AGZ Internal Auth — Worker Router Integration Gate
+# AGZ Internal Auth — Router Integration Gate
 
-## Status
-Prepared on `feat/stage-12-auth-internal`; runtime router integration is intentionally blocked until the exact `_worker.js` dispatch tail can be inspected safely.
+Status: IMPLEMENTATION INTEGRATED ON FEATURE BRANCH; PREVIEW QA PENDING
 
-## Required private routes
-- `POST /api/admin/login` → `adminLogin`
-- `POST /api/admin/logout` → `adminLogout`
-- `GET /api/admin/session` → `adminSession`
-- `GET /api/admin/inquiries` → `adminListInquiries`
-- `GET /api/admin/inquiries/:reference` → `adminGetInquiry`
+Branch: `feat/stage-12-auth-internal`
 
-## Security invariant
-All `/api/admin/*` routes must dispatch to the authenticated handlers before any D1 Inquiry data is read. No static `/admin` page check is a substitute for server-side authorization.
+The Worker now imports `dispatchAdminRoute` from `src/admin/admin-router.js` and invokes it only for `/api/admin/*` paths before the existing public Inquiry route and asset fallback.
 
-## Public regression invariant
-`POST /api/inquiries` must remain unchanged and unauthenticated. Telegram/R2/Email Inquiry processing must not be bypassed or replaced by Admin routing.
+The adapter returns `null` for non-admin paths, so the existing Worker router remains authoritative for public Inquiry, health, multilingual preview, Telegram, Email, R2 and assets.
 
-## Safe integration procedure
-1. Obtain the complete current `_worker.js` router/dispatch section.
-2. Add imports for the five Admin handlers.
-3. Add exact path/method dispatch before generic asset fallback.
-4. Preserve existing `/api/inquiries` handling and all Telegram/R2/Email logic byte-for-byte outside the intended dispatch addition.
-5. Run source contract checks.
-6. Deploy only the feature branch to Preview.
-7. Execute the internal-auth QA matrix before any release decision.
+Private admin handlers remain read-only, bounded, `no-store`, and expose attachment metadata only; they do not expose R2 object keys or bytes.
 
-## Explicit non-action
-Do not reconstruct or overwrite the Worker tail from a truncated API response. Do not merge to `main` or deploy Production from this gate.
+## Preview release gates
+
+1. Admin login with configured deployment secrets.
+2. Unauthenticated private API rejected.
+3. Invalid/unauthorized session rejected.
+4. Authenticated list/search/filter/pagination.
+5. Authenticated detail by valid reference.
+6. Attachment metadata without R2 key/object exposure.
+7. `Cache-Control: no-store` on private responses.
+8. Public `POST /api/inquiries` regression, including Email text-only and Telegram attachment flow.
+9. Logout/session invalidation.
+10. Mobile/admin UI sanity.
+
+This repository-side integration is **not** a Production approval. Cloudflare Preview deployment and live runtime verification remain pending because Cloudflare MCP/Wrangler execution is unavailable in the current tool environment.
