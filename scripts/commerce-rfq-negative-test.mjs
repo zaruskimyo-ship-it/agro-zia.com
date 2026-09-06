@@ -25,6 +25,12 @@ assert.match(repository, /const status = "submitted"/);
 assert.doesNotMatch(repository, /normalized\.request_number/);
 assert.doesNotMatch(repository, /normalized\.status/);
 
+// A supplied product ID must resolve to a published product; the canonical product name is server-owned.
+assert.match(repository, /FROM commerce_products/);
+assert.match(repository, /WHERE id = \? AND status = 'published'/);
+assert.match(repository, /if \(!result\) throw new Error\("invalid_rfq"\)/);
+assert.match(repository, /const productName = product\?\.name \|\| normalized\.product_name/);
+
 // Oversized, malformed and wrong-method requests fail closed.
 assert.match(api, /MAX_BODY_BYTES = 32 \* 1024/);
 assert.match(api, /body\.byteLength > MAX_BODY_BYTES/);
