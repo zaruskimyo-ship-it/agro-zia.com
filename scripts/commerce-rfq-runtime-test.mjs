@@ -78,9 +78,21 @@ const wrongMethod = await handlePublicRfqs(
 );
 assert.equal(wrongMethod.status, 405);
 
+const unsupportedMediaType = await handlePublicRfqs(
+  new Request("https://example.test/api/rfqs", {
+    method: "POST",
+    headers: { "content-type": "text/plain" },
+    body: JSON.stringify(baseInput),
+  }),
+  { AGROZIA_DB: db },
+);
+assert.equal(unsupportedMediaType.status, 415);
+assert.deepEqual(await unsupportedMediaType.json(), { error: "unsupported_media_type" });
+
 const invalidJson = await handlePublicRfqs(
   new Request("https://example.test/api/rfqs", {
     method: "POST",
+    headers: { "content-type": "application/json" },
     body: "not-json",
   }),
   { AGROZIA_DB: db },
@@ -91,6 +103,7 @@ assert.deepEqual(await invalidJson.json(), { error: "invalid_json" });
 const invalidRfq = await handlePublicRfqs(
   new Request("https://example.test/api/rfqs", {
     method: "POST",
+    headers: { "content-type": "application/json" },
     body: JSON.stringify({ product_name: "" }),
   }),
   { AGROZIA_DB: db },
@@ -101,6 +114,7 @@ assert.deepEqual(await invalidRfq.json(), { error: "invalid_rfq" });
 const oversized = await handlePublicRfqs(
   new Request("https://example.test/api/rfqs", {
     method: "POST",
+    headers: { "content-type": "application/json" },
     body: JSON.stringify({ product_name: "Urea", description: "x".repeat(33 * 1024) }),
   }),
   { AGROZIA_DB: db },
@@ -109,7 +123,11 @@ assert.equal(oversized.status, 413);
 assert.deepEqual(await oversized.json(), { error: "payload_too_large" });
 
 const unavailable = await handlePublicRfqs(
-  new Request("https://example.test/api/rfqs", { method: "POST", body: "{}" }),
+  new Request("https://example.test/api/rfqs", {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: "{}",
+  }),
   {},
 );
 assert.equal(unavailable.status, 503);
