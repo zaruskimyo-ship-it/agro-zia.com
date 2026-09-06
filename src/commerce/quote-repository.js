@@ -59,7 +59,7 @@ export async function createQuote(db, input, now = new Date().toISOString()) {
   const product = await resolveProduct(db, normalized.product_id);
 
   if (product && product.supplier_id !== supplier.id) throw new Error("quote_supplier_product_mismatch");
-  if (rfq.product_id && product && rfq.product_id !== product.id) throw new Error("quote_rfq_product_mismatch");
+  if (rfq.product_id && (!product || rfq.product_id !== product.id)) throw new Error("quote_rfq_product_mismatch");
 
   const productName = product?.name || rfq.product_name;
   const quantity = normalized.quantity || rfq.quantity || "";
