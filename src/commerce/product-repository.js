@@ -46,7 +46,7 @@ export async function listPublicProducts(db, params = {}) {
     `SELECT id, slug, name, brand, category_id, status, origin_country, moq, unit,
             availability_status, lead_time, price_visibility, currency, price_min, price_max,
             supply_capacity, incoterms, short_description, description, specifications_json,
-            packaging, application, supplier_id, verification_level, verification_updated_at
+            packaging, application, verification_level, verification_updated_at
      FROM commerce_products${where}
      ORDER BY published_at DESC, created_at DESC
      LIMIT ? OFFSET ?`,
@@ -67,7 +67,7 @@ export async function getPublicProductBySlug(db, slug) {
     `SELECT id, slug, name, brand, category_id, status, origin_country, moq, unit,
             availability_status, lead_time, price_visibility, currency, price_min, price_max,
             supply_capacity, incoterms, short_description, description, specifications_json,
-            packaging, application, supplier_id, verification_level, verification_updated_at
+            packaging, application, verification_level, verification_updated_at
      FROM commerce_products
      WHERE slug = ? AND status = 'published'
      LIMIT 1`,
