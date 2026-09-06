@@ -10,11 +10,31 @@ function createRequestNumber(now, id) {
   return `AGZ-RFQ-${stamp}-${id.slice(0, 8).toUpperCase()}`;
 }
 
+async function resolvePublishedProduct(db, productId) {
+  if (!productId) return null;
+
+  const result = await db
+    .prepare(
+      `SELECT id, name, status
+       FROM commerce_products
+       WHERE id = ? AND status = 'published'
+       LIMIT 1`,
+    )
+    .bind(productId)
+    .first();
+
+  if (!result) throw new Error("invalid_rfq");
+  return result;
+}
+
 export async function createRfq(db, input, now = new Date().toISOString()) {
   requireDb(db);
 
   const normalized = normalizeRfq(input);
   if (!normalized) throw new Error("invalid_rfq");
+
+  const product = await resolvePublishedProduct(db, normalized.product_id);
+  const productName = product?.name || normalized.product_name;
 
   const id = crypto.randomUUID();
   const requestNumber = createRequestNumber(now, id);
@@ -34,7 +54,7 @@ export async function createRfq(db, input, now = new Date().toISOString()) {
     status,
     normalized.language,
     normalized.product_id,
-    normalized.product_name,
+    productName,
     normalized.quantity,
     normalized.destination_country,
     normalized.destination_location,
@@ -55,6 +75,7 @@ export async function createRfq(db, input, now = new Date().toISOString()) {
 
   return publicRfq({
     ...normalized,
+    product_name: productName,
     id,
     request_number: requestNumber,
     status,
