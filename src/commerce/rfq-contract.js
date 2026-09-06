@@ -37,19 +37,14 @@ const asText = (value, max) => {
   return trimmed;
 };
 
-const asRequiredText = (value, max) => asText(value, max);
-
 export function normalizeRfq(input = {}) {
   if (!input || typeof input !== "object" || Array.isArray(input)) return null;
 
-  const productName = asRequiredText(input.product_name, MAX_LENGTHS.product_name);
+  const productName = asText(input.product_name, MAX_LENGTHS.product_name);
   if (!productName) return null;
 
   const sampleRequired = input.sample_required === true || input.sample_required === 1;
-
-  const attachmentCount = Number.isInteger(input.attachment_count)
-    ? input.attachment_count
-    : 0;
+  const attachmentCount = Number.isInteger(input.attachment_count) ? input.attachment_count : 0;
   if (attachmentCount < 0 || attachmentCount > MAX_ATTACHMENTS) return null;
 
   return {
@@ -61,7 +56,7 @@ export function normalizeRfq(input = {}) {
     quantity: asText(input.quantity, MAX_LENGTHS.quantity),
     destination_country: asText(input.destination_country, MAX_LENGTHS.destination_country),
     destination_location: asText(input.destination_location, MAX_LENGTHS.destination_location),
-    packaging: asText(input.packaging, MAX_LENGTHS.packAGING || MAX_LENGTHS.packaging),
+    packaging: asText(input.packaging, MAX_LENGTHS.packaging),
     private_label: asText(input.private_label, MAX_LENGTHS.private_label),
     sample_required: sampleRequired,
     documents_required: asText(input.documents_required, MAX_LENGTHS.documents_required),
