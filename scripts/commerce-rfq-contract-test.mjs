@@ -37,9 +37,11 @@ assert.match(repository, /\.bind\(/);
 assert.doesNotMatch(repository, /normalized\.status/);
 assert.doesNotMatch(repository, /normalized\.request_number/);
 
-// Public API accepts creation only, requires D1, bounds the body, and fails closed.
+// Public API accepts JSON creation only, requires D1, bounds the body, and fails closed.
 assert.match(api, /request\.method !== "POST"/);
 assert.match(api, /method_not_allowed/);
+assert.match(api, /application\\\/json/);
+assert.match(api, /unsupported_media_type/);
 assert.match(api, /MAX_BODY_BYTES = 32 \* 1024/);
 assert.match(api, /payload_too_large/);
 assert.match(api, /invalid_json/);
