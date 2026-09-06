@@ -4,184 +4,109 @@
 
 Introduce a structured B2B Request for Quotation (RFQ) flow without rebuilding or bypassing the existing Inquiry pipeline.
 
-The RFQ is the commercial evolution of an inquiry:
+Commercial flow:
 
 `RFQ → review → product/supplier matching → quotation → negotiation → proforma → order`
 
-Commerce-2 defines the data and API boundary first. Runtime deployment and Production schema changes remain gated.
+Commerce-2 defines the RFQ data and public creation boundary. Preview/runtime and Production schema changes remain gated.
 
-## Relationship to existing Inquiry
+## Relationship to Inquiry
 
-The existing `inquiries` table remains the intake and notification foundation. Existing inquiry behavior must not regress.
+The existing `inquiries` table remains the intake and notification foundation and must not regress. Commerce-2 does not delete, rename, or repurpose existing inquiry columns.
 
-An RFQ may originate from:
+Future integrations may relate an RFQ to its originating inquiry, but Commerce-2 does not rebuild the Inquiry pipeline.
 
-- a public product page;
-- a general sourcing request;
-- a future category/search experience.
+## RFQ data
 
-The implementation should preserve the original inquiry/request reference and provide a deterministic relationship between the commercial RFQ record and the originating inquiry when one exists.
+The dedicated `commerce_rfqs` table contains:
 
-Do not delete, rename, or repurpose existing inquiry columns as part of Commerce-2.
+- server-generated opaque `id`;
+- server-generated unique `request_number`;
+- controlled `status`;
+- language;
+- optional product reference and product name;
+- quantity and destination details;
+- packaging/private-label/sample requirements;
+- requested documents and timing;
+- description/specification;
+- buyer contact fields for internal fulfillment;
+- attachment count and server timestamps.
 
-## RFQ identity
+Current status values are:
 
-Required logical fields:
+`submitted`, `reviewing`, `matched`, `quoted`, `negotiating`, `converted`, `cancelled`.
 
-- `id` — opaque server-generated identifier;
-- `request_number` — human-facing unique reference, compatible with the existing request-reference convention;
-- `status` — controlled lifecycle value;
-- `created_at`, `updated_at` — server timestamps.
+Status is server-controlled. Public creation always stores `submitted`, regardless of a client-supplied status.
 
-Recommended initial statuses:
+## Product integrity
 
-- `received`
-- `under_review`
-- `matching`
-- `quoted`
-- `negotiating`
-- `converted`
-- `cancelled`
-- `closed`
+When `product_id` is supplied, the server must resolve it against `commerce_products` and accept it only when the product exists and has `status = 'published'`.
 
-Only explicitly supported transitions may be accepted by future mutation endpoints.
+The server uses the published product's canonical `name` rather than trusting a client-supplied product name when a product ID is present. Unpublished, archived, or unknown product IDs are rejected as `invalid_rfq`.
 
-## Buyer request data
-
-The RFQ contract supports:
-
-- product or requested item;
-- optional `product_id` for a published catalog product;
-- requested quantity and unit;
-- destination country/region and optional destination details;
-- target timing;
-- packaging requirements;
-- private-label requirement;
-- sample requirement;
-- requested technical/compliance documents;
-- free-text description/specification;
-- attachment references;
-- buyer company/contact information needed for fulfillment.
-
-Sensitive contact information is internal data and must never be exposed by a public read endpoint unless an explicit authenticated contract permits it.
-
-## Commercial boundary
-
-Commerce-2 does not create quotations, orders, payment, escrow, or trade protection records. Those belong to later stages.
-
-RFQ stores the buyer's requested commercial context, not a supplier's final offer.
-
-Future quotation data must reference the RFQ rather than duplicating the RFQ as an order.
-
-## Attachments
-
-Attachments must use opaque internal storage identifiers. Private R2 object keys must not be returned from public APIs.
-
-Existing attachment handling must remain compatible. New RFQ attachment limits must be bounded by count, size, and content type, and validated server-side.
+Supplier identifiers are never accepted from or exposed by the public RFQ boundary.
 
 ## Public API boundary
 
-Public endpoints may expose only the minimum fields required to create or inspect a permitted RFQ state.
+`POST /api/rfqs` is public-facing and must:
 
-A public creation endpoint must:
+- accept POST only;
+- parse bounded JSON bodies;
+- enforce a 32 KiB maximum body size;
+- enforce contract field-length and attachment-count limits;
+- generate request identity and timestamps server-side;
+- force the initial status to `submitted`;
+- validate a supplied product ID against a published product;
+- return only the public-safe RFQ representation;
+- never expose buyer PII, supplier IDs, internal IDs, R2 keys, secrets, authentication material, or internal notes;
+- return generic failure responses without leaking internal errors.
 
-- accept `POST` only;
-- validate JSON and content type;
-- enforce body-size and field-length limits;
-- allowlist enumerated values;
-- reject unexpected privileged/internal fields;
-- generate identifiers and timestamps server-side;
-- never accept or trust a client-supplied status, supplier ID, internal user ID, storage key, or administrative flag;
-- return a stable request reference without leaking internal database details.
+Current failure contract:
 
-Public reads, if introduced, must expose only explicitly public-safe fields. Buyer contact data, supplier identifiers, internal notes, and operational metadata remain private.
+- `405 method_not_allowed` for non-POST;
+- `400 invalid_json` for malformed JSON;
+- `400 invalid_rfq` for contract or product-validation failure;
+- `413 payload_too_large` for oversized bodies;
+- `503 rfq_service_unavailable` when D1 is unavailable or an internal persistence error occurs.
 
-## Internal API boundary
+The public API has no direct access to R2, Email, or Admin authentication secrets.
 
-Administrative RFQ reads/mutations must be behind the existing internal authentication boundary.
+## Attachments
 
-Internal capabilities may include:
-
-- review and status transition;
-- supplier/product matching;
-- internal notes;
-- attachment inspection;
-- conversion to quotation.
-
-These capabilities must not be reachable through a public route by changing query parameters or HTTP methods.
+Commerce-2 currently records a bounded attachment count. Actual RFQ attachment upload/storage integration remains a later controlled step and must preserve private R2 object handling.
 
 ## Security requirements
 
-1. Fail closed when the database binding is unavailable.
-2. Use parameterized D1 statements; no string interpolation for user values.
-3. Enforce bounded pagination for internal lists.
-4. Enforce bounded text and JSON fields.
-5. Reject malformed identifiers and unsupported status values.
-6. Do not expose supplier IDs, internal IDs, R2 keys, secrets, authentication material, or internal notes publicly.
-7. Escape untrusted content at presentation boundaries.
+1. Fail closed when D1 is unavailable.
+2. Use parameterized D1 statements for user values.
+3. Validate product references server-side.
+4. Keep client-controlled request number and status out of persistence authority.
+5. Bound body, field, and attachment counts.
+6. Keep buyer PII out of public responses.
+7. Keep supplier IDs, internal IDs, R2 keys, secrets, and admin data private.
 8. Do not log passwords, session secrets, attachment contents, or unnecessary personal data.
-9. Rate limiting/abuse controls should be added before exposing high-volume anonymous RFQ creation publicly.
-10. Existing inquiry email/Telegram notifications must not be duplicated accidentally by an RFQ integration.
-
-## Data model direction
-
-A dedicated RFQ table is preferred over extending `inquiries` with a large set of commerce-only columns. This keeps the existing intake contract stable and permits later quotation/order relations.
-
-Expected relationship:
-
-`inquiries (optional origin) → rfqs → quotations → orders`
-
-The first implementation should use foreign keys only where the existing schema and migration strategy support them safely.
-
-## Product integration
-
-When `product_id` is supplied, the server must verify that the referenced product is published and publicly orderable/requestable according to the Product Intelligence contract.
-
-A client must not be able to attach an RFQ to an unpublished or archived product merely by guessing an ID or slug.
-
-## Lifecycle integrity
-
-RFQ status is not a free-form text field. Future mutation code must implement an explicit transition matrix.
-
-Initial intended flow:
-
-`received → under_review → matching → quoted → negotiating → converted`
-
-Terminal alternatives:
-
-`received/under_review/matching/quoted/negotiating → cancelled`
-
-`quoted/negotiating → closed`
-
-The exact transition implementation is a Commerce-2 code gate and must be tested before runtime PASS.
+9. Add abuse/rate controls before high-volume anonymous RFQ creation is exposed broadly.
+10. Do not duplicate existing Inquiry email/Telegram notifications accidentally.
 
 ## Migration policy
 
-`migrations/0001_inquiries.sql` and `0002_inquiry_attachments.sql` are preserved unchanged.
+`migrations/0001_inquiries.sql`, `0002_inquiry_attachments.sql`, and `0003_commerce_products.sql` remain unchanged.
 
-A Commerce-2 migration must be a new numbered migration and must not be executed against Production until:
-
-1. schema review is complete;
-2. static contract/security checks pass;
-3. Preview migration succeeds;
-4. API runtime tests pass;
-5. negative/security tests pass;
-6. rollback/recovery implications are documented.
+`migrations/0004_commerce_rfqs.sql` must not be executed against Production until schema review, Preview migration, API runtime, negative/security tests, regression checks, and recovery implications have all passed.
 
 ## Definition of Done
 
-Commerce-2 is not complete until all are true:
+Commerce-2 is fully complete only when:
 
-- RFQ contract documented;
-- dedicated schema reviewed;
-- public/internal boundary implemented;
-- validation and transition rules implemented;
-- existing Inquiry regression checks pass;
-- build passes;
-- Preview deployment succeeds;
-- public RFQ negative tests pass;
-- authenticated internal tests pass;
-- no Production promotion occurs without explicit user approval.
+- RFQ contract and schema are reviewed;
+- public boundary is implemented;
+- product-reference integrity is enforced;
+- validation and server-owned lifecycle rules are tested;
+- existing Product and Inquiry routes remain intact;
+- build and automated tests execute successfully;
+- Preview deployment and real D1 runtime tests pass;
+- negative/security tests pass in the target runtime;
+- Production remains unchanged until explicit user approval.
 
 ## Current gate
 
@@ -189,6 +114,8 @@ Branch: `feat/commerce-2-rfq`
 
 Base: Commerce-1 latest verified commit `e23c7ec2cc67abf4f842c11e79a536bd28f5deed`
 
+Draft PR: #61
+
 `main` remains locked and untouched.
 
-Runtime/Preview evidence is still required before any stage can be declared fully PASS.
+Runtime/Preview evidence is still required before Commerce-2 can be declared fully PASS.
