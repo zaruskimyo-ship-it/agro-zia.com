@@ -14,6 +14,11 @@ function json(body, status = 200) {
 }
 
 async function readJsonBody(request) {
+  const contentType = request.headers.get("content-type") || "";
+  if (!/^application\/json(?:\s*;|\s*$)/i.test(contentType)) {
+    throw new Error("unsupported_media_type");
+  }
+
   const contentLength = Number.parseInt(request.headers.get("content-length") || "0", 10);
   if (Number.isFinite(contentLength) && contentLength > MAX_BODY_BYTES) {
     throw new Error("payload_too_large");
@@ -43,6 +48,9 @@ export async function handlePublicRfqs(request, env) {
     const rfq = await createRfq(env.AGROZIA_DB, input);
     return json({ rfq }, 201);
   } catch (error) {
+    if (error?.message === "unsupported_media_type") {
+      return json({ error: "unsupported_media_type" }, 415);
+    }
     if (error?.message === "payload_too_large") {
       return json({ error: "payload_too_large" }, 413);
     }
