@@ -67,4 +67,4 @@ assert.match(migration, /CHECK \(sample_required IN \(0,1\)\)/);
 assert.match(migration, /CHECK \(attachment_count >= 0 AND attachment_count <= 10\)/);
 assert.match(migration, /request_number TEXT NOT NULL UNIQUE/);
 
-console.log("Commerce-2 RFQ contract/security checks: PASS (static contract gate)");
+console.log("Commerce-2 RFQ contract/security checks: PREPARED (runtime execution pending)");
