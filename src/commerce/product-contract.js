@@ -107,7 +107,6 @@ export function publicProduct(product) {
     specifications: normalized.specifications,
     packaging: normalized.packaging,
     application: normalized.application,
-    supplier_id: normalized.supplier_id,
     verification_level: normalized.verification_level,
     verification_updated_at: normalized.verification_updated_at,
   };
