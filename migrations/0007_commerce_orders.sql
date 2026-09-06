@@ -1,7 +1,7 @@
 CREATE TABLE IF NOT EXISTS commerce_orders (
   id TEXT PRIMARY KEY,
   order_number TEXT NOT NULL UNIQUE,
-  quote_id TEXT NOT NULL,
+  quote_id TEXT NOT NULL UNIQUE,
   rfq_id TEXT NOT NULL,
   supplier_id TEXT NOT NULL,
   product_id TEXT,
