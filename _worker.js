@@ -29,6 +29,7 @@ const INQUIRY_EMAIL_TO = "agrozia1@gmail.com";
 const INQUIRY_EMAIL_FROM = "export@agro-zia.com";
 
 import { dispatchAdminRoute } from "./src/admin/admin-router.js";
+import { handlePublicProducts } from "./src/commerce/product-api.js";
 
 function json(data, status = 200) {
   return new Response(JSON.stringify(data), {
@@ -384,6 +385,8 @@ export default {
       const adminResponse = await dispatchAdminRoute(request, env);
       if (adminResponse) return adminResponse;
     }
+    if (url.pathname === "/api/products" && request.method === "GET") return handlePublicProducts(request, env);
+    if (url.pathname.startsWith("/api/products/") && request.method === "GET") return handlePublicProducts(request, env, decodeURIComponent(url.pathname.slice("/api/products/".length)));
     if (url.pathname === "/api/inquiries" && request.method === "POST") return createInquiry(request, env);
     if (url.pathname === "/api/health" && request.method === "GET") {
       return json({ ok: true, service: "agro-zia-inquiry-api", d1_bound: Boolean(env.AGROZIA_DB), attachment_storage_bound: Boolean(env.AGROZIA_ATTACHMENTS), email_bound: Boolean(env.EMAIL) });
