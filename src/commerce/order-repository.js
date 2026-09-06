@@ -27,6 +27,10 @@ export async function createOrder(db, input, now = new Date().toISOString()) {
   ).bind(normalized.quote_id).first();
   if (!quote || quote.status !== "accepted") throw new Error("invalid_order_quote");
 
+  if (quote.rfq_product_id && quote.product_id !== quote.rfq_product_id) {
+    throw new Error("invalid_order_product");
+  }
+
   const supplier = await db.prepare(
     `SELECT id, status FROM commerce_suppliers WHERE id = ? AND status = 'published' LIMIT 1`,
   ).bind(quote.supplier_id).first();
