@@ -10,6 +10,7 @@ const contract = read("src/commerce/rfq-contract.js");
 const repository = read("src/commerce/rfq-repository.js");
 const api = read("src/commerce/rfq-api.js");
 const migration = read("migrations/0004_commerce_rfqs.sql");
+const worker = read("_worker.js");
 
 // RFQ status and input bounds are explicit and bounded.
 assert.match(contract, /RFQ_STATUSES = Object\.freeze\(\[/);
@@ -48,6 +49,16 @@ assert.doesNotMatch(api, /AGROZIA_ATTACHMENTS/);
 assert.doesNotMatch(api, /EMAIL/);
 assert.doesNotMatch(api, /ADMIN_PASSWORD|ADMIN_SESSION_SECRET/);
 assert.match(api, /return json\(\{ rfq \}, 201\)/);
+
+// Worker integration must expose RFQ creation without bypassing the API boundary.
+assert.match(worker, /import \{ handlePublicRfqs \} from "\.\/src\/commerce\/rfq-api\.js";/);
+assert.match(worker, /url\.pathname === "\/api\/rfqs" && request\.method === "POST"/);
+assert.match(worker, /return handlePublicRfqs\(request, env\);/);
+
+// Existing public product and inquiry boundaries remain wired.
+assert.match(worker, /handlePublicProducts/);
+assert.match(worker, /url\.pathname === "\/api\/products" && request\.method === "GET"/);
+assert.match(worker, /url\.pathname === "\/api\/inquiries" && request\.method === "POST"/);
 
 // D1 schema constrains status, boolean semantics and attachment count.
 assert.match(migration, /CREATE TABLE IF NOT EXISTS commerce_rfqs/);
