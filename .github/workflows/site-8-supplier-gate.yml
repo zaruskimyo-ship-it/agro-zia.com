@@ -1,4 +1,5 @@
 name: SITE-8 Supplier Operations Gate
+
 on:
   push:
     branches: [feat/site-8-supplier-operations]
@@ -12,6 +13,7 @@ on:
 jobs:
   gate:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
