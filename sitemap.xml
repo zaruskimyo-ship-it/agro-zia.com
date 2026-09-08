@@ -1,10 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url><loc>https://agro-zia.com/</loc></url>
+  <url><loc>https://agro-zia.com/about.html</loc></url>
   <url><loc>https://agro-zia.com/products.html</loc></url>
+  <url><loc>https://agro-zia.com/engineering.html</loc></url>
+  <url><loc>https://agro-zia.com/projects.html</loc></url>
+  <url><loc>https://agro-zia.com/trade.html</loc></url>
+  <url><loc>https://agro-zia.com/knowledge.html</loc></url>
+  <url><loc>https://agro-zia.com/network.html</loc></url>
+  <url><loc>https://agro-zia.com/contact.html</loc></url>
   <url><loc>https://agro-zia.com/inquiry.html</loc></url>
   <url><loc>https://agro-zia.com/company.html</loc></url>
   <url><loc>https://agro-zia.com/services.html</loc></url>
   <url><loc>https://agro-zia.com/markets.html</loc></url>
-  <url><loc>https://agro-zia.com/knowledge.html</loc></url>
+  <url><loc>https://agro-zia.com/zarus.html</loc></url>
+  <url><loc>https://agro-zia.com/suppliers.html</loc></url>
 </urlset>
