@@ -4,9 +4,6 @@
   "main": "_worker.js",
   "compatibility_date": "2026-08-27",
   "preview_urls": true,
-  "secrets": {
-    "required": ["ADMIN_PASSWORD", "ADMIN_SESSION_SECRET"]
-  },
   "assets": {
     "directory": ".",
     "binding": "ASSETS",
