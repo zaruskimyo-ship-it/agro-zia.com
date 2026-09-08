@@ -1,0 +1,42 @@
+name: SITE Foundation Gate
+
+on:
+  push:
+    branches: [feat/site-8-supplier-operations]
+  pull_request:
+    branches: [main]
+    paths:
+      - 'index.html'
+      - 'assets/site-foundation.css'
+      - 'assets/site-foundation.js'
+      - 'docs/SITE-9-LONGITUDINAL-SITE-ARCHITECTURE.md'
+      - '.github/workflows/site-foundation-gate.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  foundation:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Syntax check foundation JavaScript
+        run: node --check assets/site-foundation.js
+      - name: Structural assertions
+        run: |
+          grep -q 'id="about"' index.html
+          grep -q 'id="products"' index.html
+          grep -q 'id="engineering"' index.html
+          grep -q 'id="projects"' index.html
+          grep -q 'id="trade"' index.html
+          grep -q 'id="zarus"' index.html
+          grep -q 'id="knowledge"' index.html
+          grep -q 'id="contact"' index.html
+          grep -q 'site-foundation.css' index.html
+          grep -q 'site-foundation.js' index.html
+          grep -q 'Customer Workspace' docs/SITE-9-LONGITUDINAL-SITE-ARCHITECTURE.md
+          grep -q 'Supplier Workspace' docs/SITE-9-LONGITUDINAL-SITE-ARCHITECTURE.md
