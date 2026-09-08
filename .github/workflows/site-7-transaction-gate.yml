@@ -1,0 +1,47 @@
+name: SITE-7 Transaction Center Gate
+
+on:
+  push:
+    branches:
+      - feat/site-5-shipping-logistics-qc-documents
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'src/customer/**'
+      - 'assets/zarus-workspace.js'
+      - 'zarus-workspace.html'
+      - 'migrations/0010_customer_transaction_center.sql'
+      - '.github/workflows/site-7-transaction-gate.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  transaction-contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Syntax check customer transaction modules
+        run: |
+          node --check src/customer/customer-api.js
+          node --check src/customer/customer-auth.js
+          node --check src/customer/transaction-api.js
+      - name: Syntax check workspace UI
+        run: node --check assets/zarus-workspace.js
+      - name: Contract assertions
+        run: |
+          grep -q "commerce_quote_messages" migrations/0010_customer_transaction_center.sql
+          grep -q "commerce_proformas" migrations/0010_customer_transaction_center.sql
+          grep -q "commerce_payment_intents" migrations/0010_customer_transaction_center.sql
+          grep -q "commerce_trade_protection" migrations/0010_customer_transaction_center.sql
+          grep -q "commerce_shipments" migrations/0010_customer_transaction_center.sql
+          grep -q "commerce_qc_inspections" migrations/0010_customer_transaction_center.sql
+          grep -q "commerce_transaction_documents" migrations/0010_customer_transaction_center.sql
+          grep -q "/api/customer/quotes/" src/customer/transaction-api.js
+          grep -q "status='accepted'" src/customer/transaction-api.js
+          grep -q "createOrder" src/customer/transaction-api.js
