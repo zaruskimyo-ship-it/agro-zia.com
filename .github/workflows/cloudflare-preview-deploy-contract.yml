@@ -1,0 +1,38 @@
+name: Cloudflare Preview Deploy Contract
+
+on:
+  push:
+    branches:
+      - feat/site-8-supplier-operations
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'scripts/cloudflare-preview-upload.sh'
+      - 'wrangler.jsonc'
+      - '.github/workflows/cloudflare-preview-deploy-contract.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Validate preview upload script
+        run: |
+          bash -n scripts/cloudflare-preview-upload.sh
+          grep -q 'wrangler versions upload --secrets-file' scripts/cloudflare-preview-upload.sh
+          grep -q 'ADMIN_PASSWORD' scripts/cloudflare-preview-upload.sh
+          grep -q 'ADMIN_SESSION_SECRET' scripts/cloudflare-preview-upload.sh
+          grep -q 'mktemp' scripts/cloudflare-preview-upload.sh
+          grep -q 'rm -f' scripts/cloudflare-preview-upload.sh
+          if grep -Eq 'ADMIN_PASSWORD=.{1,}|ADMIN_SESSION_SECRET=.{1,}' scripts/cloudflare-preview-upload.sh; then
+            echo 'Potential secret value committed to script'
+            exit 1
+          fi
