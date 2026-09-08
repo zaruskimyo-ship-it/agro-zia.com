@@ -1,0 +1,62 @@
+import { readCustomerSession } from "./customer-auth.js";
+import { createOrder } from "../commerce/order-repository.js";
+
+function json(data, status = 200, headers = {}) {
+  return new Response(JSON.stringify(data), { status, headers: { "content-type": "application/json; charset=UTF-8", "cache-control": "no-store", "x-content-type-options": "nosniff", ...headers } });
+}
+async function accountFor(request, env) {
+  const session = await readCustomerSession(request, env);
+  if (!session || !env.AGROZIA_DB) return null;
+  return env.AGROZIA_DB.prepare("SELECT id,email,name,company,phone,country,status FROM customer_accounts WHERE id = ? AND status = 'active' LIMIT 1").bind(session.accountId).first();
+}
+async function quoteFor(db, id, account) {
+  return db.prepare(`SELECT q.*, s.name AS supplier_name, r.customer_account_id, r.buyer_email, r.buyer_name, r.buyer_company, r.buyer_phone FROM commerce_quotes q JOIN commerce_rfqs r ON r.id=q.rfq_id LEFT JOIN commerce_suppliers s ON s.id=q.supplier_id WHERE q.id=? AND (r.customer_account_id=? OR (r.customer_account_id IS NULL AND LOWER(COALESCE(r.buyer_email,''))=?)) LIMIT 1`).bind(id, account.id, account.email).first();
+}
+function publicQuote(row) {
+  if (!row) return null;
+  return { id:row.id, quote_number:row.quote_number, rfq_id:row.rfq_id, supplier_id:row.supplier_id, supplier_name:row.supplier_name||null, product_id:row.product_id||null, product_name:row.product_name, quantity:row.quantity, unit_price_minor:row.unit_price_minor, currency:row.currency, packaging_cost_minor:row.packaging_cost_minor, shipping_cost_minor:row.shipping_cost_minor, insurance_cost_minor:row.insurance_cost_minor, other_fees_minor:row.other_fees_minor, total_amount_minor:row.total_amount_minor, lead_time:row.lead_time||null, validity_until:row.validity_until||null, payment_terms:row.payment_terms||null, incoterm:row.incoterm||null, destination:row.destination||null, status:row.status, created_at:row.created_at, updated_at:row.updated_at };
+}
+async function quoteDetail(request, env, id) {
+  const account = await accountFor(request, env); if (!account) return json({error:"customer_unauthorized"},401);
+  const quote = await quoteFor(env.AGROZIA_DB,id,account); if (!quote) return json({error:"not_found"},404);
+  const messages = await env.AGROZIA_DB.prepare("SELECT id,message,created_at FROM commerce_quote_messages WHERE quote_id=? AND customer_account_id=? ORDER BY created_at ASC LIMIT 200").bind(id,account.id).all();
+  return json({quote:publicQuote(quote),messages:messages.results||[]});
+}
+async function quoteAction(request, env, id) {
+  const account = await accountFor(request, env); if (!account) return json({error:"customer_unauthorized"},401);
+  const quote = await quoteFor(env.AGROZIA_DB,id,account); if (!quote) return json({error:"not_found"},404);
+  let body; try { body=await request.json(); } catch { return json({error:"invalid_json"},400); }
+  const action=String(body?.action||"");
+  const now=new Date().toISOString();
+  if(action==="accept") {
+    if(quote.status!=="sent" && quote.status!=="negotiating") return json({error:"quote_action_not_allowed"},409);
+    await env.AGROZIA_DB.prepare("UPDATE commerce_quotes SET status='accepted', updated_at=? WHERE id=? AND status IN ('sent','negotiating')").bind(now,id).run();
+    return json({ok:true,status:"accepted"});
+  }
+  if(action==="decline") {
+    if(!["sent","negotiating"].includes(quote.status)) return json({error:"quote_action_not_allowed"},409);
+    await env.AGROZIA_DB.prepare("UPDATE commerce_quotes SET status='rejected', updated_at=? WHERE id=? AND status IN ('sent','negotiating')").bind(now,id).run();
+    return json({ok:true,status:"rejected"});
+  }
+  if(action==="negotiate") {
+    const message=typeof body?.message==="string"?body.message.trim().slice(0,4000):"";
+    if(!message) return json({error:"message_required"},400);
+    if(!["sent","negotiating"].includes(quote.status)) return json({error:"quote_action_not_allowed"},409);
+    await env.AGROZIA_DB.prepare("UPDATE commerce_quotes SET status='negotiating', updated_at=? WHERE id=? AND status IN ('sent','negotiating')").bind(now,id).run();
+    await env.AGROZIA_DB.prepare("INSERT INTO commerce_quote_messages (id,quote_id,customer_account_id,message,created_at) VALUES (?,?,?,?,?)").bind(crypto.randomUUID(),id,account.id,message,now).run();
+    return json({ok:true,status:"negotiating"},201);
+  }
+  return json({error:"unknown_action"},400);
+}
+async function orderFor(db,id,account) {
+  return db.prepare(`SELECT o.*,s.name AS supplier_name,r.customer_account_id,r.buyer_email FROM commerce_orders o JOIN commerce_rfqs r ON r.id=o.rfq_id LEFT JOIN commerce_suppliers s ON s.id=o.supplier_id WHERE o.id=? AND (r.customer_account_id=? OR (r.customer_account_id IS NULL AND LOWER(COALESCE(r.buyer_email,''))=?)) LIMIT 1`).bind(id,account.id,account.email).first();
+}
+function publicOrder(row){return row?{id:row.id,order_number:row.order_number,quote_id:row.quote_id,rfq_id:row.rfq_id,supplier_id:row.supplier_id,supplier_name:row.supplier_name||null,product_id:row.product_id||null,product_name:row.product_name,quantity:row.quantity,currency:row.currency,unit_price_minor:row.unit_price_minor,quoted_amount_minor:row.quoted_amount_minor,destination:row.destination||null,status:row.status,created_at:row.created_at,updated_at:row.updated_at}:null}
+async function createCustomerOrder(request,env,id){const account=await accountFor(request,env);if(!account)return json({error:"customer_unauthorized"},401);const quote=await quoteFor(env.AGROZIA_DB,id,account);if(!quote)return json({error:"not_found"},404);if(quote.status!=="accepted")return json({error:"quote_not_accepted"},409);try{const order=await createOrder(env.AGROZIA_DB,{quote_id:id});return json({order},201)}catch(error){if(error?.message==="invalid_order_quote")return json({error:"quote_not_accepted"},409);if(error?.message==="invalid_order_supplier")return json({error:"invalid_supplier"},409);if(error?.message==="invalid_order_product")return json({error:"invalid_product"},409);if(error?.message==="invalid_order")return json({error:"invalid_order"},400);return json({error:"order_creation_failed"},503)}}
+async function proforma(db,order){const existing=await db.prepare("SELECT * FROM commerce_proformas WHERE order_id=? ORDER BY version DESC LIMIT 1").bind(order.id).first();if(existing)return existing;const id=crypto.randomUUID(),now=new Date().toISOString(),number=`AGZ-PROFORMA-${now.replace(/[-:TZ.]/g,"").slice(0,14)}-${id.slice(0,8).toUpperCase()}`;await db.prepare("INSERT INTO commerce_proformas (id,proforma_number,order_id,version,currency,amount_minor,product_name,quantity,destination,incoterm,payment_terms,status,issued_at,created_at) SELECT ?,?,?,1,currency,quoted_amount_minor,product_name,quantity,destination,NULL,NULL,'issued',?,? FROM commerce_orders WHERE id=?").bind(id,number,order.id,now,now,order.id).run();return db.prepare("SELECT * FROM commerce_proformas WHERE id=?").bind(id).first()}
+async function transaction(request,env,id){const account=await accountFor(request,env);if(!account)return json({error:"customer_unauthorized"},401);const order=await orderFor(env.AGROZIA_DB,id,account);if(!order)return json({error:"not_found"},404);const [pf,payment,protection,shipment,qc,docs]=await Promise.all([env.AGROZIA_DB.prepare("SELECT * FROM commerce_proformas WHERE order_id=? ORDER BY version DESC LIMIT 1").bind(id).first(),env.AGROZIA_DB.prepare("SELECT * FROM commerce_payment_intents WHERE order_id=? ORDER BY created_at DESC LIMIT 1").bind(id).first(),env.AGROZIA_DB.prepare("SELECT * FROM commerce_trade_protection WHERE order_id=? LIMIT 1").bind(id).first(),env.AGROZIA_DB.prepare("SELECT * FROM commerce_shipments WHERE order_id=? ORDER BY updated_at DESC LIMIT 20").bind(id).all(),env.AGROZIA_DB.prepare("SELECT * FROM commerce_qc_inspections WHERE order_id=? ORDER BY created_at DESC LIMIT 20").bind(id).all(),env.AGROZIA_DB.prepare("SELECT id,document_type,document_name,status,created_at FROM commerce_transaction_documents WHERE order_id=? ORDER BY created_at DESC LIMIT 100").bind(id).all()]);return json({order:publicOrder(order),proforma:pf,payment:payment||null,trade_protection:protection||{status:"not_requested"},shipments:shipment.results||[],qc:qc.results||[],documents:docs.results||[]});}
+async function ensureProforma(request,env,id){const account=await accountFor(request,env);if(!account)return json({error:"customer_unauthorized"},401);const order=await orderFor(env.AGROZIA_DB,id,account);if(!order)return json({error:"not_found"},404);const pf=await proforma(env.AGROZIA_DB,order);return json({proforma:pf});}
+async function paymentIntent(request,env,id){const account=await accountFor(request,env);if(!account)return json({error:"customer_unauthorized"},401);const order=await orderFor(env.AGROZIA_DB,id,account);if(!order)return json({error:"not_found"},404);const pf=await proforma(env.AGROZIA_DB,order);const key=crypto.randomUUID(),existing=await env.AGROZIA_DB.prepare("SELECT * FROM commerce_payment_intents WHERE idempotency_key=?").bind(key).first();if(existing)return json({payment:existing});const pid=crypto.randomUUID(),now=new Date().toISOString();await env.AGROZIA_DB.prepare("INSERT INTO commerce_payment_intents (id,order_id,proforma_id,provider,amount_minor,currency,status,idempotency_key,created_at,updated_at) VALUES (?,?,?,'unconfigured',?,?, 'created',?,?,?)").bind(pid,id,pf.id,order.quoted_amount_minor,order.currency,key,now,now).run();return json({payment:await env.AGROZIA_DB.prepare("SELECT * FROM commerce_payment_intents WHERE id=?").bind(pid).first()},201);}
+async function protectionAction(request,env,id){const account=await accountFor(request,env);if(!account)return json({error:"customer_unauthorized"},401);const order=await orderFor(env.AGROZIA_DB,id,account);if(!order)return json({error:"not_found"},404);const now=new Date().toISOString();await env.AGROZIA_DB.prepare("INSERT INTO commerce_trade_protection (id,order_id,status,updated_at) VALUES (?,?, 'requested',?) ON CONFLICT(order_id) DO UPDATE SET status='requested',updated_at=?").bind(crypto.randomUUID(),id,now,now).run();return json({ok:true,status:"requested"});}
+export async function handleCustomerTransactionRoute(request,env){const url=new URL(request.url),m=url.pathname.match(/^\/api\/customer\/(quotes|orders|transactions)\/([^/]+)(?:\/(actions|proforma|payment|trade-protection))?$/);if(!m)return null;const [,kind,id,sub]=m;if(kind==="quotes"){if(!sub&&request.method==="GET")return quoteDetail(request,env,id);if(sub==="actions"&&request.method==="POST")return quoteAction(request,env,id);return json({error:"not_found"},404)}if(kind==="orders"){if(sub==="proforma"&&request.method==="POST")return ensureProforma(request,env,id);if(sub==="payment"&&request.method==="POST")return paymentIntent(request,env,id);if(sub==="trade-protection"&&request.method==="POST")return protectionAction(request,env,id);if(!sub&&request.method==="GET")return transaction(request,env,id);return json({error:"not_found"},404)}if(kind==="transactions"&&request.method==="GET")return transaction(request,env,id);return json({error:"not_found"},404)}
+export async function handleCustomerOrderFromQuote(request,env,id){if(request.method!=="POST")return json({error:"method_not_allowed"},405);return createCustomerOrder(request,env,id)}
