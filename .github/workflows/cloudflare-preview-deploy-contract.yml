@@ -26,6 +26,9 @@ jobs:
           node-version: 22
       - name: Validate preview upload script
         run: |
+          # Keep this contract on the same feature branch as the corrected
+          # Workers Builds preview command so the next Cloudflare build uses
+          # the current branch head rather than an older queued revision.
           bash -n scripts/cloudflare-preview-upload.sh
           grep -q '^npx wrangler versions upload$' scripts/cloudflare-preview-upload.sh
           ! grep -q 'secrets-file' scripts/cloudflare-preview-upload.sh
