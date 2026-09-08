@@ -1,0 +1,28 @@
+name: Commerce-5 Order Gate
+
+on:
+  pull_request:
+    paths:
+      - 'docs/commerce-5-order.md'
+      - 'migrations/0007_commerce_orders.sql'
+      - 'src/commerce/order-*.js'
+      - 'scripts/commerce-order-*.mjs'
+      - '.github/workflows/commerce-5-order-gate.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  order-runtime-security:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Order contract and security gate
+        run: node scripts/commerce-order-contract-test.mjs
+      - name: Order mock-D1 runtime gate
+        run: node scripts/commerce-order-runtime-test.mjs
