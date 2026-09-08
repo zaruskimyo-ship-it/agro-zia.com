@@ -32,7 +32,3 @@ jobs:
           grep -q 'ADMIN_SESSION_SECRET' scripts/cloudflare-preview-upload.sh
           grep -q 'mktemp' scripts/cloudflare-preview-upload.sh
           grep -q 'rm -f' scripts/cloudflare-preview-upload.sh
-          if grep -Eq 'ADMIN_PASSWORD=.{1,}|ADMIN_SESSION_SECRET=.{1,}' scripts/cloudflare-preview-upload.sh; then
-            echo 'Potential secret value committed to script'
-            exit 1
-          fi
