@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - feat/site-5-shipping-logistics-qc-documents
+      - feat/site-8-supplier-operations
   pull_request:
     branches:
       - main
@@ -43,5 +44,5 @@ jobs:
           grep -q "commerce_qc_inspections" migrations/0010_customer_transaction_center.sql
           grep -q "commerce_transaction_documents" migrations/0010_customer_transaction_center.sql
           grep -q "/api/customer/quotes/" src/customer/transaction-api.js
-          grep -q "status='accepted'" src/customer/transaction-api.js
+          grep -q 'status:"accepted"' src/customer/transaction-api.js
           grep -q "createOrder" src/customer/transaction-api.js
