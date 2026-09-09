@@ -70,11 +70,9 @@ export async function handleSupplierMessagingRoute(request, env) {
   const quote = await ownedQuote(env.AGROZIA_DB, quoteId, supplier.supplier_id);
   if (!quote) return json({ error: "not_found" }, 404);
 
-  if (request.method === "GET") {
-    return json({ messages: await thread(env.AGROZIA_DB, quoteId) });
-  }
-
+  if (request.method === "GET") return json({ messages: await thread(env.AGROZIA_DB, quoteId) });
   if (request.method !== "POST") return json({ error: "method_not_allowed" }, 405);
+
   let body;
   try {
     body = await parseBody(request);
@@ -82,9 +80,9 @@ export async function handleSupplierMessagingRoute(request, env) {
     return json({ error: error.message }, 400);
   }
 
-  const message = typeof body?.message === "string" ? body.message.trim().slice(0, MAX_MESSAGE_LENGTH) : "";
-  if (!message) return json({ error: "message_required" }, 400);
-  if (message.length > MAX_MESSAGE_LENGTH) return json({ error: "message_too_long", max_length: MAX_MESSAGE_LENGTH }, 400);
+  const rawMessage = typeof body?.message === "string" ? body.message.trim() : "";
+  if (!rawMessage) return json({ error: "message_required" }, 400);
+  if (rawMessage.length > MAX_MESSAGE_LENGTH) return json({ error: "message_too_long", max_length: MAX_MESSAGE_LENGTH }, 400);
   if (!["sent", "negotiating"].includes(quote.status)) return json({ error: "quote_action_not_allowed" }, 409);
 
   const now = new Date().toISOString();
@@ -98,7 +96,7 @@ export async function handleSupplierMessagingRoute(request, env) {
     INSERT INTO commerce_supplier_quote_messages
       (id, quote_id, supplier_account_id, supplier_id, message, created_at)
     VALUES (?, ?, ?, ?, ?, ?)
-  `).bind(id, quoteId, supplier.account_id, supplier.supplier_id, message, now).run();
+  `).bind(id, quoteId, supplier.account_id, supplier.supplier_id, rawMessage, now).run();
 
-  return json({ ok: true, status: "negotiating", message: { id, message, created_at: now, sender_type: "supplier" } }, 201);
+  return json({ ok: true, status: "negotiating", message: { id, message: rawMessage, created_at: now, sender_type: "supplier" } }, 201);
 }
