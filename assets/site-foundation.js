@@ -73,7 +73,12 @@
     }
 
     const path = window.location.pathname.replace(/\/+$/, '') || '/';
-    const load = (src) => { const s = document.createElement('script'); s.src = src; document.head.appendChild(s); };
+    const load = (src) => { if (document.querySelector(`script[src="${src}"]`)) return; const s = document.createElement('script'); s.src = src; document.body.appendChild(s); };
+    const loadStyle = (href) => { if (document.querySelector(`link[href="${href}"]`)) return; const l = document.createElement('link'); l.rel = 'stylesheet'; l.href = href; document.head.appendChild(l); };
+    loadStyle('/assets/floating-nav.css');
+    loadStyle('/assets/bottom-actions.css');
+    load('/assets/floating-nav.js');
+    load('/assets/bottom-actions.js');
     if (path === '/') { load('/assets/home-auto.js'); load('/assets/home-nav-auto.js'); }
     else if (path === '/about.html') load('/assets/about-auto.js');
     else if (path === '/trade.html') load('/assets/trade-auto.js');
