@@ -73,11 +73,11 @@ jobs:
           grep -q "uz:" assets/home-auto.js
           grep -q "tr:" assets/home-auto.js
           grep -q "ru:" assets/home-auto.js
-          grep -q "فارسی" assets/home-nav-auto.js
-          grep -q "العربية" assets/home-nav-auto.js
-          grep -q "O‘zbek" assets/home-nav-auto.js
-          grep -q "Türkçe" assets/home-nav-auto.js
-          grep -q "Русский" assets/home-nav-auto.js
+          grep -q "fa:" assets/home-nav-auto.js
+          grep -q "ar:" assets/home-nav-auto.js
+          grep -q "uz:" assets/home-nav-auto.js
+          grep -q "tr:" assets/home-nav-auto.js
+          grep -q "ru:" assets/home-nav-auto.js
           grep -q "home-auto.js" assets/site-foundation.js
           grep -q "home-nav-auto.js" assets/site-foundation.js
       - name: Navigation regression assertions
