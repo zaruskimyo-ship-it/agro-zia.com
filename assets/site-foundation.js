@@ -51,9 +51,7 @@
     document.documentElement.lang = supported;
     document.documentElement.dir = ['fa', 'ar'].includes(supported) ? 'rtl' : 'ltr';
 
-    // Persist the selected language across the whole site. Every same-origin
-    // navigation keeps the current ?lang value unless the destination already
-    // specifies an explicit language (for example Trade market links).
+    // Persist the selected language across same-origin navigation.
     document.querySelectorAll('a[href]').forEach((link) => {
       const raw = link.getAttribute('href');
       if (!raw || raw.startsWith('#') || /^(mailto:|tel:|javascript:|https?:\/\/)/i.test(raw)) return;
@@ -86,6 +84,8 @@
     if (path === '/') {
       load('/assets/home-auto.js');
       load('/assets/home-nav-auto.js');
+    } else if (path === '/about.html') {
+      load('/assets/about-auto.js');
     } else if (path === '/trade.html') {
       load('/assets/trade-auto.js');
     }
