@@ -1,4 +1,3 @@
-import { readSupplierSession } from "./supplier-auth.js";
 import { requireSupplier, supplierUnauthorized } from "./supplier-ownership.js";
 
 function json(data, status = 200) {
@@ -32,10 +31,7 @@ export async function handleSupplierWorkspaceRoute(request, env) {
              r.destination_location, r.created_at
       FROM commerce_rfqs r
       WHERE r.status NOT IN ('cancelled')
-        AND EXISTS (
-          SELECT 1 FROM commerce_rfq_supplier rs
-          WHERE rs.rfq_id = r.id AND rs.supplier_id = ?
-        )
+        AND r.supplier_id = ?
       ORDER BY r.created_at DESC LIMIT 100
     `).bind(supplier.supplier_id).all(),
     env.AGROZIA_DB.prepare(`
@@ -46,7 +42,7 @@ export async function handleSupplierWorkspaceRoute(request, env) {
       ORDER BY created_at DESC LIMIT 100
     `).bind(supplier.supplier_id).all(),
     env.AGROZIA_DB.prepare(`
-      SELECT id, order_number, quote_id, status, currency, total_amount_minor,
+      SELECT id, order_number, quote_id, status, currency, quoted_amount_minor,
              created_at, updated_at
       FROM commerce_orders
       WHERE supplier_id = ?
@@ -67,9 +63,4 @@ export async function handleSupplierWorkspaceRoute(request, env) {
     quotes: quotes.results || [],
     orders: orders.results || [],
   });
-}
-
-export async function requireSupplierSession(request, env) {
-  const session = await readSupplierSession(request, env);
-  return session || null;
 }
