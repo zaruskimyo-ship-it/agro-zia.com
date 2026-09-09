@@ -4,20 +4,30 @@
     const nav = document.querySelector('[data-nav], header nav');
     const navWrap = document.querySelector('.nav');
     const labels = { en: 'English', fa: 'فارسی', ar: 'العربية', uz: 'O‘zbek', tr: 'Türkçe', ru: 'Русский' };
-    const url = new URL(window.location.href);
-    const current = url.searchParams.get('lang') || document.documentElement.lang || 'en';
+    const current = new URL(window.location.href).searchParams.get('lang') || document.documentElement.lang || 'en';
     const supported = Object.prototype.hasOwnProperty.call(labels, current) ? current : 'en';
+    const navLabels = {
+      en: ['Home','About','Products','Engineering','Projects','Trade','ZARUS','Knowledge','Network','Contact'],
+      fa: ['خانه','درباره ما','محصولات','مهندسی','پروژه‌ها','تجارت','ZARUS','دانش','شبکه','تماس'],
+      ar: ['الرئيسية','من نحن','المنتجات','الهندسة','المشاريع','التجارة','ZARUS','المعرفة','الشبكة','اتصل بنا'],
+      uz: ['Bosh sahifa','Biz haqimizda','Mahsulotlar','Muhandislik','Loyihalar','Savdo','ZARUS','Bilim','Tarmoq','Aloqa'],
+      tr: ['Ana Sayfa','Hakkımızda','Ürünler','Mühendislik','Projeler','Ticaret','ZARUS','Bilgi','Ağ','İletişim'],
+      ru: ['Главная','О нас','Продукты','Инжиниринг','Проекты','Торговля','ZARUS','Знания','Сеть','Контакты']
+    };
     const homeLabels = { en: 'Home', fa: 'خانه', ar: 'الرئيسية', uz: 'Bosh sahifa', tr: 'Ana Sayfa', ru: 'Главная' };
 
     if (nav) {
       nav.dataset.nav = 'true';
+      let links = Array.from(nav.querySelectorAll('a'));
       if (!nav.querySelector('a[data-home-link]')) {
         const home = document.createElement('a');
         home.href = '/?lang=' + encodeURIComponent(supported);
-        home.textContent = homeLabels[supported];
         home.dataset.homeLink = 'true';
         nav.insertBefore(home, nav.firstChild);
+        links = Array.from(nav.querySelectorAll('a'));
       }
+      const texts = navLabels[supported] || navLabels.en;
+      links.slice(0, texts.length).forEach((link, i) => { link.textContent = texts[i]; });
     }
 
     let select = navWrap?.querySelector('.language-select');
@@ -29,33 +39,21 @@
       select.className = 'language-select';
       select.setAttribute('aria-label', 'Select language');
       Object.entries(labels).forEach(([code, label]) => {
-        const option = document.createElement('option');
-        option.value = code;
-        option.textContent = label;
-        option.selected = code === supported;
-        select.appendChild(option);
+        const option = document.createElement('option'); option.value = code; option.textContent = label; option.selected = code === supported; select.appendChild(option);
       });
-      box.appendChild(select);
-      navWrap.insertBefore(box, button || nav || null);
+      box.appendChild(select); navWrap.insertBefore(box, button || nav || null);
     }
     if (select && !select.dataset.languageBound) {
-      select.dataset.languageBound = 'true';
-      select.value = supported;
-      select.addEventListener('change', () => {
-        const next = new URL(window.location.href);
-        next.searchParams.set('lang', select.value);
-        window.location.assign(next.toString());
-      });
+      select.dataset.languageBound = 'true'; select.value = supported;
+      select.addEventListener('change', () => { const next = new URL(window.location.href); next.searchParams.set('lang', select.value); window.location.assign(next.toString()); });
     }
 
     document.documentElement.lang = supported;
     document.documentElement.dir = ['fa', 'ar'].includes(supported) ? 'rtl' : 'ltr';
 
-    // Persist the selected language across same-origin navigation.
     document.querySelectorAll('a[href]').forEach((link) => {
       const raw = link.getAttribute('href');
       if (!raw || raw.startsWith('#') || /^(mailto:|tel:|javascript:|https?:\/\/)/i.test(raw)) return;
-      if (link.dataset.languagePersistBound) return;
       try {
         const target = new URL(raw, window.location.origin);
         if (target.origin !== window.location.origin) return;
@@ -66,30 +64,16 @@
     });
 
     if (button && nav && !button.dataset.menuBound) {
-      button.dataset.menuBound = 'true';
-      button.dataset.menu = 'true';
-      button.setAttribute('aria-expanded', 'false');
-      button.addEventListener('click', () => {
-        const open = nav.classList.toggle('open');
-        button.setAttribute('aria-expanded', String(open));
-      });
-      nav.querySelectorAll('a').forEach((link) => link.addEventListener('click', () => {
-        nav.classList.remove('open');
-        button.setAttribute('aria-expanded', 'false');
-      }));
+      button.dataset.menuBound = 'true'; button.dataset.menu = 'true'; button.setAttribute('aria-expanded', 'false');
+      button.addEventListener('click', () => { const open = nav.classList.toggle('open'); button.setAttribute('aria-expanded', String(open)); });
+      nav.querySelectorAll('a').forEach((link) => link.addEventListener('click', () => { nav.classList.remove('open'); button.setAttribute('aria-expanded', 'false'); }));
     }
 
     const path = window.location.pathname.replace(/\/+$/, '') || '/';
     const load = (src) => { const s = document.createElement('script'); s.src = src; document.head.appendChild(s); };
-    if (path === '/') {
-      load('/assets/home-auto.js');
-      load('/assets/home-nav-auto.js');
-    } else if (path === '/about.html') {
-      load('/assets/about-auto.js');
-    } else if (path === '/trade.html') {
-      load('/assets/trade-auto.js');
-    }
+    if (path === '/') { load('/assets/home-auto.js'); load('/assets/home-nav-auto.js'); }
+    else if (path === '/about.html') load('/assets/about-auto.js');
+    else if (path === '/trade.html') load('/assets/trade-auto.js');
   };
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init, { once: true });
-  else init();
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init, { once: true }); else init();
 })();
