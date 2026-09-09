@@ -4,8 +4,6 @@
     const nav = document.querySelector('[data-nav], header nav');
     const navWrap = document.querySelector('.nav');
     const labels = { en: 'English', fa: 'فارسی', ar: 'العربية', uz: 'O‘zbek', tr: 'Türkçe', ru: 'Русский' };
-    const current = new URL(window.location.href).searchParams.get('lang') || document.documentElement.lang || 'en';
-    const supported = Object.prototype.hasOwnProperty.call(labels, current) ? current : 'en';
     const navLabels = {
       en: { '/': 'Home','/about.html':'About','/products.html':'Products','/engineering.html':'Engineering','/projects.html':'Projects','/trade.html':'Trade','/zarus.html':'ZARUS','/knowledge.html':'Knowledge','/network.html':'Network','/contact.html':'Contact' },
       fa: { '/':'خانه','/about.html':'درباره ما','/products.html':'محصولات','/engineering.html':'مهندسی','/projects.html':'پروژه‌ها','/trade.html':'تجارت','/zarus.html':'ZARUS','/knowledge.html':'دانش','/network.html':'شبکه','/contact.html':'تماس' },
@@ -14,6 +12,18 @@
       tr: { '/':'Ana Sayfa','/about.html':'Hakkımızda','/products.html':'Ürünler','/engineering.html':'Mühendislik','/projects.html':'Projeler','/trade.html':'Ticaret','/zarus.html':'ZARUS','/knowledge.html':'Bilgi','/network.html':'Ağ','/contact.html':'İletişim' },
       ru: { '/':'Главная','/about.html':'О нас','/products.html':'Продукты','/engineering.html':'Инжиниринг','/projects.html':'Проекты','/trade.html':'Торговля','/zarus.html':'ZARUS','/knowledge.html':'Знания','/network.html':'Сеть','/contact.html':'Контакты' }
     };
+    const url = new URL(window.location.href);
+    const queryLang = url.searchParams.get('lang');
+    const storedLang = (() => { try { return localStorage.getItem('agrozia-lang'); } catch (_) { return null; } })();
+    const documentLang = document.documentElement.lang;
+    const supported = Object.prototype.hasOwnProperty.call(labels, queryLang) ? queryLang
+      : Object.prototype.hasOwnProperty.call(labels, storedLang) ? storedLang
+      : Object.prototype.hasOwnProperty.call(labels, documentLang) ? documentLang : 'en';
+
+    document.documentElement.lang = supported;
+    document.documentElement.dir = ['fa', 'ar'].includes(supported) ? 'rtl' : 'ltr';
+    window.AgroZiaActiveLanguage = supported;
+    try { localStorage.setItem('agrozia-lang', supported); } catch (_) {}
 
     if (nav) {
       nav.dataset.nav = 'true';
@@ -48,11 +58,23 @@
     }
     if (select && !select.dataset.languageBound) {
       select.dataset.languageBound = 'true'; select.value = supported;
-      select.addEventListener('change', () => { const next = new URL(window.location.href); next.searchParams.set('lang', select.value); window.location.assign(next.toString()); });
+      select.addEventListener('change', () => {
+        const next = new URL(window.location.href); next.searchParams.set('lang', select.value);
+        try { localStorage.setItem('agrozia-lang', select.value); } catch (_) {}
+        window.location.assign(next.toString());
+      });
     }
 
-    document.documentElement.lang = supported;
-    document.documentElement.dir = ['fa', 'ar'].includes(supported) ? 'rtl' : 'ltr';
+    if (nav) {
+      nav.querySelectorAll('a[href]').forEach((link) => {
+        try {
+          const target = new URL(link.getAttribute('href') || '/', window.location.origin);
+          if (target.origin !== window.location.origin) return;
+          target.searchParams.set('lang', supported);
+          link.href = target.pathname + target.search + target.hash;
+        } catch (_) {}
+      });
+    }
 
     document.querySelectorAll('a[href]').forEach((link) => {
       const raw = link.getAttribute('href');
@@ -73,8 +95,8 @@
     }
 
     const path = window.location.pathname.replace(/\/+$/, '') || '/';
-    const load = (src) => { if (document.querySelector(`script[src="${src}"]`)) return; const s = document.createElement('script'); s.src = src; document.body.appendChild(s); };
-    const loadStyle = (href) => { if (document.querySelector(`link[href="${href}"]`)) return; const l = document.createElement('link'); l.rel = 'stylesheet'; l.href = href; document.head.appendChild(l); };
+    const load = (src) => { if (document.querySelector(`script[data-agz-src="${src}"]`)) return; const s = document.createElement('script'); s.src = src + '?v=20260909'; s.dataset.agzSrc = src; document.body.appendChild(s); };
+    const loadStyle = (href) => { if (document.querySelector(`link[data-agz-style="${href}"]`)) return; const l = document.createElement('link'); l.rel = 'stylesheet'; l.href = href + '?v=20260909'; l.dataset.agzStyle = href; document.head.appendChild(l); };
     loadStyle('/assets/floating-nav.css');
     loadStyle('/assets/bottom-actions.css');
     load('/assets/floating-nav.js');
