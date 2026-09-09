@@ -49,7 +49,7 @@ jobs:
           for table in "${required_tables[@]}"; do
             grep -Fq "$table" migrations/0010_customer_transaction_center.sql || { echo "Missing migration contract: $table"; exit 1; }
           done
-          grep -Fq '/api/customer/quotes/' src/customer/transaction-api.js || { echo 'Missing quote API route contract'; exit 1; }
+          grep -Fq 'quotes|orders|transactions' src/customer/transaction-api.js || { echo 'Missing transaction route family contract'; exit 1; }
           grep -Fq 'accepted' src/customer/transaction-api.js || { echo 'Missing accepted quote contract'; exit 1; }
           grep -Fq 'createOrder' src/customer/transaction-api.js || { echo 'Missing createOrder contract'; exit 1; }
           grep -Fq 'handleCustomerTransactionRoute' src/customer/customer-api.js || { echo 'Missing transaction route dispatch contract'; exit 1; }
