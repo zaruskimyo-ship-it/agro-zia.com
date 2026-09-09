@@ -56,8 +56,10 @@ jobs:
           grep -q 'supplier_account_id' migrations/0012_supplier_quote_messages.sql
           grep -Fq 'MAX_MESSAGE_LENGTH = 4000' src/supplier/supplier-messaging-api.js
           grep -Fq 'sender_type: "supplier"' src/supplier/supplier-messaging-api.js
+          grep -Fq 'commerce_supplier_quote_messages' src/supplier/supplier-messaging-api.js
           grep -Fq 'commerce_quote_messages' src/supplier/supplier-messaging-api.js
           grep -Fq 'commerce_supplier_quote_messages' src/customer/transaction-api.js
+          grep -Fq 'commerce_quote_messages' src/customer/transaction-api.js
           grep -Fq 'sender_type' src/customer/transaction-api.js
           grep -Fq 'message_required' src/customer/transaction-api.js
           grep -Fq 'customer_account_id' src/customer/transaction-api.js
