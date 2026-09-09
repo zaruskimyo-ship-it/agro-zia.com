@@ -7,6 +7,9 @@ on:
     branches: [main]
     paths:
       - 'index.html'
+      - 'about.html'
+      - 'trade.html'
+      - 'inquiry.html'
       - 'assets/site-foundation.css'
       - 'assets/site-foundation.js'
       - 'docs/SITE-9-LONGITUDINAL-SITE-ARCHITECTURE.md'
@@ -43,10 +46,32 @@ jobs:
       - name: Localization header assertions
         run: |
           grep -q 'data-language-switcher' assets/site-foundation.js
-          grep -q "labels =" assets/site-foundation.js
+          grep -q 'labels =' assets/site-foundation.js
           grep -q "fa: 'فارسی'" assets/site-foundation.js
+          grep -q "ar: 'العربية'" assets/site-foundation.js
+          grep -q "uz: 'O‘zbek'" assets/site-foundation.js
           grep -q "tr: 'Türkçe'" assets/site-foundation.js
           grep -q "ru: 'Русский'" assets/site-foundation.js
           grep -q 'language-switcher' assets/site-foundation.css
           grep -q 'language-select' assets/site-foundation.css
           grep -q 'searchParams.get.*lang' assets/site-foundation.js
+      - name: Navigation regression assertions
+        run: |
+          grep -q 'data-home-link' assets/site-foundation.js
+          grep -q 'DOMContentLoaded' assets/site-foundation.js
+          grep -q 'aria-expanded' assets/site-foundation.js
+          grep -q 'href="/"' about.html
+          grep -q 'href="/inquiry.html"' trade.html
+          grep -q 'Iran · فارسی' trade.html
+          grep -q 'Iraq · العربية' trade.html
+          grep -q 'Uzbekistan · O‘zbek' trade.html
+          grep -q 'Türkiye · Türkçe' trade.html
+          grep -q 'INTERNATIONAL TRADE · English' trade.html
+          grep -q 'data-inquiry-home' inquiry.html
+          grep -q 'data-inquiry-menu' inquiry.html
+          grep -q 'href="/?lang=en"' inquiry.html
+      - name: Page JavaScript syntax assertions
+        run: |
+          node --check assets/site-foundation.js
+          node --check inquiry-ux.js
+          node --check locales/language-selector.js
