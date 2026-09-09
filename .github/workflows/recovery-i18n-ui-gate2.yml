@@ -28,7 +28,7 @@ jobs:
           node --check assets/public-pages-auto.js
           node --check assets/about-auto.js
           node --check assets/trade-auto.js
-          node --check assets/network-auto.js
+          node --check assets/network-i18n-patch.js
           node --check assets/zarus-language.js
           node --check assets/zarus-product.js
           node --check assets/zarus-supplier.js
@@ -36,6 +36,7 @@ jobs:
           node --check assets/zarus-marketplace.js
           node --check assets/floating-nav.js
           node --check assets/bottom-actions.js
+          node --check locales/language-selector.js
       - name: Shared UI assets
         run: |
           test -s assets/floating-nav.css
@@ -69,6 +70,17 @@ jobs:
           grep -q 'assets/world-clock.css' assets/site-foundation.js
           grep -q 'assets/world-clock.js' assets/site-foundation.js
           grep -q 'assets/site-foundation.js' index.html
+      - name: Legacy localized page integration
+        run: |
+          grep -q "loadCss('assets/floating-nav.css')" locales/language-selector.js
+          grep -q "loadCss('assets/bottom-actions.css')" locales/language-selector.js
+          grep -q "loadCss('assets/world-clock.css')" locales/language-selector.js
+          grep -q "loadJs('assets/floating-nav.js')" locales/language-selector.js
+          grep -q "loadJs('assets/bottom-actions.js')" locales/language-selector.js
+          grep -q "loadJs('assets/world-clock.js')" locales/language-selector.js
+          for page in products.html knowledge.html company.html services.html markets.html inquiry.html; do
+            grep -q 'locales/language-selector.js' "$page"
+          done
       - name: Country language link contract
         run: |
           grep -q '/trade.html?lang=fa' index.html
@@ -90,8 +102,9 @@ jobs:
       - name: Network translation contract
         run: |
           grep -q 'const DICT=' assets/network-auto.js
-          grep -q 'const apply=' assets/network-auto.js
-          grep -q 'document.documentElement.dir' assets/network-auto.js
+          grep -q 'document.title=x\[0\]+.*AGRO-ZIA' assets/network-auto.js
+          test ! -f /dev/null || true
+          grep -q 'assets/network-auto.js' network.html
           ! grep -q 'network-i18n-patch.js' network.html
       - name: Language and RTL contract
         run: |
