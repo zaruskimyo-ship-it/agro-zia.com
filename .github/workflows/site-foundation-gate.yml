@@ -12,6 +12,7 @@ on:
       - 'inquiry.html'
       - 'assets/site-foundation.css'
       - 'assets/site-foundation.js'
+      - 'assets/home-auto.js'
       - 'assets/trade-auto.js'
       - 'docs/SITE-9-LONGITUDINAL-SITE-ARCHITECTURE.md'
       - '.github/workflows/site-foundation-gate.yml'
@@ -58,6 +59,18 @@ jobs:
           grep -q 'language-switcher' assets/site-foundation.css
           grep -q 'language-select' assets/site-foundation.css
           grep -q 'searchParams.get.*lang' assets/site-foundation.js
+      - name: Homepage localization assertions
+        run: |
+          test -s assets/home-auto.js
+          node --check assets/home-auto.js
+          grep -q "fa:" assets/home-auto.js
+          grep -q "ar:" assets/home-auto.js
+          grep -q "uz:" assets/home-auto.js
+          grep -q "tr:" assets/home-auto.js
+          grep -q "ru:" assets/home-auto.js
+          grep -q "document.documentElement.lang" assets/home-auto.js
+          grep -q "document.documentElement.dir" assets/home-auto.js
+          grep -q "home-auto.js" assets/site-foundation.js
       - name: Navigation regression assertions
         run: |
           grep -q 'data-home-link' assets/site-foundation.js
@@ -87,6 +100,7 @@ jobs:
       - name: Page JavaScript syntax assertions
         run: |
           node --check assets/site-foundation.js
+          node --check assets/home-auto.js
           node --check assets/trade-auto.js
           node --check inquiry-ux.js
           node --check locales/language-selector.js
