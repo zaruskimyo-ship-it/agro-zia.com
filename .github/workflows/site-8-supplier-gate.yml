@@ -37,29 +37,46 @@ jobs:
           node --check _worker.js
       - name: Contract assertions
         run: |
-          grep -q 'draft -> sent -> negotiating' docs/SITE-8-SUPPLIER-OPERATIONS.md
-          grep -q 'supplier/workspace' assets/zarus-supplier-operations.js
-          grep -q 'RFQ' zarus-supplier-workspace.html
-          grep -Fq 'handleSupplierMessagingRoute' _worker.js
-          grep -Fq 'url.pathname.startsWith("/api/supplier/quotes")' _worker.js
-          grep -Fq 'requireSupplier' src/supplier/supplier-quote-api.js
-          grep -Fq 'supplier_id: supplier.supplier_id' src/supplier/supplier-quote-api.js
-          grep -Fq 'WHERE id = ? AND supplier_id = ?' src/supplier/supplier-quote-api.js
-          grep -Fq 'send: { from:' src/supplier/supplier-quote-api.js
-          grep -Fq 'negotiate: { from:' src/supplier/supplier-quote-api.js
-          grep -Fq 'withdraw: { from:' src/supplier/supplier-quote-api.js
-          grep -Fq 'action === "expire"' src/supplier/supplier-quote-api.js
-          grep -Fq "status='expired'" src/supplier/supplier-quote-api.js
-          grep -Fq 'WHERE r.supplier_id = ?' src/supplier/supplier-workspace-api.js
-          grep -Fq 'WHERE supplier_id = ?' src/supplier/supplier-workspace-api.js
-          grep -q 'commerce_supplier_quote_messages' migrations/0012_supplier_quote_messages.sql
-          grep -q 'supplier_account_id' migrations/0012_supplier_quote_messages.sql
-          grep -Fq 'MAX_MESSAGE_LENGTH = 4000' src/supplier/supplier-messaging-api.js
-          grep -Fq 'sender_type: "supplier"' src/supplier/supplier-messaging-api.js
-          grep -Fq 'commerce_supplier_quote_messages' src/supplier/supplier-messaging-api.js
-          grep -Fq 'commerce_quote_messages' src/supplier/supplier-messaging-api.js
-          grep -Fq 'commerce_supplier_quote_messages' src/customer/transaction-api.js
-          grep -Fq 'commerce_quote_messages' src/customer/transaction-api.js
-          grep -Fq 'sender_type' src/customer/transaction-api.js
-          grep -Fq 'message_required' src/customer/transaction-api.js
-          grep -Fq 'customer_account_id' src/customer/transaction-api.js
+          python3 - <<'PY'
+          from pathlib import Path
+
+          checks = [
+              ('docs/SITE-8-SUPPLIER-OPERATIONS.md', 'draft -> sent -> negotiating'),
+              ('assets/zarus-supplier-operations.js', 'supplier/workspace'),
+              ('zarus-supplier-workspace.html', 'RFQ'),
+              ('_worker.js', 'handleSupplierMessagingRoute'),
+              ('_worker.js', 'url.pathname.startsWith("/api/supplier/quotes")'),
+              ('src/supplier/supplier-quote-api.js', 'requireSupplier'),
+              ('src/supplier/supplier-quote-api.js', 'supplier_id: supplier.supplier_id'),
+              ('src/supplier/supplier-quote-api.js', 'WHERE id = ? AND supplier_id = ?'),
+              ('src/supplier/supplier-quote-api.js', 'send: { from:'),
+              ('src/supplier/supplier-quote-api.js', 'negotiate: { from:'),
+              ('src/supplier/supplier-quote-api.js', 'withdraw: { from:'),
+              ('src/supplier/supplier-quote-api.js', 'action === "expire"'),
+              ('src/supplier/supplier-quote-api.js', "status='expired'"),
+              ('src/supplier/supplier-workspace-api.js', 'WHERE r.supplier_id = ?'),
+              ('src/supplier/supplier-workspace-api.js', 'WHERE supplier_id = ?'),
+              ('migrations/0012_supplier_quote_messages.sql', 'commerce_supplier_quote_messages'),
+              ('migrations/0012_supplier_quote_messages.sql', 'supplier_account_id'),
+              ('src/supplier/supplier-messaging-api.js', 'MAX_MESSAGE_LENGTH = 4000'),
+              ('src/supplier/supplier-messaging-api.js', 'sender_type: "supplier"'),
+              ('src/supplier/supplier-messaging-api.js', 'commerce_supplier_quote_messages'),
+              ('src/supplier/supplier-messaging-api.js', 'commerce_quote_messages'),
+              ('src/customer/transaction-api.js', 'commerce_supplier_quote_messages'),
+              ('src/customer/transaction-api.js', 'commerce_quote_messages'),
+              ('src/customer/transaction-api.js', "'customer' AS sender_type"),
+              ('src/customer/transaction-api.js', 'message_required'),
+              ('src/customer/transaction-api.js', 'customer_account_id'),
+          ]
+
+          missing = []
+          for filename, needle in checks:
+              text = Path(filename).read_text(encoding='utf-8')
+              if needle not in text:
+                  missing.append(f'{filename}: {needle}')
+          if missing:
+              print('Missing contract assertions:')
+              print('\n'.join(missing))
+              raise SystemExit(1)
+          print(f'SITE-8 supplier and unified quote-thread contracts: PASS ({len(checks)} assertions)')
+          PY
