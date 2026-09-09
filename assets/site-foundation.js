@@ -10,7 +10,7 @@
       ar: { '/':'الرئيسية','/about.html':'من نحن','/products.html':'المنتجات','/engineering.html':'الهندسة','/projects.html':'المشاريع','/trade.html':'التجارة','/zarus.html':'ZARUS','/knowledge.html':'المعرفة','/network.html':'الشبكة','/contact.html':'اتصل بنا' },
       uz: { '/':'Bosh sahifa','/about.html':'Biz haqimizda','/products.html':'Mahsulotlar','/engineering.html':'Muhandislik','/projects.html':'Loyihalar','/trade.html':'Savdo','/zarus.html':'ZARUS','/knowledge.html':'Bilim','/network.html':'Tarmoq','/contact.html':'Aloqa' },
       tr: { '/':'Ana Sayfa','/about.html':'Hakkımızda','/products.html':'Ürünler','/engineering.html':'Mühendislik','/projects.html':'Projeler','/trade.html':'Ticaret','/zarus.html':'ZARUS','/knowledge.html':'Bilgi','/network.html':'Ağ','/contact.html':'İletişim' },
-      ru: { '/':'Главная','/about.html':'О нас','/products.html':'Продукты','/engineering.html':'Инжиниринг','/projects.html':'Проекты','/trade.html':'Торговля','/zarus.html':'Знания','/network.html':'Сеть','/contact.html':'Контакты' }
+      ru: { '/':'Главная','/about.html':'О нас','/products.html':'Продукты','/engineering.html':'Инжиниринг','/projects.html':'Проекты','/trade.html':'Торговля','/zarus.html':'ZARUS','/knowledge.html':'Знания','/network.html':'Сеть','/contact.html':'Контакты' }
     };
     const supportedCodes = Object.keys(labels);
     const url = new URL(window.location.href);
