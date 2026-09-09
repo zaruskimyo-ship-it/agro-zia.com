@@ -66,14 +66,12 @@
     }
 
     const path = window.location.pathname.replace(/\/+$/, '') || '/';
+    const load = (src) => { const s = document.createElement('script'); s.src = src; document.head.appendChild(s); };
     if (path === '/') {
-      const s = document.createElement('script');
-      s.src = '/assets/home-auto.js';
-      document.head.appendChild(s);
+      load('/assets/home-auto.js');
+      load('/assets/home-nav-auto.js');
     } else if (path === '/trade.html') {
-      const s = document.createElement('script');
-      s.src = '/assets/trade-auto.js';
-      document.head.appendChild(s);
+      load('/assets/trade-auto.js');
     }
   };
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init, { once: true });
