@@ -12,9 +12,11 @@ on:
       - 'inquiry.html'
       - 'assets/site-foundation.css'
       - 'assets/site-foundation.js'
+      - 'assets/about-auto.js'
       - 'assets/home-auto.js'
       - 'assets/home-nav-auto.js'
       - 'assets/trade-auto.js'
+      - 'locales/language-selector.css'
       - 'docs/SITE-9-LONGITUDINAL-SITE-ARCHITECTURE.md'
       - '.github/workflows/site-foundation-gate.yml'
 
@@ -61,6 +63,7 @@ jobs:
           grep -q "ru: 'Русский'" assets/site-foundation.js
           grep -q 'language-switcher' assets/site-foundation.css
           grep -q 'language-select' assets/site-foundation.css
+          grep -q 'locales/language-selector.css' assets/site-foundation.css
           grep -q 'searchParams.get.*lang' assets/site-foundation.js
       - name: Homepage localization assertions
         run: |
@@ -80,6 +83,19 @@ jobs:
           grep -q "ru:" assets/home-nav-auto.js
           grep -q "home-auto.js" assets/site-foundation.js
           grep -q "home-nav-auto.js" assets/site-foundation.js
+      - name: About localization assertions
+        run: |
+          test -s assets/about-auto.js
+          node --check assets/about-auto.js
+          grep -q "fa:" assets/about-auto.js
+          grep -q "ar:" assets/about-auto.js
+          grep -q "uz:" assets/about-auto.js
+          grep -q "tr:" assets/about-auto.js
+          grep -q "ru:" assets/about-auto.js
+          grep -q "about-auto.js" assets/site-foundation.js
+          grep -q 'searchParams.get.*lang' assets/about-auto.js
+          grep -q 'document.documentElement.lang' assets/about-auto.js
+          grep -q 'document.documentElement.dir' assets/about-auto.js
       - name: Navigation regression assertions
         run: |
           grep -q 'data-home-link' assets/site-foundation.js
@@ -106,11 +122,18 @@ jobs:
           grep -q "ru:" assets/trade-auto.js
           grep -q "document.documentElement.lang" assets/trade-auto.js
           grep -q "document.documentElement.dir" assets/trade-auto.js
+      - name: Typography assertions
+        run: |
+          grep -q 'Vazirmatn' locales/language-selector.css
+          grep -q 'html\[lang="fa"\]' locales/language-selector.css
+          grep -q 'html\[lang="ar"\]' locales/language-selector.css
+          grep -q 'font-family:"Vazirmatn"' locales/language-selector.css
       - name: Page JavaScript syntax assertions
         run: |
           node --check assets/site-foundation.js
           node --check assets/home-auto.js
           node --check assets/home-nav-auto.js
+          node --check assets/about-auto.js
           node --check assets/trade-auto.js
           node --check inquiry-ux.js
           node --check locales/language-selector.js
