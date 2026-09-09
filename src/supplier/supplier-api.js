@@ -9,9 +9,11 @@ import {
   supplierSessionCookie,
   readSupplierSession,
 } from "./supplier-auth.js";
+import { requireSupplier, supplierUnauthorized } from "./supplier-ownership.js";
 
 const CODE_RE = /^\d{6}$/;
 const CODE_TTL_MINUTES = 10;
+const MAX_MESSAGE_LENGTH = 4000;
 
 function json(data, status = 200, headers = {}) {
   return new Response(JSON.stringify(data), {
@@ -19,6 +21,7 @@ function json(data, status = 200, headers = {}) {
     headers: {
       "content-type": "application/json; charset=UTF-8",
       "cache-control": "no-store",
+      "x-content-type-options": "nosniff",
       ...headers,
     },
   });
@@ -74,7 +77,6 @@ async function requestLogin(request, env) {
   if (!email) return json({ error: "invalid_email" }, 400);
 
   const account = await findAccount(env.AGROZIA_DB, email);
-  // Do not disclose whether a supplier account exists.
   if (!account || account.account_status !== "active" || account.status === "archived") {
     return json({ ok: true, message: "If this email can sign in, a code has been sent." });
   }
@@ -165,10 +167,66 @@ async function session(request, env) {
   return json({ authenticated: true, supplier: publicSupplier(account) });
 }
 
+async function quoteForSupplier(db, quoteId, supplier) {
+  return db.prepare(`
+    SELECT q.id, q.quote_number, q.rfq_id, q.product_id, q.product_name, q.quantity,
+           q.status, q.validity_until, q.created_at, q.updated_at
+    FROM commerce_quotes q
+    WHERE q.id = ? AND q.supplier_id = ?
+    LIMIT 1
+  `).bind(quoteId, supplier.supplier_id).first();
+}
+
+async function supplierQuoteMessages(request, env, quoteId) {
+  if (!env.AGROZIA_DB) return json({ error: "d1_unavailable" }, 503);
+  const supplier = await requireSupplier(env.AGROZIA_DB, request, env);
+  if (!supplier) return supplierUnauthorized();
+  const quote = await quoteForSupplier(env.AGROZIA_DB, quoteId, supplier);
+  if (!quote) return json({ error: "not_found" }, 404);
+
+  if (request.method === "GET") {
+    const rows = await env.AGROZIA_DB.prepare(`
+      SELECT id, quote_id, 'supplier' AS sender_type, message, created_at
+      FROM commerce_supplier_quote_messages
+      WHERE quote_id = ? AND supplier_id = ?
+      ORDER BY created_at ASC LIMIT 200
+    `).bind(quoteId, supplier.supplier_id).all();
+    return json({ ok: true, quote_id: quoteId, messages: rows.results || [] });
+  }
+
+  if (request.method !== "POST") return json({ error: "method_not_allowed" }, 405);
+  let body;
+  try { body = await parseJson(request); } catch (error) {
+    return json({ error: error.message === "body_too_large" ? "body_too_large" : "invalid_json" }, 400);
+  }
+  const message = typeof body?.message === "string" ? body.message.trim() : "";
+  if (!message) return json({ error: "message_required" }, 400);
+  if (message.length > MAX_MESSAGE_LENGTH) return json({ error: "message_too_long", max_length: MAX_MESSAGE_LENGTH }, 400);
+  if (!["sent", "negotiating"].includes(quote.status)) return json({ error: "quote_action_not_allowed" }, 409);
+
+  const now = new Date().toISOString();
+  const id = crypto.randomUUID();
+  await env.AGROZIA_DB.prepare(`
+    INSERT INTO commerce_supplier_quote_messages
+      (id, quote_id, supplier_account_id, supplier_id, message, created_at)
+    VALUES (?, ?, ?, ?, ?, ?)
+  `).bind(id, quoteId, supplier.account_id, supplier.supplier_id, message, now).run();
+
+  if (quote.status === "sent") {
+    await env.AGROZIA_DB.prepare(
+      "UPDATE commerce_quotes SET status='negotiating', updated_at=? WHERE id=? AND supplier_id=? AND status='sent'"
+    ).bind(now, quoteId, supplier.supplier_id).run();
+  }
+
+  return json({ ok: true, status: "negotiating", message: { id, quote_id: quoteId, sender_type: "supplier", message, created_at: now } }, 201);
+}
+
 export async function handleSupplierRoute(request, env) {
   const url = new URL(request.url);
   if (!url.pathname.startsWith("/api/supplier/")) return null;
   try {
+    const messageMatch = url.pathname.match(/^\/api\/supplier\/quotes\/([^/]+)\/messages$/);
+    if (messageMatch) return await supplierQuoteMessages(request, env, decodeURIComponent(messageMatch[1]));
     if (url.pathname === "/api/supplier/auth/request" && request.method === "POST") return await requestLogin(request, env);
     if (url.pathname === "/api/supplier/auth/verify" && request.method === "POST") return await verifyLogin(request, env);
     if (url.pathname === "/api/supplier/session" && request.method === "GET") return await session(request, env);
