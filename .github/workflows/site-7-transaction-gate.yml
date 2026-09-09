@@ -36,13 +36,21 @@ jobs:
         run: node --check assets/zarus-workspace.js
       - name: Contract assertions
         run: |
-          grep -q "commerce_quote_messages" migrations/0010_customer_transaction_center.sql
-          grep -q "commerce_proformas" migrations/0010_customer_transaction_center.sql
-          grep -q "commerce_payment_intents" migrations/0010_customer_transaction_center.sql
-          grep -q "commerce_trade_protection" migrations/0010_customer_transaction_center.sql
-          grep -q "commerce_shipments" migrations/0010_customer_transaction_center.sql
-          grep -q "commerce_qc_inspections" migrations/0010_customer_transaction_center.sql
-          grep -q "commerce_transaction_documents" migrations/0010_customer_transaction_center.sql
-          grep -q "/api/customer/quotes/" src/customer/transaction-api.js
-          grep -q 'status.*accepted' src/customer/transaction-api.js
-          grep -q "createOrder" src/customer/transaction-api.js
+          set -euo pipefail
+          required_tables=(
+            commerce_quote_messages
+            commerce_proformas
+            commerce_payment_intents
+            commerce_trade_protection
+            commerce_shipments
+            commerce_qc_inspections
+            commerce_transaction_documents
+          )
+          for table in "${required_tables[@]}"; do
+            grep -Fq "$table" migrations/0010_customer_transaction_center.sql || { echo "Missing migration contract: $table"; exit 1; }
+          done
+          grep -Fq '/api/customer/quotes/' src/customer/transaction-api.js || { echo 'Missing quote API route contract'; exit 1; }
+          grep -Fq 'accepted' src/customer/transaction-api.js || { echo 'Missing accepted quote contract'; exit 1; }
+          grep -Fq 'createOrder' src/customer/transaction-api.js || { echo 'Missing createOrder contract'; exit 1; }
+          grep -Fq 'handleCustomerTransactionRoute' src/customer/customer-api.js || { echo 'Missing transaction route dispatch contract'; exit 1; }
+          grep -Fq 'handleCustomerRoute' _worker.js || { echo 'Missing customer route dispatch contract'; exit 1; }
