@@ -1,0 +1,54 @@
+name: Recovery I18N Gate
+
+on:
+  push:
+    branches:
+      - feat/recovery-4fe4c1d8-i18n-qa
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  recovery-i18n:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: JavaScript syntax
+        run: |
+          node --check assets/zarus-language.js
+          node --check assets/zarus-product.js
+          node --check assets/zarus-supplier.js
+          node --check assets/zarus-rfq.js
+      - name: Shared language contract
+        run: |
+          grep -q "supported = new Set.*en.*fa.*ar.*uz.*tr.*ru" assets/zarus-language.js
+          grep -q "rtl = new Set.*fa.*ar" assets/zarus-language.js
+          grep -q "document.documentElement.lang = lang" assets/zarus-language.js
+          grep -q "document.documentElement.dir" assets/zarus-language.js
+          grep -q "searchParams.set('lang', next)" assets/zarus-language.js
+          grep -q "location.assign(nextUrl.pathname + nextUrl.search + nextUrl.hash)" assets/zarus-language.js
+      - name: ZARUS page contract
+        run: |
+          test -s zarus-product.html
+          test -s zarus-supplier.html
+          test -s zarus-rfq.html
+          grep -q 'class="z-language"' zarus-product.html
+          grep -q 'class="z-language"' zarus-supplier.html
+          grep -q 'class="z-language"' zarus-rfq.html
+          grep -q 'assets/zarus-language.js' zarus-product.html
+          grep -q 'assets/zarus-language.js' zarus-supplier.html
+          grep -q 'assets/zarus-language.js' zarus-rfq.html
+          grep -q 'assets/floating-nav.js' zarus-rfq.html
+      - name: Product and supplier language propagation
+        run: |
+          grep -q "q.get('lang')||'en'" assets/zarus-product.js
+          grep -q "q.get('lang')||'en'" assets/zarus-supplier.js
+          grep -q '&lang=' assets/zarus-product.js
+          grep -q '&lang=' assets/zarus-supplier.js
