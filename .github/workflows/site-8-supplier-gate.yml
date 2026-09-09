@@ -2,12 +2,14 @@ name: SITE-8 Supplier Operations Gate
 
 on:
   push:
-    branches: [feat/site-8-supplier-operations]
+    branches: [feat/site-8-supplier-operations, feat/recovery-i18n-country-clock]
   pull_request:
     branches: [main]
     paths:
       - 'zarus-supplier-workspace.html'
       - 'assets/zarus-supplier-operations.js'
+      - 'src/supplier/**'
+      - 'migrations/0011_supplier_accounts.sql'
       - 'docs/SITE-8-SUPPLIER-OPERATIONS.md'
       - '.github/workflows/site-8-supplier-gate.yml'
 jobs:
@@ -20,9 +22,21 @@ jobs:
         with:
           node-version: 22
       - name: Syntax check
-        run: node --check assets/zarus-supplier-operations.js
+        run: |
+          node --check assets/zarus-supplier-operations.js
+          node --check src/supplier/supplier-auth.js
+          node --check src/supplier/supplier-ownership.js
+          node --check src/supplier/supplier-api.js
+          node --check src/supplier/supplier-workspace-api.js
+          node --check src/supplier/supplier-quote-api.js
       - name: Contract assertions
         run: |
           grep -q 'draft -> sent -> negotiating' docs/SITE-8-SUPPLIER-OPERATIONS.md
           grep -q 'supplier/workspace' assets/zarus-supplier-operations.js
           grep -q 'RFQ' zarus-supplier-workspace.html
+          grep -q '/api/supplier/quotes' _worker.js
+          grep -q 'requireSupplier' src/supplier/supplier-quote-api.js
+          grep -q 'supplier_id: supplier.supplier_id' src/supplier/supplier-quote-api.js
+          grep -q 'SELECT id, supplier_id, product_id, status' src/supplier/supplier-quote-api.js
+          grep -q 'WHERE r.supplier_id = ?' src/supplier/supplier-workspace-api.js
+          grep -q 'WHERE supplier_id = ?' src/supplier/supplier-workspace-api.js
