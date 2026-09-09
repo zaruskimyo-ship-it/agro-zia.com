@@ -62,11 +62,26 @@ jobs:
               ('src/supplier/supplier-messaging-api.js', 'sender_type: "supplier"'),
               ('src/supplier/supplier-messaging-api.js', 'commerce_supplier_quote_messages'),
               ('src/supplier/supplier-messaging-api.js', 'commerce_quote_messages'),
+              ('src/supplier/supplier-messaging-api.js', 'requireSupplier'),
+              ('src/supplier/supplier-messaging-api.js', 'supplier.supplier_id'),
+              ('src/supplier/supplier-messaging-api.js', 'cache-control'),
               ('src/customer/transaction-api.js', 'commerce_supplier_quote_messages'),
               ('src/customer/transaction-api.js', 'commerce_quote_messages'),
               ('src/customer/transaction-api.js', "'customer' AS sender_type"),
               ('src/customer/transaction-api.js', 'message_required'),
               ('src/customer/transaction-api.js', 'customer_account_id'),
+              ('src/customer/transaction-api.js', 'quoteFor'),
+              ('src/supplier/supplier-auth.js', 'SUPPLIER_SESSION_SECRET'),
+              ('src/supplier/supplier-auth.js', 'agz_supplier_session'),
+              ('src/supplier/supplier-auth.js', 'HttpOnly'),
+              ('src/supplier/supplier-auth.js', 'Secure'),
+              ('src/supplier/supplier-auth.js', 'SameSite=Lax'),
+              ('src/supplier/supplier-ownership.js', 'readSupplierSession'),
+              ('src/supplier/supplier-ownership.js', 'supplierUnauthorized'),
+              ('src/supplier/supplier-ownership.js', 'supplierForbidden'),
+              ('src/supplier/supplier-api.js', '/api/supplier/auth/request'),
+              ('src/supplier/supplier-api.js', '/api/supplier/auth/verify'),
+              ('src/supplier/supplier-api.js', '/api/supplier/logout'),
           ]
 
           missing = []
@@ -75,8 +90,8 @@ jobs:
               if needle not in text:
                   missing.append(f'{filename}: {needle}')
           if missing:
-              print('Missing contract assertions:')
+              print('Missing security/commerce contract assertions:')
               print('\n'.join(missing))
               raise SystemExit(1)
-          print(f'SITE-8 supplier and unified quote-thread contracts: PASS ({len(checks)} assertions)')
+          print(f'SITE-8 supplier security and unified quote-thread contracts: PASS ({len(checks)} assertions)')
           PY
