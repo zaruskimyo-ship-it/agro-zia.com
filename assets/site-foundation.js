@@ -20,12 +20,12 @@
       }
     }
 
-    if (navWrap && !navWrap.querySelector('[data-language-switcher]')) {
-      const wrap = document.createElement('div');
-      wrap.className = 'language-switcher';
-      wrap.dataset.languageSwitcher = '';
-      wrap.setAttribute('aria-label', 'Language');
-      const select = document.createElement('select');
+    let select = navWrap?.querySelector('.language-select');
+    if (!select && navWrap) {
+      const box = document.createElement('div');
+      box.className = 'language-switcher';
+      box.dataset.languageSwitcher = '';
+      select = document.createElement('select');
       select.className = 'language-select';
       select.setAttribute('aria-label', 'Select language');
       Object.entries(labels).forEach(([code, label]) => {
@@ -35,13 +35,17 @@
         option.selected = code === supported;
         select.appendChild(option);
       });
+      box.appendChild(select);
+      navWrap.insertBefore(box, button || nav || null);
+    }
+    if (select && !select.dataset.languageBound) {
+      select.dataset.languageBound = 'true';
+      select.value = supported;
       select.addEventListener('change', () => {
         const next = new URL(window.location.href);
         next.searchParams.set('lang', select.value);
         window.location.assign(next.toString());
       });
-      wrap.appendChild(select);
-      navWrap.insertBefore(wrap, button || nav || null);
     }
 
     document.documentElement.lang = supported;
@@ -64,7 +68,6 @@
     if (window.location.pathname === '/trade.html') {
       const s = document.createElement('script');
       s.src = '/assets/trade-auto.js';
-      s.defer = false;
       document.head.appendChild(s);
     }
   };
