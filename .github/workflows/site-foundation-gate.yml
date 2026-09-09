@@ -40,3 +40,13 @@ jobs:
           grep -q 'site-foundation.js' index.html
           grep -q 'Customer Workspace' docs/SITE-9-LONGITUDINAL-SITE-ARCHITECTURE.md
           grep -q 'Supplier Workspace' docs/SITE-9-LONGITUDINAL-SITE-ARCHITECTURE.md
+      - name: Localization header assertions
+        run: |
+          grep -q 'data-language-switcher' assets/site-foundation.js
+          grep -q "labels =" assets/site-foundation.js
+          grep -q "fa: 'فارسی'" assets/site-foundation.js
+          grep -q "tr: 'Türkçe'" assets/site-foundation.js
+          grep -q "ru: 'Русский'" assets/site-foundation.js
+          grep -q 'language-switcher' assets/site-foundation.css
+          grep -q 'language-select' assets/site-foundation.css
+          grep -q 'searchParams.get.*lang' assets/site-foundation.js
