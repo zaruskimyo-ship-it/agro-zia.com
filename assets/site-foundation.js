@@ -60,6 +60,13 @@
         button.setAttribute('aria-expanded', 'false');
       }));
     }
+
+    if (window.location.pathname === '/trade.html') {
+      const s = document.createElement('script');
+      s.src = '/assets/trade-auto.js';
+      s.defer = false;
+      document.head.appendChild(s);
+    }
   };
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init, { once: true });
   else init();
