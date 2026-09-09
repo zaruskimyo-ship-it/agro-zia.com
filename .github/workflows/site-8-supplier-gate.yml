@@ -42,6 +42,6 @@ jobs:
           grep -Fq 'negotiate: { from:' src/supplier/supplier-quote-api.js
           grep -Fq 'withdraw: { from:' src/supplier/supplier-quote-api.js
           grep -Fq 'action === "expire"' src/supplier/supplier-quote-api.js
-          grep -Fq 'status=\'expired\'' src/supplier/supplier-quote-api.js
+          grep -Fq "status='expired'" src/supplier/supplier-quote-api.js
           grep -Fq 'WHERE r.supplier_id = ?' src/supplier/supplier-workspace-api.js
           grep -Fq 'WHERE supplier_id = ?' src/supplier/supplier-workspace-api.js
