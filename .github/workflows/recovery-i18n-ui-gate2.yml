@@ -102,8 +102,7 @@ jobs:
       - name: Network translation contract
         run: |
           grep -q 'const DICT=' assets/network-auto.js
-          grep -q 'document.title=x\[0\]+.*AGRO-ZIA' assets/network-auto.js
-          test ! -f /dev/null || true
+          grep -q "set('.hero h1',t.h)" assets/network-auto.js
           grep -q 'assets/network-auto.js' network.html
           ! grep -q 'network-i18n-patch.js' network.html
       - name: Language and RTL contract
