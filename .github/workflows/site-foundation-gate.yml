@@ -50,6 +50,8 @@ jobs:
         run: |
           grep -q 'data-language-switcher' assets/site-foundation.js
           grep -q 'languageBound' assets/site-foundation.js
+          grep -q 'languagePersistBound' assets/site-foundation.js
+          grep -q 'searchParams.set.*lang' assets/site-foundation.js
           grep -q 'addEventListener.*change' assets/site-foundation.js
           grep -q 'labels =' assets/site-foundation.js
           grep -q "fa: 'فارسی'" assets/site-foundation.js
