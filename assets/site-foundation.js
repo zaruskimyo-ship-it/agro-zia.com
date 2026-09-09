@@ -51,6 +51,22 @@
     document.documentElement.lang = supported;
     document.documentElement.dir = ['fa', 'ar'].includes(supported) ? 'rtl' : 'ltr';
 
+    // Persist the selected language across the whole site. Every same-origin
+    // navigation keeps the current ?lang value unless the destination already
+    // specifies an explicit language (for example Trade market links).
+    document.querySelectorAll('a[href]').forEach((link) => {
+      const raw = link.getAttribute('href');
+      if (!raw || raw.startsWith('#') || /^(mailto:|tel:|javascript:|https?:\/\/)/i.test(raw)) return;
+      if (link.dataset.languagePersistBound) return;
+      try {
+        const target = new URL(raw, window.location.origin);
+        if (target.origin !== window.location.origin) return;
+        if (!target.searchParams.has('lang')) target.searchParams.set('lang', supported);
+        link.href = target.pathname + target.search + target.hash;
+        link.dataset.languagePersistBound = 'true';
+      } catch (_) {}
+    });
+
     if (button && nav && !button.dataset.menuBound) {
       button.dataset.menuBound = 'true';
       button.dataset.menu = 'true';
