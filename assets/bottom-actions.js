@@ -28,11 +28,21 @@
     };
     if (path.endsWith('zarus-product.html')) {
       addLink(t.home, '⌂', withLang('/zarus.html', lang));
-      const supplierLink = document.querySelector('.z-card-row a.z-btn-ghost[href*="zarus-supplier.html"]');
-      if (supplierLink) addLink(t.chat, '💬', supplierLink.href);
       const product = q.get('slug') || q.get('id'); const supplier = q.get('supplier');
-      let href = '/zarus-rfq.html?'; const params = new URLSearchParams({ lang }); if (product) params.set('product', product); if (supplier) params.set('supplier', supplier);
-      addLink(t.inquiry, '▣', href + params.toString(), true);
+      const params = new URLSearchParams({ lang }); if (product) params.set('product', product); if (supplier) params.set('supplier', supplier);
+      const inquiry = addLink(t.inquiry, '▣', '/zarus-rfq.html?' + params.toString(), true);
+      const addSupplierContact = () => {
+        if (inner.querySelector('[data-supplier-contact]')) return true;
+        const supplierLink = document.querySelector('.z-card-row a.z-btn-ghost[href*="zarus-supplier.html"]');
+        if (!supplierLink) return false;
+        const contact = document.createElement('a'); contact.href = supplierLink.href; contact.dataset.supplierContact = 'true'; contact.innerHTML = `<span class="agz-bottom-actions__icon" aria-hidden="true">💬</span><span class="agz-bottom-actions__label">${esc(t.chat)}</span>`;
+        inner.insertBefore(contact, inquiry); return true;
+      };
+      if (!addSupplierContact()) {
+        const observer = new MutationObserver(() => { if (addSupplierContact()) observer.disconnect(); });
+        observer.observe(document.querySelector('#product-root') || document.body, { childList:true, subtree:true });
+        setTimeout(() => observer.disconnect(), 10000);
+      }
     } else if (path.endsWith('zarus-supplier.html')) {
       addLink(t.home, '⌂', withLang('/zarus.html', lang));
       const slug = q.get('slug'); const params = new URLSearchParams({ lang }); if (slug) params.set('supplier', slug);
