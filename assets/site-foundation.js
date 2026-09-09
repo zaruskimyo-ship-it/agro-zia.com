@@ -24,7 +24,7 @@
     if (!select && navWrap) {
       const box = document.createElement('div');
       box.className = 'language-switcher';
-      box.dataset.languageSwitcher = '';
+      box.setAttribute('data-language-switcher', '');
       select = document.createElement('select');
       select.className = 'language-select';
       select.setAttribute('aria-label', 'Select language');
