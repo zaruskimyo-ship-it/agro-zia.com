@@ -12,13 +12,18 @@
       tr: { '/':'Ana Sayfa','/about.html':'Hakkımızda','/products.html':'Ürünler','/engineering.html':'Mühendislik','/projects.html':'Projeler','/trade.html':'Ticaret','/zarus.html':'ZARUS','/knowledge.html':'Bilgi','/network.html':'Ağ','/contact.html':'İletişim' },
       ru: { '/':'Главная','/about.html':'О нас','/products.html':'Продукты','/engineering.html':'Инжиниринг','/projects.html':'Проекты','/trade.html':'Торговля','/zarus.html':'ZARUS','/knowledge.html':'Знания','/network.html':'Сеть','/contact.html':'Контакты' }
     };
+    const supportedCodes = Object.keys(labels);
     const url = new URL(window.location.href);
     const queryLang = url.searchParams.get('lang');
     const storedLang = (() => { try { return localStorage.getItem('agrozia-lang'); } catch (_) { return null; } })();
     const documentLang = document.documentElement.lang;
-    const supported = Object.prototype.hasOwnProperty.call(labels, queryLang) ? queryLang
-      : Object.prototype.hasOwnProperty.call(labels, storedLang) ? storedLang
-      : Object.prototype.hasOwnProperty.call(labels, documentLang) ? documentLang : 'en';
+    const supported = supportedCodes.includes(queryLang) ? queryLang
+      : supportedCodes.includes(storedLang) ? storedLang
+      : supportedCodes.includes(documentLang) ? documentLang : 'en';
+    if (!supportedCodes.includes(queryLang)) {
+      url.searchParams.set('lang', supported);
+      try { window.history.replaceState({}, '', url.pathname + url.search + url.hash); } catch (_) {}
+    }
     document.documentElement.lang = supported;
     document.documentElement.dir = ['fa', 'ar'].includes(supported) ? 'rtl' : 'ltr';
     window.AgroZiaActiveLanguage = supported;
@@ -43,13 +48,24 @@
       select.addEventListener('change', () => { const next = new URL(window.location.href); next.searchParams.set('lang', select.value); try { localStorage.setItem('agrozia-lang', select.value); } catch (_) {} window.location.assign(next.toString()); });
     }
     if (nav) nav.querySelectorAll('a[href]').forEach((link) => { try { const target = new URL(link.getAttribute('href') || '/', window.location.origin); if (target.origin !== window.location.origin) return; target.searchParams.set('lang', supported); link.href = target.pathname + target.search + target.hash; } catch (_) {} });
-    document.querySelectorAll('a[href]').forEach((link) => { const raw = link.getAttribute('href'); if (!raw || raw.startsWith('#') || /^(mailto:|tel:|javascript:|https?:\/\/)/i.test(raw)) return; try { const target = new URL(raw, window.location.origin); if (target.origin !== window.location.origin) return; target.searchParams.set('lang', supported); link.href = target.pathname + target.search + target.hash; link.dataset.languagePersistBound = 'true'; } catch (_) {} });
+    document.querySelectorAll('a[href]').forEach((link) => {
+      const raw = link.getAttribute('href');
+      if (!raw || raw.startsWith('#') || /^(mailto:|tel:|javascript:|https?:\/\/)/i.test(raw)) return;
+      if (link.closest('.markets')) return;
+      try {
+        const target = new URL(raw, window.location.origin);
+        if (target.origin !== window.location.origin) return;
+        target.searchParams.set('lang', supported);
+        link.href = target.pathname + target.search + target.hash;
+        link.dataset.languagePersistBound = 'true';
+      } catch (_) {}
+    });
     if (button && nav && !button.dataset.menuBound) { button.dataset.menuBound = 'true'; button.dataset.menu = 'true'; button.setAttribute('aria-expanded', 'false'); button.addEventListener('click', () => { const open = nav.classList.toggle('open'); button.setAttribute('aria-expanded', String(open)); }); nav.querySelectorAll('a').forEach((link) => link.addEventListener('click', () => { nav.classList.remove('open'); button.setAttribute('aria-expanded', 'false'); })); }
     const path = window.location.pathname.replace(/\/+$/, '') || '/';
     const load = (src) => { if (document.querySelector(`script[data-agz-src="${src}"]`)) return; const s = document.createElement('script'); s.src = src + '?v=20260909'; s.dataset.agzSrc = src; document.body.appendChild(s); };
     const loadStyle = (href) => { if (document.querySelector(`link[data-agz-style="${href}"]`)) return; const l = document.createElement('link'); l.rel = 'stylesheet'; l.href = href + '?v=20260909'; l.dataset.agzStyle = href; document.head.appendChild(l); };
     loadStyle('/assets/floating-nav.css'); loadStyle('/assets/bottom-actions.css'); load('/assets/floating-nav.js'); load('/assets/bottom-actions.js');
-    if (path === '/') { load('/assets/home-auto.js'); load('/assets/home-nav-auto.js'); }
+    if (path === '/') { load('/assets/home-auto.js'); load('/assets/home-nav-auto.js'); load('/assets/world-clock.js'); }
     else if (path === '/about.html') load('/assets/about-auto.js');
     else if (path === '/trade.html') load('/assets/trade-auto.js');
     else if (path === '/network.html') load('/assets/network-auto.js');
