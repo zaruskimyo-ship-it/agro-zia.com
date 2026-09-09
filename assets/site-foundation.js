@@ -7,27 +7,30 @@
     const current = new URL(window.location.href).searchParams.get('lang') || document.documentElement.lang || 'en';
     const supported = Object.prototype.hasOwnProperty.call(labels, current) ? current : 'en';
     const navLabels = {
-      en: ['Home','About','Products','Engineering','Projects','Trade','ZARUS','Knowledge','Network','Contact'],
-      fa: ['خانه','درباره ما','محصولات','مهندسی','پروژه‌ها','تجارت','ZARUS','دانش','شبکه','تماس'],
-      ar: ['الرئيسية','من نحن','المنتجات','الهندسة','المشاريع','التجارة','ZARUS','المعرفة','الشبكة','اتصل بنا'],
-      uz: ['Bosh sahifa','Biz haqimizda','Mahsulotlar','Muhandislik','Loyihalar','Savdo','ZARUS','Bilim','Tarmoq','Aloqa'],
-      tr: ['Ana Sayfa','Hakkımızda','Ürünler','Mühendislik','Projeler','Ticaret','ZARUS','Bilgi','Ağ','İletişim'],
-      ru: ['Главная','О нас','Продукты','Инжиниринг','Проекты','Торговля','ZARUS','Знания','Сеть','Контакты']
+      en: { '/': 'Home','/about.html':'About','/products.html':'Products','/engineering.html':'Engineering','/projects.html':'Projects','/trade.html':'Trade','/zarus.html':'ZARUS','/knowledge.html':'Knowledge','/network.html':'Network','/contact.html':'Contact' },
+      fa: { '/':'خانه','/about.html':'درباره ما','/products.html':'محصولات','/engineering.html':'مهندسی','/projects.html':'پروژه‌ها','/trade.html':'تجارت','/zarus.html':'ZARUS','/knowledge.html':'دانش','/network.html':'شبکه','/contact.html':'تماس' },
+      ar: { '/':'الرئيسية','/about.html':'من نحن','/products.html':'المنتجات','/engineering.html':'الهندسة','/projects.html':'المشاريع','/trade.html':'التجارة','/zarus.html':'ZARUS','/knowledge.html':'المعرفة','/network.html':'الشبكة','/contact.html':'اتصل بنا' },
+      uz: { '/':'Bosh sahifa','/about.html':'Biz haqimizda','/products.html':'Mahsulotlar','/engineering.html':'Muhandislik','/projects.html':'Loyihalar','/trade.html':'Savdo','/zarus.html':'ZARUS','/knowledge.html':'Bilim','/network.html':'Tarmoq','/contact.html':'Aloqa' },
+      tr: { '/':'Ana Sayfa','/about.html':'Hakkımızda','/products.html':'Ürünler','/engineering.html':'Mühendislik','/projects.html':'Projeler','/trade.html':'Ticaret','/zarus.html':'ZARUS','/knowledge.html':'Bilgi','/network.html':'Ağ','/contact.html':'İletişim' },
+      ru: { '/':'Главная','/about.html':'О нас','/products.html':'Продукты','/engineering.html':'Инжиниринг','/projects.html':'Проекты','/trade.html':'Торговля','/zarus.html':'ZARUS','/knowledge.html':'Знания','/network.html':'Сеть','/contact.html':'Контакты' }
     };
-    const homeLabels = { en: 'Home', fa: 'خانه', ar: 'الرئيسية', uz: 'Bosh sahifa', tr: 'Ana Sayfa', ru: 'Главная' };
 
     if (nav) {
       nav.dataset.nav = 'true';
-      let links = Array.from(nav.querySelectorAll('a'));
       if (!nav.querySelector('a[data-home-link]')) {
         const home = document.createElement('a');
         home.href = '/?lang=' + encodeURIComponent(supported);
         home.dataset.homeLink = 'true';
         nav.insertBefore(home, nav.firstChild);
-        links = Array.from(nav.querySelectorAll('a'));
       }
-      const texts = navLabels[supported] || navLabels.en;
-      links.slice(0, texts.length).forEach((link, i) => { link.textContent = texts[i]; });
+      const map = navLabels[supported] || navLabels.en;
+      nav.querySelectorAll('a').forEach((link) => {
+        try {
+          const u = new URL(link.getAttribute('href') || '/', window.location.origin);
+          const path = u.pathname.replace(/\/+$/, '') || '/';
+          if (map[path]) link.textContent = map[path];
+        } catch (_) {}
+      });
     }
 
     let select = navWrap?.querySelector('.language-select');
@@ -57,7 +60,7 @@
       try {
         const target = new URL(raw, window.location.origin);
         if (target.origin !== window.location.origin) return;
-        if (!target.searchParams.has('lang')) target.searchParams.set('lang', supported);
+        target.searchParams.set('lang', supported);
         link.href = target.pathname + target.search + target.hash;
         link.dataset.languagePersistBound = 'true';
       } catch (_) {}
@@ -74,6 +77,7 @@
     if (path === '/') { load('/assets/home-auto.js'); load('/assets/home-nav-auto.js'); }
     else if (path === '/about.html') load('/assets/about-auto.js');
     else if (path === '/trade.html') load('/assets/trade-auto.js');
+    else if (path === '/network.html') load('/assets/network-auto.js');
   };
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init, { once: true }); else init();
 })();
