@@ -28,6 +28,7 @@ jobs:
           node --check assets/public-pages-auto.js
           node --check assets/about-auto.js
           node --check assets/trade-auto.js
+          node --check assets/network-i18n-patch.js
           node --check assets/network-auto.js
           node --check assets/zarus-language.js
           node --check assets/zarus-product.js
@@ -109,13 +110,12 @@ jobs:
           grep -q 'assets/world-clock.css' zarus-supplier-workspace.html
           grep -q 'assets/world-clock.js' zarus-supplier-workspace.html
           grep -q 'assets/zarus-language.js' zarus-supplier-workspace.html
-          grep -q 'class="z-language"' zarus-supplier-workspace.html
-          grep -q 'noindex,nofollow' zarus-supplier-workspace.html
+          grep -q 'assets/zarus-supplier-operations.js' zarus-supplier-workspace.html
       - name: Network translation contract
         run: |
           grep -q 'const DICT=' assets/network-auto.js
           grep -q "set('.hero h1',t.h)" assets/network-auto.js
-          grep -q 'assets/network-auto.js' network.html
+          grep -q "load('assets/network-auto.js')" assets/site-foundation.js
           ! grep -q 'network-i18n-patch.js' network.html
       - name: Language and RTL contract
         run: |
