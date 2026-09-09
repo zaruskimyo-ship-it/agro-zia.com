@@ -1,0 +1,56 @@
+name: SITE-7 Transaction Center Gate
+
+on:
+  push:
+    branches:
+      - feat/site-5-shipping-logistics-qc-documents
+      - feat/site-8-supplier-operations
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'src/customer/**'
+      - 'assets/zarus-workspace.js'
+      - 'zarus-workspace.html'
+      - 'migrations/0010_customer_transaction_center.sql'
+      - '.github/workflows/site-7-transaction-gate.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  transaction-contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Syntax check customer transaction modules
+        run: |
+          node --check src/customer/customer-api.js
+          node --check src/customer/customer-auth.js
+          node --check src/customer/transaction-api.js
+      - name: Syntax check workspace UI
+        run: node --check assets/zarus-workspace.js
+      - name: Contract assertions
+        run: |
+          set -euo pipefail
+          required_tables=(
+            commerce_quote_messages
+            commerce_proformas
+            commerce_payment_intents
+            commerce_trade_protection
+            commerce_shipments
+            commerce_qc_inspections
+            commerce_transaction_documents
+          )
+          for table in "${required_tables[@]}"; do
+            grep -Fq "$table" migrations/0010_customer_transaction_center.sql || { echo "Missing migration contract: $table"; exit 1; }
+          done
+          grep -Fq 'quotes|orders|transactions' src/customer/transaction-api.js || { echo 'Missing transaction route family contract'; exit 1; }
+          grep -Fq 'accepted' src/customer/transaction-api.js || { echo 'Missing accepted quote contract'; exit 1; }
+          grep -Fq 'createOrder' src/customer/transaction-api.js || { echo 'Missing createOrder contract'; exit 1; }
+          grep -Fq 'handleCustomerTransactionRoute' src/customer/customer-api.js || { echo 'Missing transaction route dispatch contract'; exit 1; }
+          grep -Fq 'handleCustomerRoute' _worker.js || { echo 'Missing customer route dispatch contract'; exit 1; }
