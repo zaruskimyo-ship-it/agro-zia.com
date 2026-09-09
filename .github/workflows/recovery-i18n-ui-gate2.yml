@@ -28,12 +28,13 @@ jobs:
           node --check assets/public-pages-auto.js
           node --check assets/about-auto.js
           node --check assets/trade-auto.js
-          node --check assets/network-i18n-patch.js
+          node --check assets/network-auto.js
           node --check assets/zarus-language.js
           node --check assets/zarus-product.js
           node --check assets/zarus-supplier.js
           node --check assets/zarus-rfq.js
           node --check assets/zarus-marketplace.js
+          node --check assets/zarus-supplier-operations.js
           node --check assets/floating-nav.js
           node --check assets/bottom-actions.js
           node --check locales/language-selector.js
@@ -99,6 +100,17 @@ jobs:
             grep -q 'assets/zarus-language.js' "$page"
           done
           grep -q 'class="z-language"' zarus.html
+      - name: Supplier workspace shared UI
+        run: |
+          grep -q 'assets/floating-nav.css' zarus-supplier-workspace.html
+          grep -q 'assets/floating-nav.js' zarus-supplier-workspace.html
+          grep -q 'assets/bottom-actions.css' zarus-supplier-workspace.html
+          grep -q 'assets/bottom-actions.js' zarus-supplier-workspace.html
+          grep -q 'assets/world-clock.css' zarus-supplier-workspace.html
+          grep -q 'assets/world-clock.js' zarus-supplier-workspace.html
+          grep -q 'assets/zarus-language.js' zarus-supplier-workspace.html
+          grep -q 'class="z-language"' zarus-supplier-workspace.html
+          grep -q 'noindex,nofollow' zarus-supplier-workspace.html
       - name: Network translation contract
         run: |
           grep -q 'const DICT=' assets/network-auto.js
