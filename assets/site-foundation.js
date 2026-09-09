@@ -65,7 +65,12 @@
       }));
     }
 
-    if (window.location.pathname === '/trade.html') {
+    const path = window.location.pathname.replace(/\/+$/, '') || '/';
+    if (path === '/') {
+      const s = document.createElement('script');
+      s.src = '/assets/home-auto.js';
+      document.head.appendChild(s);
+    } else if (path === '/trade.html') {
       const s = document.createElement('script');
       s.src = '/assets/trade-auto.js';
       document.head.appendChild(s);
