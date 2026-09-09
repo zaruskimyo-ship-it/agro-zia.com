@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - feat/recovery-4fe4c1d8-i18n
+      - feat/recovery-i18n-country-clock
   pull_request:
     branches:
       - main
@@ -22,6 +23,12 @@ jobs:
           node-version: 22
       - name: JavaScript syntax
         run: |
+          node --check assets/site-foundation.js
+          node --check assets/world-clock.js
+          node --check assets/public-pages-auto.js
+          node --check assets/about-auto.js
+          node --check assets/trade-auto.js
+          node --check assets/network-i18n-patch.js
           node --check assets/zarus-language.js
           node --check assets/zarus-product.js
           node --check assets/zarus-supplier.js
@@ -35,18 +42,41 @@ jobs:
           test -s assets/floating-nav.js
           test -s assets/bottom-actions.css
           test -s assets/bottom-actions.js
+          test -s assets/world-clock.css
+          test -s assets/world-clock.js
           grep -q 'z-index:1200' assets/floating-nav.css
           grep -q 'Chat Online' assets/bottom-actions.js
           grep -q 'Request Inquiry' assets/bottom-actions.js
           grep -q 'گفتگوی آنلاین' assets/bottom-actions.js
           grep -q 'درخواست استعلام' assets/bottom-actions.js
+      - name: Header clock integration
+        run: |
+          grep -q "loadStyle('/assets/world-clock.css')" assets/site-foundation.js
+          grep -q "load('/assets/world-clock.js')" assets/site-foundation.js
+          grep -q "nav.insertBefore(el, menu)" assets/world-clock.js
+          grep -q 'position:relative' assets/world-clock.css
+          grep -q 'order:3' assets/world-clock.css
+          grep -q "zone: 'Asia/Tehran'" assets/world-clock.js
+          grep -q "zone: 'Asia/Tashkent'" assets/world-clock.js
+          grep -q "zone: 'Europe/Istanbul'" assets/world-clock.js
+          grep -q "zone: 'Europe/Moscow'" assets/world-clock.js
       - name: Public site integration
         run: |
           grep -q 'assets/floating-nav.css' assets/site-foundation.js
           grep -q 'assets/bottom-actions.css' assets/site-foundation.js
           grep -q 'assets/floating-nav.js' assets/site-foundation.js
           grep -q 'assets/bottom-actions.js' assets/site-foundation.js
+          grep -q 'assets/world-clock.css' assets/site-foundation.js
+          grep -q 'assets/world-clock.js' assets/site-foundation.js
           grep -q 'assets/site-foundation.js' index.html
+      - name: Country language link contract
+        run: |
+          grep -q '/trade.html?lang=fa' index.html
+          grep -q '/trade.html?lang=ar' index.html
+          grep -q '/trade.html?lang=uz' index.html
+          grep -q '/trade.html?lang=tr' index.html
+          grep -q '/trade.html?lang=en' index.html
+          grep -q 'link.closest(.markets)' assets/site-foundation.js
       - name: ZARUS marketplace integration
         run: |
           for page in zarus.html zarus-product.html zarus-supplier.html zarus-rfq.html; do
