@@ -3,7 +3,7 @@ name: Recovery I18N Gate
 on:
   push:
     branches:
-      - feat/recovery-floating-actions
+      - feat/recovery-floating-actions-qa
   pull_request:
     branches:
       - main
