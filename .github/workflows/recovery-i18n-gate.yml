@@ -3,7 +3,7 @@ name: Recovery I18N Gate
 on:
   push:
     branches:
-      - feat/recovery-4fe4c1d8-i18n-qa
+      - feat/recovery-floating-actions
   pull_request:
     branches:
       - main
@@ -26,6 +26,8 @@ jobs:
           node --check assets/zarus-product.js
           node --check assets/zarus-supplier.js
           node --check assets/zarus-rfq.js
+          node --check assets/floating-nav.js
+          node --check assets/bottom-actions.js
       - name: Shared language contract
         run: |
           grep -q "supported = new Set.*en.*fa.*ar.*uz.*tr.*ru" assets/zarus-language.js
@@ -52,3 +54,18 @@ jobs:
           grep -q "get('lang')||'en'" assets/zarus-supplier.js
           grep -q '&lang=' assets/zarus-product.js
           grep -q '&lang=' assets/zarus-supplier.js
+      - name: Public floating navigation and bottom actions contract
+        run: |
+          test -s assets/floating-nav.js
+          test -s assets/floating-nav.css
+          test -s assets/bottom-actions.js
+          test -s assets/bottom-actions.css
+          grep -q "loadCss('/assets/floating-nav.css')" assets/site-foundation.js
+          grep -q "loadCss('/assets/bottom-actions.css')" assets/site-foundation.js
+          grep -q "load('/assets/floating-nav.js')" assets/site-foundation.js
+          grep -q "load('/assets/bottom-actions.js')" assets/site-foundation.js
+          grep -q "Request Inquiry" assets/bottom-actions.js
+          grep -q "Chat Online" assets/bottom-actions.js
+          grep -q "withLang('/inquiry.html',lang)" assets/bottom-actions.js
+          grep -q "withLang('/contact.html',lang)" assets/bottom-actions.js
+          grep -q "className='agz-float-nav'" assets/floating-nav.js
