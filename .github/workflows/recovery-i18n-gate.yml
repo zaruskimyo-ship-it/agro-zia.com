@@ -48,7 +48,7 @@ jobs:
           grep -q 'assets/floating-nav.js' zarus-rfq.html
       - name: Product and supplier language propagation
         run: |
-          grep -q "q.get('lang')||'en'" assets/zarus-product.js
-          grep -q "q.get('lang')||'en'" assets/zarus-supplier.js
+          grep -q "get('lang')||'en'" assets/zarus-product.js
+          grep -q "get('lang')||'en'" assets/zarus-supplier.js
           grep -q '&lang=' assets/zarus-product.js
           grep -q '&lang=' assets/zarus-supplier.js
