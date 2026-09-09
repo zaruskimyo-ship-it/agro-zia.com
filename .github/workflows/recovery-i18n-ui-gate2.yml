@@ -38,6 +38,8 @@ jobs:
           node --check assets/floating-nav.js
           node --check assets/bottom-actions.js
           node --check locales/language-selector.js
+          node --check src/supplier/supplier-auth.js
+          node --check src/supplier/supplier-ownership.js
       - name: Shared UI assets
         run: |
           test -s assets/floating-nav.css
@@ -117,6 +119,16 @@ jobs:
           grep -Fq 't.h' assets/network-auto.js
           grep -Fq "load('assets/network-auto.js')" assets/site-foundation.js
           ! grep -Fq 'network-i18n-patch.js' network.html
+      - name: Supplier authentication foundation
+        run: |
+          test -s migrations/0011_supplier_accounts.sql
+          grep -Fq 'CREATE TABLE IF NOT EXISTS supplier_accounts' migrations/0011_supplier_accounts.sql
+          grep -Fq 'CREATE TABLE IF NOT EXISTS supplier_login_challenges' migrations/0011_supplier_accounts.sql
+          grep -Fq 'SUPPLIER_SESSION_SECRET' src/supplier/supplier-auth.js
+          grep -Fq 'agz_supplier_session' src/supplier/supplier-auth.js
+          grep -Fq 'HttpOnly; Secure; SameSite=Lax' src/supplier/supplier-auth.js
+          grep -Fq 'readSupplierSession' src/supplier/supplier-ownership.js
+          grep -Fq 'supplier_forbidden' src/supplier/supplier-ownership.js
       - name: Language and RTL contract
         run: |
           grep -q 'supported = new Set.*en.*fa.*ar.*uz.*tr.*ru' assets/zarus-language.js
