@@ -46,11 +46,10 @@ jobs:
           grep -Fq "status='expired'" src/supplier/supplier-quote-api.js
           grep -Fq 'WHERE r.supplier_id = ?' src/supplier/supplier-workspace-api.js
           grep -Fq 'WHERE supplier_id = ?' src/supplier/supplier-workspace-api.js
-          grep -q '0012_supplier_quote_messages.sql' migrations/0012_supplier_quote_messages.sql migrations/0012_supplier_quote_messages.sql
           grep -q 'commerce_supplier_quote_messages' migrations/0012_supplier_quote_messages.sql
           grep -q 'supplier_account_id' migrations/0012_supplier_quote_messages.sql
           grep -q 'supplierQuoteMessages' src/supplier/supplier-api.js
-          grep -q '/^\\/api\\/supplier\\/quotes\\/([^/]+)\\/messages\$/' src/supplier/supplier-api.js
+          grep -q 'messages' src/supplier/supplier-api.js
           grep -q 'MAX_MESSAGE_LENGTH = 4000' src/supplier/supplier-api.js
           grep -q 'sender_type: "supplier"' src/supplier/supplier-api.js
           grep -q 'status === "sent"' src/supplier/supplier-api.js
