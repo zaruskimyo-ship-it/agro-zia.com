@@ -10,7 +10,7 @@
       ar: { '/':'الرئيسية','/about.html':'من نحن','/products.html':'المنتجات','/engineering.html':'الهندسة','/projects.html':'المشاريع','/trade.html':'التجارة','/zarus.html':'ZARUS','/knowledge.html':'المعرفة','/network.html':'الشبكة','/contact.html':'اتصل بنا' },
       uz: { '/':'Bosh sahifa','/about.html':'Biz haqimizda','/products.html':'Mahsulotlar','/engineering.html':'Muhandislik','/projects.html':'Loyihalar','/trade.html':'Savdo','/zarus.html':'ZARUS','/knowledge.html':'Bilim','/network.html':'Tarmoq','/contact.html':'Aloqa' },
       tr: { '/':'Ana Sayfa','/about.html':'Hakkımızda','/products.html':'Ürünler','/engineering.html':'Mühendislik','/projects.html':'Projeler','/trade.html':'Ticaret','/zarus.html':'ZARUS','/knowledge.html':'Bilgi','/network.html':'Ağ','/contact.html':'İletişim' },
-      ru: { '/':'Главная','/about.html':'О нас','/products.html':'Продукты','/engineering.html':'Инжиниринг','/projects.html':'Проекты','/trade.html':'Торговля','/zarus.html':'ZARUS','/knowledge.html':'Знания','/network.html':'Сеть','/contact.html':'Контакты' }
+      ru: { '/':'Главная','/about.html':'О нас','/products.html':'Продукты','/engineering.html':'Инжиниринг','/projects.html':'Проекты','/trade.html':'Торговля','/zarus.html':'Знания','/network.html':'Сеть','/contact.html':'Контакты' }
     };
     const supportedCodes = Object.keys(labels);
     const url = new URL(window.location.href);
@@ -41,8 +41,9 @@
     const path = window.location.pathname.replace(/\/+$/, '') || '/';
     const load = (src) => { if (document.querySelector(`script[data-agz-src="${src}"]`)) return; const s = document.createElement('script'); s.src = src + '?v=20260909'; s.dataset.agzSrc = src; document.body.appendChild(s); };
     const loadStyle = (href) => { if (document.querySelector(`link[data-agz-style="${href}"]`)) return; const l = document.createElement('link'); l.rel = 'stylesheet'; l.href = href + '?v=20260909'; l.dataset.agzStyle = href; document.head.appendChild(l); };
-    loadStyle('/assets/floating-nav.css'); loadStyle('/assets/bottom-actions.css'); if (path === '/') loadStyle('/assets/world-clock.css'); load('/assets/floating-nav.js'); load('/assets/bottom-actions.js');
-    if (path === '/') { load('/assets/home-auto.js'); load('/assets/home-nav-auto.js'); load('/assets/world-clock.js'); }
+    loadStyle('/assets/floating-nav.css'); loadStyle('/assets/bottom-actions.css'); loadStyle('/assets/world-clock.css');
+    load('/assets/floating-nav.js'); load('/assets/bottom-actions.js'); load('/assets/world-clock.js');
+    if (path === '/') { load('/assets/home-auto.js'); load('/assets/home-nav-auto.js'); }
     else if (path === '/about.html') load('/assets/about-auto.js'); else if (path === '/trade.html') load('/assets/trade-auto.js'); else if (path === '/network.html') load('/assets/network-auto.js'); else if (path === '/engineering.html' || path === '/projects.html' || path === '/contact.html') load('/assets/public-pages-auto.js');
   };
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init, { once: true }); else init();
