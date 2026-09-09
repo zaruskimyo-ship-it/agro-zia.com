@@ -9,6 +9,8 @@ on:
       - 'index.html'
       - 'about.html'
       - 'trade.html'
+      - 'network.html'
+      - 'zarus.html'
       - 'inquiry.html'
       - 'assets/site-foundation.css'
       - 'assets/site-foundation.js'
@@ -16,6 +18,9 @@ on:
       - 'assets/home-auto.js'
       - 'assets/home-nav-auto.js'
       - 'assets/trade-auto.js'
+      - 'assets/network-auto.js'
+      - 'assets/zarus-marketplace.css'
+      - 'assets/zarus-marketplace.js'
       - 'locales/language-selector.css'
       - 'docs/SITE-9-LONGITUDINAL-SITE-ARCHITECTURE.md'
       - '.github/workflows/site-foundation-gate.yml'
@@ -96,6 +101,30 @@ jobs:
           grep -q 'searchParams.get.*lang' assets/about-auto.js
           grep -q 'document.documentElement.lang' assets/about-auto.js
           grep -q 'document.documentElement.dir' assets/about-auto.js
+      - name: Network localization assertions
+        run: |
+          test -s assets/network-auto.js
+          node --check assets/network-auto.js
+          grep -q "fa:" assets/network-auto.js
+          grep -q "ar:" assets/network-auto.js
+          grep -q "uz:" assets/network-auto.js
+          grep -q "tr:" assets/network-auto.js
+          grep -q "ru:" assets/network-auto.js
+          grep -q "network-auto.js" assets/site-foundation.js
+          grep -q 'document.documentElement.lang' assets/network-auto.js
+          grep -q 'document.documentElement.dir' assets/network-auto.js
+      - name: ZARUS localization assertions
+        run: |
+          test -s assets/zarus-marketplace.js
+          node --check assets/zarus-marketplace.js
+          grep -q "ar:" assets/zarus-marketplace.js
+          grep -q "uz:" assets/zarus-marketplace.js
+          grep -q "tr:" assets/zarus-marketplace.js
+          grep -q "ru:" assets/zarus-marketplace.js
+          grep -q 'z-home' zarus.html
+          grep -q 'z-menu' zarus.html
+          grep -q 'z-language' zarus.html
+          grep -q 'Vazirmatn' assets/zarus-marketplace.css
       - name: Navigation regression assertions
         run: |
           grep -q 'data-home-link' assets/site-foundation.js
@@ -135,5 +164,7 @@ jobs:
           node --check assets/home-nav-auto.js
           node --check assets/about-auto.js
           node --check assets/trade-auto.js
+          node --check assets/network-auto.js
+          node --check assets/zarus-marketplace.js
           node --check inquiry-ux.js
           node --check locales/language-selector.js
