@@ -54,7 +54,7 @@ jobs:
               ('src/supplier/supplier-quote-api.js', 'withdraw: { from:'),
               ('src/supplier/supplier-quote-api.js', 'action === "expire"'),
               ('src/supplier/supplier-quote-api.js', "status='expired'"),
-              ('src/supplier/supplier-workspace-api.js', 'WHERE r.supplier_id = ?'),
+              ('src/supplier/supplier-workspace-api.js', 'r.supplier_id = ?'),
               ('src/supplier/supplier-workspace-api.js', 'WHERE supplier_id = ?'),
               ('migrations/0012_supplier_quote_messages.sql', 'commerce_supplier_quote_messages'),
               ('migrations/0012_supplier_quote_messages.sql', 'supplier_account_id'),
