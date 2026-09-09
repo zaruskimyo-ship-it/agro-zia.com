@@ -27,21 +27,16 @@ async function parseBody(request) {
   }
 }
 
-async function loadSupplier(db, request, env) {
-  return requireSupplier(db, request, env);
-}
-
 async function supplierCanQuote(db, supplierId, rfqId, productId) {
   const rfq = await db.prepare(`
-    SELECT id, product_id, status
+    SELECT id, supplier_id, product_id, status
     FROM commerce_rfqs
     WHERE id = ?
     LIMIT 1
   `).bind(rfqId).first();
   if (!rfq) return { ok: false, reason: "rfq_not_found" };
   if (rfq.status === "cancelled") return { ok: false, reason: "rfq_not_eligible" };
-  if (rfq.supplier_id && rfq.supplier_id !== supplierId) return { ok: false, reason: "supplier_forbidden" };
-  if (!rfq.supplier_id) return { ok: false, reason: "supplier_not_assigned" };
+  if (!rfq.supplier_id || rfq.supplier_id !== supplierId) return { ok: false, reason: "supplier_forbidden" };
   if (rfq.product_id && productId && rfq.product_id !== productId) return { ok: false, reason: "product_mismatch" };
   if (rfq.product_id && !productId) return { ok: false, reason: "product_required" };
   return { ok: true };
@@ -53,7 +48,7 @@ export async function handleSupplierQuoteRoute(request, env) {
   if (request.method !== "POST") return json({ error: "method_not_allowed" }, 405);
   if (!env.AGROZIA_DB) return json({ error: "d1_unavailable" }, 503);
 
-  const supplier = await loadSupplier(env.AGROZIA_DB, request, env);
+  const supplier = await requireSupplier(env.AGROZIA_DB, request, env);
   if (!supplier) return supplierUnauthorized();
 
   let body;
@@ -69,7 +64,7 @@ export async function handleSupplierQuoteRoute(request, env) {
 
   const authorization = await supplierCanQuote(env.AGROZIA_DB, supplier.supplier_id, rfqId, productId);
   if (!authorization.ok) {
-    if (authorization.reason === "supplier_forbidden" || authorization.reason === "supplier_not_assigned") return supplierForbidden();
+    if (authorization.reason === "supplier_forbidden") return supplierForbidden();
     return json({ error: authorization.reason }, 400);
   }
 
