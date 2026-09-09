@@ -13,6 +13,7 @@ on:
       - 'assets/site-foundation.css'
       - 'assets/site-foundation.js'
       - 'assets/home-auto.js'
+      - 'assets/home-nav-auto.js'
       - 'assets/trade-auto.js'
       - 'docs/SITE-9-LONGITUDINAL-SITE-ARCHITECTURE.md'
       - '.github/workflows/site-foundation-gate.yml'
@@ -62,15 +63,21 @@ jobs:
       - name: Homepage localization assertions
         run: |
           test -s assets/home-auto.js
+          test -s assets/home-nav-auto.js
           node --check assets/home-auto.js
+          node --check assets/home-nav-auto.js
           grep -q "fa:" assets/home-auto.js
           grep -q "ar:" assets/home-auto.js
           grep -q "uz:" assets/home-auto.js
           grep -q "tr:" assets/home-auto.js
           grep -q "ru:" assets/home-auto.js
-          grep -q "document.documentElement.lang" assets/home-auto.js
-          grep -q "document.documentElement.dir" assets/home-auto.js
+          grep -q "فارسی" assets/home-nav-auto.js
+          grep -q "العربية" assets/home-nav-auto.js
+          grep -q "O‘zbek" assets/home-nav-auto.js
+          grep -q "Türkçe" assets/home-nav-auto.js
+          grep -q "Русский" assets/home-nav-auto.js
           grep -q "home-auto.js" assets/site-foundation.js
+          grep -q "home-nav-auto.js" assets/site-foundation.js
       - name: Navigation regression assertions
         run: |
           grep -q 'data-home-link' assets/site-foundation.js
@@ -101,6 +108,7 @@ jobs:
         run: |
           node --check assets/site-foundation.js
           node --check assets/home-auto.js
+          node --check assets/home-nav-auto.js
           node --check assets/trade-auto.js
           node --check inquiry-ux.js
           node --check locales/language-selector.js
