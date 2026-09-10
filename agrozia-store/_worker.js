@@ -1,3 +1,5 @@
+import { handleCustomerAuth } from "./src/auth/customer-auth.js";
+
 function json(data, status = 200) {
   return new Response(JSON.stringify(data), {
     status,
@@ -25,6 +27,15 @@ export default {
         database: db,
         timestamp: new Date().toISOString()
       });
+    }
+
+    if (url.pathname.startsWith("/api/customer/")) {
+      try {
+        const response = await handleCustomerAuth(request, env, url.pathname);
+        if (response) return response;
+      } catch {
+        return json({ ok: false, error: "customer_auth_unavailable" }, 503);
+      }
     }
 
     return new Response("Agro-Zia Store foundation is running.", {
