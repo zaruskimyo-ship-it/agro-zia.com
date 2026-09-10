@@ -114,10 +114,18 @@ jobs:
           grep -q 'assets/zarus-supplier-operations.js' zarus-supplier-workspace.html
       - name: Network translation contract
         run: |
-          grep -Fq 'const DICT=' assets/network-auto.js
-          grep -Fq '.hero h1' assets/network-auto.js
-          grep -Fq "load('assets/network-auto.js')" assets/site-foundation.js
-          ! grep -Fq 'network-i18n-patch.js' network.html
+          set -u
+          printf '%s\n' '--- Network translation gate diagnostics ---'
+          printf 'network.html sha: '; sha256sum network.html | cut -d' ' -f1
+          printf 'network-auto.js sha: '; sha256sum assets/network-auto.js | cut -d' ' -f1
+          grep -Fq 'const DICT=' assets/network-auto.js || { echo 'FAIL: const DICT= missing'; exit 1; }
+          grep -Fq '.hero h1' assets/network-auto.js || { echo 'FAIL: .hero h1 selector missing'; exit 1; }
+          grep -Fq "load('assets/network-auto.js')" assets/site-foundation.js || { echo 'FAIL: network-auto.js loader missing'; exit 1; }
+          if grep -Fq 'network-i18n-patch.js' network.html; then
+            echo 'FAIL: obsolete network-i18n-patch.js reference remains in network.html'
+            exit 1
+          fi
+          echo 'PASS: all Network translation assertions'
       - name: Supplier authentication foundation
         run: |
           test -s migrations/0011_supplier_accounts.sql
