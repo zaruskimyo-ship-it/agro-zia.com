@@ -61,7 +61,6 @@ export async function createDirectOrder(db, customer, checkoutId) {
   const orderId = crypto.randomUUID();
   const orderNumber = `AGZ-ORD-${new Date().toISOString().replace(/[-:TZ.]/g, "").slice(0, 14)}-${orderId.slice(0, 8).toUpperCase()}`;
   const created = nowIso();
-  const total = checkout.subtotal;
 
   const orderStatement = db.prepare(`INSERT INTO commerce_orders
     (id, order_number, customer_id, checkout_id, status, currency, subtotal, total,
@@ -79,8 +78,13 @@ export async function createDirectOrder(db, customer, checkoutId) {
     .bind(crypto.randomUUID(), orderId, item.product_id, item.product_slug, item.product_name,
       item.quantity, item.unit || null, item.unit_price, item.currency, item.line_total, created));
 
+  const completeCheckout = db.prepare(`UPDATE commerce_checkouts SET status = 'completed', updated_at = ?2
+    WHERE id = ?1 AND customer_id = ?3 AND status = 'open'`).bind(id, created, customer.id);
+  const convertCart = db.prepare(`UPDATE commerce_carts SET status = 'converted', updated_at = ?2
+    WHERE id = ?1 AND customer_id = ?3 AND status = 'active'`).bind(checkout.cart_id, created, customer.id);
+
   try {
-    await db.batch([orderStatement, ...itemStatements]);
+    await db.batch([orderStatement, ...itemStatements, completeCheckout, convertCart]);
   } catch (error) {
     const raced = await db.prepare(`SELECT id, order_number, customer_id, checkout_id, status, currency, subtotal, total,
         customer_name, customer_email, customer_phone, shipping_name, shipping_phone,
@@ -89,10 +93,6 @@ export async function createDirectOrder(db, customer, checkoutId) {
     if (raced) return readOrder(db, raced);
     throw error;
   }
-
-  // Consume the checkout only after the immutable order snapshot is written.
-  await db.prepare(`UPDATE commerce_checkouts SET status = 'completed', updated_at = ?2
-    WHERE id = ?1 AND customer_id = ?3 AND status = 'open'`).bind(id, created, customer.id).run();
 
   const order = await loadOrder(db, orderId, customer.id);
   return readOrder(db, order);
