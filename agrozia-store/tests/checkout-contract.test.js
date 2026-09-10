@@ -31,3 +31,12 @@ test("public checkout projection excludes private customer fields", () => {
   assert.equal("customer_email" in result, false);
   assert.equal("supplier_id" in result.items[0], false);
 });
+
+test("checkout public projection preserves terminal status", () => {
+  const result = publicCheckout({
+    id: "c2", status: "expired", currency: "USD", subtotal: "10",
+    shipping_name: "Buyer", shipping_phone: "+123", shipping_country: "TR", shipping_city: "Istanbul",
+    shipping_address: "Street", shipping_postal_code: null, expires_at: "past", created_at: "now"
+  }, []);
+  assert.equal(result.status, "expired");
+});
