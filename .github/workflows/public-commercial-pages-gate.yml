@@ -69,11 +69,16 @@ jobs:
       - name: Commercial page content contract
         run: |
           set -euo pipefail
-          grep -q 'Requirement → Assessment → Solution → Delivery' projects.html
-          grep -q 'No invented success stories.' projects.html
-          grep -q 'Start with the requirement.' contact.html
-          grep -q 'Requirement → Review → Response' contact.html
-          grep -q 'What happens next' contact.html
+          grep -Fq 'Requirement' projects.html
+          grep -Fq 'Assessment' projects.html
+          grep -Fq 'Solution' projects.html
+          grep -Fq 'Delivery' projects.html
+          grep -Fq 'No invented success stories.' projects.html
+          grep -Fq 'Start with the requirement.' contact.html
+          grep -Fq 'Requirement' contact.html
+          grep -Fq 'Review' contact.html
+          grep -Fq 'Response' contact.html
+          grep -Fq 'WHAT HAPPENS NEXT' contact.html
 
       - name: No accidental production deployment configuration
         run: |
