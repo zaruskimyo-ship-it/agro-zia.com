@@ -23,7 +23,10 @@ export async function handlePublicProducts(request, env, pathname) {
       return json({ ok: true, ...result });
     }
     if (pathname.startsWith("/api/products/")) {
-      const slug = decodeURIComponent(pathname.slice("/api/products/".length));
+      const rawSlug = pathname.slice("/api/products/".length);
+      let slug;
+      try { slug = decodeURIComponent(rawSlug); } catch { return json({ error: "invalid_slug" }, 400); }
+      if (!slug || slug.includes("/")) return json({ error: "invalid_slug" }, 400);
       const product = await getPublicProductBySlug(env.STORE_DB, slug);
       return product ? json({ ok: true, product }) : json({ error: "not_found" }, 404);
     }
