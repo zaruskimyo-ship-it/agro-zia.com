@@ -43,26 +43,36 @@ export async function createOrder(db, input, now = new Date().toISOString()) {
     if (!product || product.supplier_id !== supplier.id) throw new Error("invalid_order_product");
   }
 
+  const existing = await db.prepare("SELECT * FROM commerce_orders WHERE quote_id = ? LIMIT 1").bind(quote.id).first();
+  if (existing) return publicOrder(existing);
+
   const id = crypto.randomUUID();
   const orderNumber = createOrderNumber(now, id);
   const status = ORDER_STATUSES[0];
   const destination = quote.destination || null;
 
-  await db.prepare(
-    `INSERT INTO commerce_orders (
-      id, order_number, quote_id, rfq_id, supplier_id, product_id, product_name,
-      quantity, currency, unit_price_minor, quoted_amount_minor, destination,
-      status, buyer_company, buyer_name, buyer_email, buyer_phone, created_at, updated_at
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-  ).bind(
-    id, orderNumber, quote.id, quote.rfq_id, supplier.id, quote.product_id || null,
-    quote.product_name || quote.rfq_product_name, quote.quantity, quote.currency,
-    quote.unit_price_minor, quote.total_amount_minor, destination, status,
-    quote.buyer_company || null, quote.buyer_name || null, quote.buyer_email || null,
-    quote.buyer_phone || null, now, now,
-  ).run();
+  try {
+    await db.prepare(
+      `INSERT INTO commerce_orders (
+        id, order_number, quote_id, rfq_id, supplier_id, product_id, product_name,
+        quantity, currency, unit_price_minor, quoted_amount_minor, destination,
+        status, buyer_company, buyer_name, buyer_email, buyer_phone, created_at, updated_at
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    ).bind(
+      id, orderNumber, quote.id, quote.rfq_id, supplier.id, quote.product_id || null,
+      quote.product_name || quote.rfq_product_name, quote.quantity, quote.currency,
+      quote.unit_price_minor, quote.total_amount_minor, destination, status,
+      quote.buyer_company || null, quote.buyer_name || null, quote.buyer_email || null,
+      quote.buyer_phone || null, now, now,
+    ).run();
+  } catch (error) {
+    const duplicate = await db.prepare("SELECT * FROM commerce_orders WHERE quote_id = ? LIMIT 1").bind(quote.id).first();
+    if (duplicate) return publicOrder(duplicate);
+    throw error;
+  }
 
   return publicOrder({
+    id,
     order_number: orderNumber,
     quote_id: quote.id,
     rfq_id: quote.rfq_id,
