@@ -74,8 +74,8 @@ jobs:
           grep -q 'name="quantity"' zarus-rfq.html
           grep -q 'name="destination_country"' zarus-rfq.html
           grep -q 'name="target_timing"' zarus-rfq.html
-          grep -q 'fetch('/api/products/' assets/zarus-product.js
-          grep -q 'fetch('/api/rfqs' assets/zarus-rfq.js
+          grep -q "fetch('/api/products/" assets/zarus-product.js
+          grep -q "fetch('/api/rfqs'" assets/zarus-rfq.js
           grep -q 'Open My Workspace' assets/zarus-rfq.js
 
       - name: Commercial page content contract
