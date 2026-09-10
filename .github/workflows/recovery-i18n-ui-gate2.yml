@@ -126,7 +126,7 @@ jobs:
           grep -Fq 'SUPPLIER_SESSION_SECRET' src/supplier/supplier-auth.js
           grep -Fq 'agz_supplier_session' src/supplier/supplier-auth.js
           grep -Fq 'HttpOnly; Secure; SameSite=Lax' src/supplier/supplier-auth.js
-          grep -Fq 'readSupplierSession' src/supplier-ownership.js
+          grep -Fq 'readSupplierSession' src/supplier/supplier-ownership.js
           grep -Fq 'supplier_forbidden' src/supplier/supplier-ownership.js
       - name: Language and RTL contract
         run: |
