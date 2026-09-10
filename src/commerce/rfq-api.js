@@ -1,4 +1,5 @@
 import { createRfq } from "./rfq-repository.js";
+import { readCustomerSession } from "../customer/customer-auth.js";
 
 const MAX_BODY_BYTES = 32 * 1024;
 
@@ -45,7 +46,9 @@ export async function handlePublicRfqs(request, env) {
 
   try {
     const input = await readJsonBody(request);
-    const rfq = await createRfq(env.AGROZIA_DB, input);
+    const session = await readCustomerSession(request, env);
+    const serverInput = { ...input, customer_account_id: session?.accountId || null };
+    const rfq = await createRfq(env.AGROZIA_DB, serverInput);
     return json({ rfq }, 201);
   } catch (error) {
     if (error?.message === "unsupported_media_type") {
