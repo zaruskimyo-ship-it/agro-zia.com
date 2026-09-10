@@ -60,9 +60,8 @@ jobs:
           set -euo pipefail
           for page in index.html about.html products.html engineering.html projects.html trade.html knowledge.html contact.html; do
             grep -q 'href="/products.html"' "$page"
-            grep -q 'href="/projects.html"' "$page"
-            grep -q 'href="/trade.html"' "$page"
             grep -q 'href="/contact.html"' "$page"
+            grep -q 'href="/zarus.html"' "$page"
           done
 
       - name: Commercial page content contract
