@@ -14,8 +14,10 @@ Independent checkout session for the Direct Sale path of `agrozia.ir`.
 - Checkout stores a server-computed subtotal and immutable product-line snapshots.
 - Monetary multiplication uses integer micro-units in JavaScript to avoid ordinary floating-point addition errors; product values with more than six decimal places are rejected rather than silently rounded.
 - Shipping contact/address is required and snapshotted into the checkout.
+- Checkout + all checkout items are written with one D1 batch, preventing a partial checkout from being left behind when an item write fails.
 - Idempotency key is customer-scoped and prevents duplicate checkout creation on replay.
-- Checkout sessions expire after 30 minutes by policy; no payment provider is connected.
+- Concurrent requests using the same customer/idempotency key are reconciled by the database uniqueness constraint and return the winning checkout instead of creating a duplicate.
+- Checkout sessions expire after 30 minutes by policy; read/replay paths fail closed by marking an overdue `open` checkout as `expired`.
 - Checkout does not create an order.
 
 ## Routes
