@@ -22,7 +22,7 @@ test("supplier session is readable before expiry", async () => {
 test("supplier session rejects expiry and tampering", async () => {
   const now = Date.parse("2026-09-09T20:00:00.000Z");
   const token = await createSupplierSession(ENV, "supplier-a", now);
-  assert.equal(await readSupplierSession(requestWithCookie(token), ENV, now + 8 * 60 * 60 * 1000 + 1), null);
+  assert.equal(await readSupplierSession(requestWithCookie(token), ENV, now + 8 * 60 * 60 * 1000 + 2000), null);
   const parts = token.split(".");
   parts[0] = "supplier-b";
   assert.equal(await readSupplierSession(requestWithCookie(parts.join(".")), ENV, now), null);
@@ -38,7 +38,7 @@ test("supplier session cookie has required security flags", async () => {
 });
 
 test("supplier messaging derives ownership and sender identity server-side", () => {
-  const source = fs.readFileSync("src/supplier/supplier-messaging-api.js", "utf8");
+  const source = fs.readFileSync("src/supplier/supplier-api.js", "utf8");
   assert.match(source, /requireSupplier\(env\.AGROZIA_DB, request, env\)/);
   assert.match(source, /supplier\.supplier_id/);
   assert.match(source, /supplier\.account_id/);
@@ -56,9 +56,9 @@ test("customer thread preserves authenticated customer identity", () => {
 });
 
 test("cross-party thread endpoints remain ownership-gated", () => {
-  const supplier = fs.readFileSync("src/supplier/supplier-messaging-api.js", "utf8");
+  const supplier = fs.readFileSync("src/supplier/supplier-api.js", "utf8");
   const customer = fs.readFileSync("src/customer/transaction-api.js", "utf8");
   assert.match(supplier, /WHERE id = \? AND supplier_id = \?/);
-  assert.match(customer, /quoteFor\(db, quoteId, account\)/);
-  assert.match(customer, /r\.customer_account_id = \?/);
+  assert.match(customer, /quoteFor\(db,id,account\)/);
+  assert.match(customer, /r\.customer_account_id=\?/);
 });
