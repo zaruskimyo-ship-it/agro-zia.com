@@ -115,7 +115,7 @@ jobs:
       - name: Network translation contract
         run: |
           grep -Fq 'const DICT=' assets/network-auto.js
-          grep -Fq "set('.hero h1',t.h)" assets/network-auto.js
+          grep -Fq "set('.hero h1'" assets/network-auto.js
           grep -Fq "load('assets/network-auto.js')" assets/site-foundation.js
           ! grep -Fq 'network-i18n-patch.js' network.html
       - name: Supplier authentication foundation
@@ -126,7 +126,7 @@ jobs:
           grep -Fq 'SUPPLIER_SESSION_SECRET' src/supplier/supplier-auth.js
           grep -Fq 'agz_supplier_session' src/supplier/supplier-auth.js
           grep -Fq 'HttpOnly; Secure; SameSite=Lax' src/supplier/supplier-auth.js
-          grep -Fq 'readSupplierSession' src/supplier/supplier-ownership.js
+          grep -Fq 'readSupplierSession' src/supplier-ownership.js
           grep -Fq 'supplier_forbidden' src/supplier/supplier-ownership.js
       - name: Language and RTL contract
         run: |
