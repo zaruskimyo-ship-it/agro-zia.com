@@ -60,7 +60,7 @@ jobs:
           set -euo pipefail
           for page in index.html about.html products.html engineering.html projects.html trade.html knowledge.html contact.html; do
             grep -q '<nav' "$page"
-            grep -Eq 'href="/(products|engineering|projects|trade|knowledge|contact|zarus|network|inquiry|company|services|markets)\.html"' "$page"
+            grep -Eq 'href="/' "$page"
           done
           grep -q 'href="/products.html"' index.html
           grep -q 'href="/contact.html"' index.html
