@@ -33,21 +33,39 @@ function validateProductLine(row) {
   return { quantity, unitPrice, lineMicros };
 }
 
+async function readCheckoutWithItems(db, checkout) {
+  const items = await db.prepare(`SELECT product_id, product_slug, product_name, quantity, unit, unit_price, currency, line_total
+    FROM commerce_checkout_items WHERE checkout_id = ?1 ORDER BY created_at ASC`).bind(checkout.id).all();
+  return publicCheckout(checkout, items?.results || []);
+}
+
+async function expireIfNeeded(db, checkout) {
+  if (checkout.status !== "open") return checkout;
+  if (!checkout.expires_at || new Date(checkout.expires_at).getTime() > Date.now()) return checkout;
+  const updatedAt = nowIso();
+  await db.prepare(`UPDATE commerce_checkouts SET status = 'expired', updated_at = ?2
+    WHERE id = ?1 AND status = 'open'`).bind(checkout.id, updatedAt).run();
+  return { ...checkout, status: "expired", updated_at: updatedAt };
+}
+
+async function findExistingByIdempotency(db, customerId, key) {
+  return db.prepare(`SELECT id, customer_id, cart_id, status, currency, subtotal,
+      customer_name, customer_email, customer_phone, shipping_name, shipping_phone,
+      shipping_country, shipping_city, shipping_address, shipping_postal_code,
+      idempotency_key, expires_at, created_at, updated_at
+    FROM commerce_checkouts WHERE customer_id = ?1 AND idempotency_key = ?2 LIMIT 1`)
+    .bind(customerId, key).first();
+}
+
 export async function createCheckout(db, customer, input) {
   requireCustomer(customer);
   const normalized = normalizeCheckoutInput(input);
   if (!normalized) throw new Error("invalid_checkout_input");
 
-  const existing = await db.prepare(`SELECT id, customer_id, cart_id, status, currency, subtotal,
-      customer_name, customer_email, customer_phone, shipping_name, shipping_phone,
-      shipping_country, shipping_city, shipping_address, shipping_postal_code,
-      idempotency_key, expires_at, created_at, updated_at
-    FROM commerce_checkouts WHERE customer_id = ?1 AND idempotency_key = ?2 LIMIT 1`)
-    .bind(customer.id, normalized.idempotency_key).first();
+  let existing = await findExistingByIdempotency(db, customer.id, normalized.idempotency_key);
   if (existing) {
-    const items = await db.prepare(`SELECT product_id, product_slug, product_name, quantity, unit, unit_price, currency, line_total
-      FROM commerce_checkout_items WHERE checkout_id = ?1 ORDER BY created_at ASC`).bind(existing.id).all();
-    return publicCheckout(existing, items?.results || []);
+    existing = await expireIfNeeded(db, existing);
+    return readCheckoutWithItems(db, existing);
   }
 
   const cart = await loadCart(db, customer.id);
@@ -85,7 +103,7 @@ export async function createCheckout(db, customer, input) {
   const expires = new Date(Date.now() + CHECKOUT_TTL_MINUTES * 60 * 1000).toISOString();
   const checkoutId = crypto.randomUUID();
   const subtotal = microsToDecimal(subtotalMicros);
-  await db.prepare(`INSERT INTO commerce_checkouts
+  const checkoutStatement = db.prepare(`INSERT INTO commerce_checkouts
     (id, customer_id, cart_id, status, currency, subtotal, customer_name, customer_email, customer_phone,
      shipping_name, shipping_phone, shipping_country, shipping_city, shipping_address, shipping_postal_code,
      idempotency_key, expires_at, created_at, updated_at)
@@ -93,14 +111,25 @@ export async function createCheckout(db, customer, input) {
     .bind(checkoutId, customer.id, cart.id, currency, subtotal, customer.name, customer.email, customer.phone || null,
       normalized.shipping_address.name, normalized.shipping_address.phone, normalized.shipping_address.country,
       normalized.shipping_address.city, normalized.shipping_address.address, normalized.shipping_address.postal_code || null,
-      normalized.idempotency_key, expires, created).run();
+      normalized.idempotency_key, expires, created);
 
-  for (const line of lines) {
-    await db.prepare(`INSERT INTO commerce_checkout_items
+  const itemStatements = lines.map((line) => db.prepare(`INSERT INTO commerce_checkout_items
       (id, checkout_id, product_id, product_slug, product_name, quantity, unit, unit_price, currency, line_total, created_at)
       VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11)`)
-      .bind(crypto.randomUUID(), checkoutId, line.product_id, line.product_slug, line.product_name, line.quantity,
-        line.unit, line.unit_price, line.currency, line.line_total, created).run();
+    .bind(crypto.randomUUID(), checkoutId, line.product_id, line.product_slug, line.product_name, line.quantity,
+      line.unit, line.unit_price, line.currency, line.line_total, created));
+
+  try {
+    await db.batch([checkoutStatement, ...itemStatements]);
+  } catch (error) {
+    // The unique customer/idempotency constraint closes the concurrent-request race.
+    // If another request won the race, return that checkout instead of leaking a 500.
+    const raced = await findExistingByIdempotency(db, customer.id, normalized.idempotency_key);
+    if (raced) {
+      const current = await expireIfNeeded(db, raced);
+      return readCheckoutWithItems(db, current);
+    }
+    throw error;
   }
 
   const checkout = await db.prepare(`SELECT id, customer_id, cart_id, status, currency, subtotal,
@@ -115,13 +144,12 @@ export async function getCheckout(db, customer, checkoutId) {
   requireCustomer(customer);
   const id = typeof checkoutId === "string" ? checkoutId.trim() : "";
   if (!id) throw new Error("invalid_checkout_id");
-  const checkout = await db.prepare(`SELECT id, customer_id, cart_id, status, currency, subtotal,
+  let checkout = await db.prepare(`SELECT id, customer_id, cart_id, status, currency, subtotal,
       customer_name, customer_email, customer_phone, shipping_name, shipping_phone,
       shipping_country, shipping_city, shipping_address, shipping_postal_code,
       idempotency_key, expires_at, created_at, updated_at
     FROM commerce_checkouts WHERE id = ?1 AND customer_id = ?2 LIMIT 1`).bind(id, customer.id).first();
   if (!checkout) throw new Error("checkout_not_found");
-  const items = await db.prepare(`SELECT product_id, product_slug, product_name, quantity, unit, unit_price, currency, line_total
-    FROM commerce_checkout_items WHERE checkout_id = ?1 ORDER BY created_at ASC`).bind(id).all();
-  return publicCheckout(checkout, items?.results || []);
+  checkout = await expireIfNeeded(db, checkout);
+  return readCheckoutWithItems(db, checkout);
 }
