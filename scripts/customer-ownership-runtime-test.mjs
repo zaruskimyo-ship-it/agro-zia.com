@@ -4,6 +4,7 @@ import { createCustomerSession, customerSessionCookie } from "../src/customer/cu
 
 const ENV = { CUSTOMER_SESSION_SECRET: "01234567890123456789012345678901" };
 const IDS = { customerA: "customer-a", customerB: "customer-b", product: "product-1", supplier: "supplier-1" };
+const CUSTOMER_ACCOUNT_COLUMN_INDEX = 6;
 
 function makeDb({ accountStatuses = {}, inserted = [] } = {}) {
   return {
@@ -64,9 +65,7 @@ assert.ok(tokenA);
   const response = await handlePublicRfqs(request(forged, customerSessionCookie(tokenA)), { ...ENV, AGROZIA_DB: db });
   assert.equal(response.status, 201);
   assert.equal(inserted.length, 1);
-  const accountIndex = inserted[0].sql.split("VALUES")[0].split(",").indexOf("customer_account_id");
-  assert.ok(accountIndex >= 0);
-  assert.equal(inserted[0].args[accountIndex], IDS.customerA, "browser-supplied customer_account_id must be ignored");
+  assert.equal(inserted[0].args[CUSTOMER_ACCOUNT_COLUMN_INDEX], IDS.customerA, "browser-supplied customer_account_id must be ignored");
 }
 
 {
@@ -74,8 +73,7 @@ assert.ok(tokenA);
   const db = makeDb({ inserted });
   const response = await handlePublicRfqs(request(base), { ...ENV, AGROZIA_DB: db });
   assert.equal(response.status, 201);
-  const accountIndex = inserted[0].sql.split("VALUES")[0].split(",").indexOf("customer_account_id");
-  assert.equal(inserted[0].args[accountIndex], null, "anonymous RFQ must remain unowned");
+  assert.equal(inserted[0].args[CUSTOMER_ACCOUNT_COLUMN_INDEX], null, "anonymous RFQ must remain unowned");
 }
 
 {
@@ -93,8 +91,7 @@ assert.ok(tokenA);
   const expiredToken = await createCustomerSession(ENV, IDS.customerA, now - (8 * 60 * 60 * 1000) - 2000);
   const response = await handlePublicRfqs(request(base, customerSessionCookie(expiredToken)), { ...ENV, AGROZIA_DB: db });
   assert.equal(response.status, 201);
-  const accountIndex = inserted[0].sql.split("VALUES")[0].split(",").indexOf("customer_account_id");
-  assert.equal(inserted[0].args[accountIndex], null, "expired session must not confer ownership");
+  assert.equal(inserted[0].args[CUSTOMER_ACCOUNT_COLUMN_INDEX], null, "expired session must not confer ownership");
 }
 
 console.log("CUSTOMER OWNERSHIP RUNTIME GATE: PASS (mock-D1)");
