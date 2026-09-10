@@ -18,6 +18,7 @@ on:
       - 'contact.html'
       - 'legal.html'
       - 'zarus.html'
+      - 'zarus-marketplace.html'
       - '.github/workflows/public-commercial-pages-gate.yml'
 
 permissions:
@@ -46,7 +47,13 @@ jobs:
           grep -q 'href="/inquiry.html"' projects.html
           grep -q 'href="/inquiry.html"' trade.html
           grep -q 'href="/inquiry.html"' contact.html
-          grep -q 'href="/inquiry.html"' zarus-marketplace.html
+
+      - name: Current ZARUS marketplace alias contract
+        run: |
+          set -euo pipefail
+          grep -q 'rel="canonical" href="https://agro-zia.com/zarus.html"' zarus-marketplace.html
+          grep -q "location.replace('/zarus.html'" zarus-marketplace.html
+          grep -q 'noindex' zarus-marketplace.html
 
       - name: Public navigation contract
         run: |
