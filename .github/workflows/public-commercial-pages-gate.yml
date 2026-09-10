@@ -42,8 +42,8 @@ jobs:
         run: |
           set -euo pipefail
           grep -q 'href="/inquiry.html"' index.html
-          grep -q 'href="/inquiry.html"' products.html
-          grep -q 'href="/inquiry.html"' engineering.html
+          grep -q 'data-rfq-link' products.html
+          grep -q 'href="/contact.html"' engineering.html
           grep -q 'href="/inquiry.html"' projects.html
           grep -q 'href="/inquiry.html"' trade.html
           grep -q 'href="/inquiry.html"' contact.html
