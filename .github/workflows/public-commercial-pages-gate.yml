@@ -1,0 +1,93 @@
+name: Public Commercial Pages Gate
+
+on:
+  push:
+    branches:
+      - feat/unified-quote-thread
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'index.html'
+      - 'about.html'
+      - 'products.html'
+      - 'engineering.html'
+      - 'projects.html'
+      - 'trade.html'
+      - 'knowledge.html'
+      - 'contact.html'
+      - 'legal.html'
+      - 'zarus.html'
+      - 'zarus-product.html'
+      - 'zarus-rfq.html'
+      - 'assets/zarus-marketplace.js'
+      - 'assets/zarus-product.js'
+      - 'assets/zarus-rfq.js'
+      - '.github/workflows/public-commercial-pages-gate.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  public-commercial-pages:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Required public pages
+        run: |
+          set -euo pipefail
+          for page in index.html about.html products.html engineering.html projects.html trade.html knowledge.html contact.html legal.html zarus.html inquiry.html suppliers.html zarus-product.html zarus-rfq.html; do
+            test -s "$page"
+          done
+
+      - name: Core commercial CTA contract
+        run: |
+          set -euo pipefail
+          grep -q 'href="/inquiry.html"' index.html
+          grep -q 'href="/inquiry.html"' products.html
+          grep -q 'href="/inquiry.html"' engineering.html
+          grep -q 'href="/inquiry.html"' projects.html
+          grep -q 'href="/inquiry.html"' trade.html
+          grep -q 'href="/inquiry.html"' contact.html
+          grep -q 'href="/inquiry.html"' zarus-marketplace.html
+          grep -q 'zarus-rfq.html?product=' assets/zarus-marketplace.js
+          grep -q "fetch('/api/rfqs'" assets/zarus-rfq.js
+
+      - name: Public navigation contract
+        run: |
+          set -euo pipefail
+          for page in index.html about.html products.html engineering.html projects.html trade.html knowledge.html contact.html; do
+            grep -q 'href="/products.html"' "$page"
+            grep -q 'href="/projects.html"' "$page"
+            grep -q 'href="/trade.html"' "$page"
+            grep -q 'href="/contact.html"' "$page"
+          done
+
+      - name: ZARUS product-to-RFQ contract
+        run: |
+          set -euo pipefail
+          grep -q 'Request a Quote' zarus-product.html
+          grep -q 'name="product_id"' zarus-rfq.html
+          grep -q 'name="description"' zarus-rfq.html
+          grep -q 'name="quantity"' zarus-rfq.html
+          grep -q 'name="destination_country"' zarus-rfq.html
+          grep -q 'name="target_timing"' zarus-rfq.html
+          grep -q 'fetch('/api/products/' assets/zarus-product.js
+          grep -q 'fetch('/api/rfqs' assets/zarus-rfq.js
+          grep -q 'Open My Workspace' assets/zarus-rfq.js
+
+      - name: Commercial page content contract
+        run: |
+          set -euo pipefail
+          grep -q 'Problem → Intervention → Result' projects.html
+          grep -q 'No invented success stories.' projects.html
+          grep -q 'Start with the requirement.' contact.html
+          grep -q 'What to include' contact.html
+
+      - name: No accidental production deployment configuration
+        run: |
+          set -euo pipefail
+          test ! -f .dev.vars
+          ! grep -RIn --exclude-dir=.git --exclude='*.md' -E 'TELEGRAM_BOT_TOKEN_V2[[:space:]]*[:=][[:space:]]*[^$A-Z[:space:]]' . || true
