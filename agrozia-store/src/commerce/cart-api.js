@@ -45,7 +45,11 @@ export async function handleCart(request, env, pathname) {
     return json({ ok: false, error: "not_found" }, 404);
   } catch (error) {
     const status = error?.status || 400;
-    const known = new Set(["invalid_cart_item", "product_not_available", "cart_not_active", "unsupported_media", "payload_too_large", "invalid_json"]);
+    const known = new Set([
+      "invalid_cart_item", "product_not_available", "product_not_direct_sale",
+      "product_price_not_final", "product_currency_required", "cart_currency_mismatch",
+      "cart_not_active", "unsupported_media", "payload_too_large", "invalid_json"
+    ]);
     return json({ ok: false, error: known.has(error?.message) ? error.message : "cart_service_unavailable" }, status === 400 ? 400 : status);
   }
 }
