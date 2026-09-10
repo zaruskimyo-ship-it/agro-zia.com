@@ -2,6 +2,7 @@ import { handleCustomerAuth } from "./src/auth/customer-auth.js";
 import { handlePublicProducts } from "./src/commerce/product-api.js";
 import { handleStoreRfqs } from "./src/commerce/rfq-api.js";
 import { handleCart } from "./src/commerce/cart-api.js";
+import { handleCheckout } from "./src/commerce/checkout-api.js";
 
 function json(data, status = 200) {
   return new Response(JSON.stringify(data), { status, headers: { "content-type": "application/json; charset=utf-8" } });
@@ -36,6 +37,12 @@ export default {
         const response = await handleCart(request, env, url.pathname);
         if (response) return response;
       } catch { return json({ ok: false, error: "cart_service_unavailable" }, 503); }
+    }
+    if (url.pathname === "/api/checkout" || url.pathname.startsWith("/api/checkout/")) {
+      try {
+        const response = await handleCheckout(request, env, url.pathname);
+        if (response) return response;
+      } catch { return json({ ok: false, error: "checkout_service_unavailable" }, 503); }
     }
     return new Response("Agro-Zia Store foundation is running.", { headers: { "content-type": "text/plain; charset=utf-8" } });
   }
