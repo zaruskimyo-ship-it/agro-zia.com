@@ -58,7 +58,7 @@ test("customer thread preserves authenticated customer identity", () => {
 test("cross-party thread endpoints remain ownership-gated", () => {
   const supplier = fs.readFileSync("src/supplier/supplier-api.js", "utf8");
   const customer = fs.readFileSync("src/customer/transaction-api.js", "utf8");
-  assert.match(supplier, /WHERE id = \? AND supplier_id = \?/);
+  assert.match(supplier, /WHERE q\.id = \? AND q\.supplier_id = \?/);
   assert.match(customer, /quoteFor\(db,id,account\)/);
-  assert.match(customer, /r\.customer_account_id=\?/);
+  assert.match(customer, /r\.customer_account_id\s*=\s*\?/);
 });
