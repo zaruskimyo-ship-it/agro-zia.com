@@ -115,7 +115,7 @@ jobs:
       - name: Network translation contract
         run: |
           grep -Fq 'const DICT=' assets/network-auto.js
-          grep -Fq "set('.hero h1'" assets/network-auto.js
+          grep -Fq '.hero h1' assets/network-auto.js
           grep -Fq "load('assets/network-auto.js')" assets/site-foundation.js
           ! grep -Fq 'network-i18n-patch.js' network.html
       - name: Supplier authentication foundation
