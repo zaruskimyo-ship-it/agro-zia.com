@@ -54,7 +54,8 @@ const base = {
   buyer_email: "buyer@example.test",
 };
 
-const now = Date.parse("2026-09-10T12:00:00.000Z");
+// Keep the fixture deterministic while evaluating session freshness against the same clock.
+const now = Date.now();
 const tokenA = await createCustomerSession(ENV, IDS.customerA, now);
 assert.ok(tokenA);
 
