@@ -43,7 +43,14 @@ export async function createOrder(db, input, now = new Date().toISOString()) {
     if (!product || product.supplier_id !== supplier.id) throw new Error("invalid_order_product");
   }
 
-  const existing = await db.prepare("SELECT * FROM commerce_orders WHERE quote_id = ? LIMIT 1").bind(quote.id).first();
+  const existing = await db.prepare(
+    `SELECT id, order_number, quote_id, rfq_id, supplier_id, product_id, product_name,
+            quantity, currency, unit_price_minor, quoted_amount_minor, destination,
+            status, buyer_company, buyer_name, buyer_email, buyer_phone, created_at, updated_at
+       FROM commerce_orders
+      WHERE quote_id = ?
+      LIMIT 1`,
+  ).bind(quote.id).first();
   if (existing) return publicOrder(existing);
 
   const id = crypto.randomUUID();
@@ -66,7 +73,14 @@ export async function createOrder(db, input, now = new Date().toISOString()) {
       quote.buyer_phone || null, now, now,
     ).run();
   } catch (error) {
-    const duplicate = await db.prepare("SELECT * FROM commerce_orders WHERE quote_id = ? LIMIT 1").bind(quote.id).first();
+    const duplicate = await db.prepare(
+      `SELECT id, order_number, quote_id, rfq_id, supplier_id, product_id, product_name,
+              quantity, currency, unit_price_minor, quoted_amount_minor, destination,
+              status, buyer_company, buyer_name, buyer_email, buyer_phone, created_at, updated_at
+         FROM commerce_orders
+        WHERE quote_id = ?
+        LIMIT 1`,
+    ).bind(quote.id).first();
     if (duplicate) return publicOrder(duplicate);
     throw error;
   }
