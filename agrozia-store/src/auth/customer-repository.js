@@ -14,10 +14,10 @@ function base64ToBytes(value) {
   return Uint8Array.from(binary, (char) => char.charCodeAt(0));
 }
 
-async function derivePassword(password, saltBytes) {
+async function derivePassword(password, saltBytes, iterations = PBKDF2_ITERATIONS) {
   const key = await crypto.subtle.importKey("raw", encoder.encode(password), "PBKDF2", false, ["deriveBits"]);
   const bits = await crypto.subtle.deriveBits(
-    { name: "PBKDF2", salt: saltBytes, iterations: PBKDF2_ITERATIONS, hash: "SHA-256" },
+    { name: "PBKDF2", salt: saltBytes, iterations, hash: "SHA-256" },
     key,
     256
   );
@@ -34,7 +34,8 @@ export async function hashPassword(password) {
 export async function verifyPassword(password, record) {
   const salt = base64ToBytes(record.password_salt);
   const expected = base64ToBytes(record.password_hash);
-  const actual = await derivePassword(password, salt);
+  const iterations = Number(record.password_iterations) || PBKDF2_ITERATIONS;
+  const actual = await derivePassword(password, salt, iterations);
   if (actual.length !== expected.length) return false;
   let diff = 0;
   for (let i = 0; i < actual.length; i++) diff |= actual[i] ^ expected[i];
@@ -42,7 +43,7 @@ export async function verifyPassword(password, record) {
 }
 
 export async function findCustomerByEmail(db, email) {
-  return db.prepare("SELECT id, email, password_hash, password_salt, name, phone, company, country, role, status, email_verified_at, created_at, updated_at FROM customers WHERE email = ?1 LIMIT 1")
+  return db.prepare("SELECT id, email, password_hash, password_salt, password_iterations, name, phone, company, country, role, status, email_verified_at, created_at, updated_at FROM customers WHERE email = ?1 LIMIT 1")
     .bind(email).first();
 }
 
