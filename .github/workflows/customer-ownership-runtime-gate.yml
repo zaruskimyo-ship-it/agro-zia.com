@@ -1,0 +1,31 @@
+name: Customer Ownership Runtime Gate
+
+on:
+  push:
+    branches:
+      - feat/unified-quote-thread
+  pull_request:
+    branches:
+      - main
+    paths:
+      - "src/commerce/rfq-*.js"
+      - "src/customer/customer-auth.js"
+      - "scripts/customer-ownership-runtime-test.mjs"
+      - ".github/workflows/customer-ownership-runtime-gate.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  customer-ownership-runtime:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Customer ownership mock-D1 runtime gate
+        run: node scripts/customer-ownership-runtime-test.mjs
