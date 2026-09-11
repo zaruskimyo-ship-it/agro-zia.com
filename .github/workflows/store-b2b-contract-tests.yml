@@ -1,0 +1,27 @@
+name: Store B2B Contract Tests
+
+on:
+  push:
+    branches:
+      - feat/store-b2b-order
+  pull_request:
+    branches:
+      - feat/store-b2b-order
+
+jobs:
+  b2b-contract-tests:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: agrozia-store
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Run B2B contract tests
+        run: node --test tests/b2b-order-contract.test.js
