@@ -1,0 +1,28 @@
+name: Store Commerce Contract Tests
+
+on:
+  push:
+    branches:
+      - feat/store-b2b-order
+      - feat/store-admin-stage12
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  store-contract-tests:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: agrozia-store
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Run Store contract tests
+        run: node --test tests/b2b-order-contract.test.js tests/admin-session-contract.test.js tests/admin-product-contract.test.js tests/admin-product-api-shape.test.js tests/admin-supplier-contract.test.js tests/admin-supplier-repository-contract.test.js
