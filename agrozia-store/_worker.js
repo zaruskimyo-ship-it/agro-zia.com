@@ -12,7 +12,7 @@ import { handleOrders } from "./src/commerce/order-api.js";
 import { handleB2BOrders } from "./src/commerce/b2b-order-api.js";
 import { siteResponse } from "./src/site/store-site-shell.js";
 import { productsSiteResponse } from "./src/site/products-live-response.js";
-import { supplierSiteResponse } from "./src/site/supplier-site-shell.js";
+import { suppliersLiveResponse } from "./src/site/suppliers-live-response.js";
 import { rfqSiteResponse } from "./src/site/rfq-site-shell.js";
 import { cartSiteResponse } from "./src/site/cart-site-shell.js";
 import { checkoutSiteResponse } from "./src/site/checkout-site-shell.js";
@@ -75,7 +75,7 @@ export default {
       catch { return json({ ok: false, error: "b2b_order_service_unavailable" }, 503); }
     }
     if (request.method === "GET" && (url.pathname === "/products" || /^\/products\/[^/]+$/.test(url.pathname))) return productsSiteResponse(url.pathname);
-    if (request.method === "GET" && (url.pathname === "/suppliers" || url.pathname.startsWith("/suppliers/"))) return supplierSiteResponse(url.pathname);
+    if (request.method === "GET" && (url.pathname === "/suppliers" || url.pathname.startsWith("/suppliers/"))) return suppliersLiveResponse(url.pathname);
     if (request.method === "GET" && (url.pathname === "/rfq" || url.pathname === "/rfq/review")) return rfqSiteResponse(url.pathname);
     if (request.method === "GET" && url.pathname === "/cart") return cartSiteResponse(url.pathname);
     if (request.method === "GET" && (url.pathname === "/checkout" || url.pathname === "/checkout/review" || url.pathname === "/checkout/confirmation")) return checkoutSiteResponse(url.pathname);
