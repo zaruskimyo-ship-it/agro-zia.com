@@ -1,0 +1,8 @@
+{
+  "name": "agro-zia-store",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test:b2b": "node --test tests/b2b-order-contract.test.js"
+  }
+}
