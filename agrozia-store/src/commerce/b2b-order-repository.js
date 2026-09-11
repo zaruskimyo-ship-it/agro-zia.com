@@ -11,7 +11,7 @@ async function loadQuote(db, customerId, quoteId) {
       q.quantity, q.unit_price_minor, q.currency, q.packaging_cost_minor, q.shipping_cost_minor,
       q.insurance_cost_minor, q.other_fees_minor, q.total_amount_minor, q.lead_time, q.validity_until,
       q.payment_terms, q.incoterm, q.destination, q.notes, q.status,
-      r.customer_id AS rfq_customer_id, r.status AS rfq_status,
+      r.customer_id AS rfq_customer_id, r.status AS rfq_status, r.product_id AS rfq_product_id,
       s.status AS supplier_status,
       p.status AS product_status
     FROM commerce_quotes q
@@ -48,6 +48,7 @@ function quoteStillValid(quote) {
   if (quote.supplier_status !== "published") throw new Error("supplier_not_available");
   if (quote.product_id && quote.product_status !== "published") throw new Error("product_not_available");
   if (!quote.rfq_customer_id) throw new Error("invalid_quote_rfq");
+  if (quote.rfq_product_id !== quote.product_id) throw new Error("invalid_order_product");
 }
 
 export async function createB2BOrder(db, customer, quoteId) {
@@ -66,10 +67,6 @@ export async function createB2BOrder(db, customer, quoteId) {
   quoteStillValid(quote);
   const match = await hasActiveMatch(db, quote.rfq_id, quote.supplier_id);
   if (!match) throw new Error("supplier_match_required");
-  if (quote.product_id) {
-    const rfq = await db.prepare(`SELECT product_id FROM commerce_rfqs WHERE id = ?1 LIMIT 1`).bind(quote.rfq_id).first();
-    if (rfq?.product_id && rfq.product_id !== quote.product_id) throw new Error("invalid_order_product");
-  }
 
   const orderId = crypto.randomUUID();
   const orderNumber = `AGZ-B2B-${new Date().toISOString().replace(/[-:TZ.]/g, "").slice(0, 14)}-${orderId.slice(0, 8).toUpperCase()}`;
