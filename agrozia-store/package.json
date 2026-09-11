@@ -3,6 +3,8 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "test:b2b": "node --test tests/b2b-order-contract.test.js"
+    "test": "node --test tests/*.test.js",
+    "test:b2b": "node --test tests/b2b-order-contract.test.js",
+    "test:admin": "node --test tests/admin-session-contract.test.js"
   }
 }
