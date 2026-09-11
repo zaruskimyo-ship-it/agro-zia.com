@@ -63,7 +63,7 @@ export async function createQuote(db, input, now = new Date().toISOString()) {
 
   const productName = product?.name || rfq.product_name;
   const quantity = normalized.quantity || rfq.quantity || "";
-  const total = calculateTotalMinor(normalized);
+  const total = calculateTotalMinor({ ...normalized, quantity });
   if (total == null) throw new Error("invalid_quote_total");
 
   const id = crypto.randomUUID();
@@ -74,15 +74,16 @@ export async function createQuote(db, input, now = new Date().toISOString()) {
     `INSERT INTO commerce_quotes (
       id, quote_number, rfq_id, supplier_id, product_id, product_name, quantity,
       unit_price_minor, currency, packaging_cost_minor, shipping_cost_minor,
-      insurance_cost_minor, other_fees_minor, total_amount_minor, lead_time,
-      validity_until, payment_terms, incoterm, destination, notes, status,
-      created_at, updated_at
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      insurance_cost_minor, other_fees_minor, inflation_adjustment_minor,
+      inflation_adjustment_bps, total_amount_minor, lead_time, validity_until,
+      payment_terms, incoterm, destination, notes, status, created_at, updated_at
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
   ).bind(
     id, quoteNumber, rfq.id, supplier.id, product?.id || null, productName, quantity,
     normalized.unit_price_minor, normalized.currency, normalized.packaging_cost_minor,
     normalized.shipping_cost_minor, normalized.insurance_cost_minor, normalized.other_fees_minor,
-    total, normalized.lead_time, normalized.validity_until, normalized.payment_terms,
+    normalized.inflation_adjustment_minor, normalized.inflation_adjustment_bps, total,
+    normalized.lead_time, normalized.validity_until, normalized.payment_terms,
     normalized.incoterm, normalized.destination || rfq.destination_location || rfq.destination_country || null,
     normalized.notes, status, now, now,
   ).run();
