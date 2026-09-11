@@ -20,3 +20,20 @@ test("site shell supports the planned primary pages", () => {
     assert.match(html, /footer/);
   }
 });
+
+test("products page exposes catalog structure and product cards", () => {
+  const html = storeSiteShell("/products");
+  assert.match(html, /PRODUCT CATALOG|Browse the Agro-Zia catalog/);
+  assert.match(html, /NPK Fertilizer/);
+  assert.match(html, /href="\/products\/1"/);
+  assert.match(html, /Need a specific product/);
+});
+
+test("product detail route exposes technical and commercial structure", () => {
+  const html = storeSiteShell("/products/1");
+  assert.match(html, /NPK Fertilizer/);
+  assert.match(html, /Specification/);
+  assert.match(html, /Commercial terms/);
+  assert.match(html, /Add to Cart/);
+  assert.match(html, /Request a Quote/);
+});
