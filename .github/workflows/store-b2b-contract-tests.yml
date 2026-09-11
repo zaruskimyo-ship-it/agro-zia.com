@@ -1,15 +1,16 @@
-name: Store B2B Contract Tests
+name: Store Commerce Contract Tests
 
 on:
   push:
     branches:
       - feat/store-b2b-order
+      - feat/store-admin-stage12
   pull_request:
     branches:
       - main
 
 jobs:
-  b2b-contract-tests:
+  store-contract-tests:
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -23,5 +24,5 @@ jobs:
         with:
           node-version: 22
 
-      - name: Run B2B contract tests
-        run: node --test tests/b2b-order-contract.test.js
+      - name: Run Store contract tests
+        run: node --test tests/b2b-order-contract.test.js tests/admin-session-contract.test.js
