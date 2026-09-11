@@ -33,12 +33,47 @@
     });
   }
 
+  function enhanceMobileFields(form) {
+    const fields = [
+      ['product','off','text'], ['company','organization','text'], ['specification','off','text'],
+      ['quantity','off','text'], ['destination','off','text'], ['timing','off','text'],
+      ['email','email','email'], ['phone','tel','tel']
+    ];
+    for (const [name, autocomplete, inputMode] of fields) {
+      const input = form.elements.namedItem(name);
+      if (!input || input.tagName !== 'INPUT') continue;
+      input.setAttribute('autocomplete', autocomplete);
+      input.setAttribute('inputmode', inputMode);
+      input.style.minHeight = '44px';
+      input.style.width = '100%';
+      input.style.boxSizing = 'border-box';
+    }
+    const textarea = form.elements.namedItem('message');
+    if (textarea) {
+      textarea.style.minHeight = '140px';
+      textarea.style.width = '100%';
+      textarea.style.boxSizing = 'border-box';
+    }
+    const fileInput = form.querySelector('#inquiry-file');
+    if (fileInput) {
+      fileInput.style.minHeight = '44px';
+      fileInput.style.width = '100%';
+      fileInput.style.boxSizing = 'border-box';
+    }
+    const submit = form.querySelector('button[type="submit"]');
+    if (submit) {
+      submit.style.minHeight = '44px';
+      submit.style.width = '100%';
+    }
+  }
+
   const escapeHtml = (value) => String(value ?? '').replace(/[&<>"']/g, (char) => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[char]));
   function install() {
     installSharedNavigation();
     const form = document.getElementById('rfq');
     if (!form || form.dataset.agzInquiryUx === 'true') return;
     form.dataset.agzInquiryUx = 'true';
+    enhanceMobileFields(form);
     const button = form.querySelector('button[type="submit"]'); const result = form.querySelector('#result'); const fileInput = form.querySelector('#inquiry-file');
     if (!button || !result) return;
     const setResult = (message, error = false) => { result.className = error ? 'result show error' : 'result show'; result.textContent = message; };
