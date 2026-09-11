@@ -1,60 +1,6 @@
-function cookieToken(request) {
-  const value = request.headers.get("Cookie") ?? "";
-  const match = value.match(/(?:^|;\s*)agz_customer_session=([^;]+)/);
-  return match ? decodeURIComponent(match[1]) : null;
-}
-export { cookieToken };
-
-async function requireCustomer(db, request) {
-  const { getCustomerFromSession } = await import("../auth/customer-repository.js");
-  const customer = await getCustomerFromSession(db, cookieToken(request));
-  if (!customer) throw new Error("authentication_required");
-  return customer;
-}
-
-const COLUMNS = `q.id, q.quote_number, q.rfq_id, q.supplier_id, q.product_id, q.product_name, q.quantity,
-  q.unit_price_minor, q.currency, q.packaging_cost_minor, q.shipping_cost_minor, q.insurance_cost_minor,
-  q.other_fees_minor, q.total_amount_minor, q.lead_time, q.validity_until, q.payment_terms, q.incoterm,
-  q.destination, q.notes, q.status, q.created_at, q.updated_at, s.name AS supplier_name`;
-
-export async function listCustomerQuotes(db, request) {
-  const customer = await requireCustomer(db, request);
-  const result = await db.prepare(`SELECT ${COLUMNS} FROM commerce_quotes q
-    JOIN commerce_rfqs r ON r.id=q.rfq_id
-    JOIN commerce_suppliers s ON s.id=q.supplier_id
-    WHERE r.customer_id=?1 ORDER BY q.created_at DESC`).bind(customer.id).all();
-  return result.results ?? [];
-}
-
-export async function getCustomerQuote(db, request, quoteId) {
-  const customer = await requireCustomer(db, request);
-  return db.prepare(`SELECT ${COLUMNS} FROM commerce_quotes q
-    JOIN commerce_rfqs r ON r.id=q.rfq_id
-    JOIN commerce_suppliers s ON s.id=q.supplier_id
-    WHERE q.id=?1 AND r.customer_id=?2 LIMIT 1`).bind(String(quoteId ?? "").trim(), customer.id).first();
-}
-
-export async function acceptCustomerQuote(db, request, quoteId) {
-  const customer = await requireCustomer(db, request);
-  const quote = await db.prepare(`SELECT q.id,q.rfq_id,q.supplier_id,q.product_id,q.status,q.validity_until,
-      r.customer_id,r.product_id AS rfq_product_id,r.status AS rfq_status,
-      s.status AS supplier_status,p.status AS product_status
-    FROM commerce_quotes q JOIN commerce_rfqs r ON r.id=q.rfq_id JOIN commerce_suppliers s ON s.id=q.supplier_id
-    LEFT JOIN commerce_products p ON p.id=q.product_id
-    WHERE q.id=?1 AND r.customer_id=?2 LIMIT 1`).bind(String(quoteId ?? "").trim(), customer.id).first();
-  if (!quote) throw new Error("quote_not_found");
-  if (quote.status !== "sent") throw new Error("quote_not_acceptible");
-  if (quote.validity_until && new Date(quote.validity_until).getTime() <= Date.now()) throw new Error("quote_expired");
-  if (quote.supplier_status !== "published") throw new Error("supplier_not_available");
-  if (quote.product_id && quote.product_status !== "published") throw new Error("product_not_available");
-  if (quote.rfq_product_id !== quote.product_id) throw new Error("invalid_order_product");
-  const match = await db.prepare(`SELECT id FROM commerce_rfq_supplier_matches WHERE rfq_id=?1 AND supplier_id=?2 AND status='matched' LIMIT 1`).bind(quote.rfq_id,quote.supplier_id).first();
-  if (!match) throw new Error("supplier_match_required");
-  const now = new Date().toISOString();
-  await db.batch([
-    db.prepare("UPDATE commerce_quotes SET status='rejected', updated_at=?1 WHERE rfq_id=?2 AND id<>?3 AND status IN ('sent','draft')").bind(now,quote.rfq_id,quote.id),
-    db.prepare("UPDATE commerce_quotes SET status='accepted', updated_at=?1 WHERE id=?2 AND status='sent'").bind(now,quote.id),
-    db.prepare("UPDATE commerce_rfqs SET status='quoted', updated_at=?2 WHERE id=?1 AND status IN ('matched','negotiating','quoted')").bind(quote.rfq_id,now)
-  ]);
-  return getCustomerQuote(db, request, quote.id);
-}
+function cookieToken(request){const value=request.headers.get("Cookie")??"";const match=value.match(/(?:^|;\s*)agz_customer_session=([^;]+)/);return match?decodeURIComponent(match[1]):null}
+async function requireCustomer(db,request){const {getCustomerFromSession}=await import("../auth/customer-repository.js");const customer=await getCustomerFromSession(db,cookieToken(request));if(!customer)throw new Error("authentication_required");return customer}
+const COLUMNS=`q.id,q.quote_number,q.rfq_id,q.supplier_id,q.product_id,q.product_name,q.quantity,q.unit_price_minor,q.currency,q.packaging_cost_minor,q.shipping_cost_minor,q.insurance_cost_minor,q.other_fees_minor,q.total_amount_minor,q.lead_time,q.validity_until,q.payment_terms,q.incoterm,q.destination,q.notes,q.status,q.created_at,q.updated_at,s.name AS supplier_name`;
+export async function listCustomerQuotes(db,request){const customer=await requireCustomer(db,request);const result=await db.prepare(`SELECT ${COLUMNS} FROM commerce_quotes q JOIN commerce_rfqs r ON r.id=q.rfq_id JOIN commerce_suppliers s ON s.id=q.supplier_id WHERE r.customer_id=?1 ORDER BY q.created_at DESC`).bind(customer.id).all();return result.results??[]}
+export async function getCustomerQuote(db,request,quoteId){const customer=await requireCustomer(db,request);return db.prepare(`SELECT ${COLUMNS} FROM commerce_quotes q JOIN commerce_rfqs r ON r.id=q.rfq_id JOIN commerce_suppliers s ON s.id=q.supplier_id WHERE q.id=?1 AND r.customer_id=?2 LIMIT 1`).bind(String(quoteId??"").trim(),customer.id).first()}
+export async function acceptCustomerQuote(db,request,quoteId){const customer=await requireCustomer(db,request);const quote=await db.prepare(`SELECT q.id,q.rfq_id,q.supplier_id,q.product_id,q.status,q.validity_until,r.customer_id,r.product_id AS rfq_product_id,r.status AS rfq_status,s.status AS supplier_status,p.status AS product_status FROM commerce_quotes q JOIN commerce_rfqs r ON r.id=q.rfq_id JOIN commerce_suppliers s ON s.id=q.supplier_id LEFT JOIN commerce_products p ON p.id=q.product_id WHERE q.id=?1 AND r.customer_id=?2 LIMIT 1`).bind(String(quoteId??"").trim(),customer.id).first();if(!quote)throw new Error("quote_not_found");if(quote.status!=="sent")throw new Error("quote_not_acceptable");if(quote.validity_until&&new Date(quote.validity_until).getTime()<=Date.now())throw new Error("quote_expired");if(quote.supplier_status!=="published")throw new Error("supplier_not_available");if(quote.product_id&&quote.product_status!=="published")throw new Error("product_not_available");if(quote.rfq_product_id!==quote.product_id)throw new Error("invalid_order_product");const match=await db.prepare(`SELECT id FROM commerce_rfq_supplier_matches WHERE rfq_id=?1 AND supplier_id=?2 AND status='matched' LIMIT 1`).bind(quote.rfq_id,quote.supplier_id).first();if(!match)throw new Error("supplier_match_required");const now=new Date().toISOString();await db.batch([db.prepare("UPDATE commerce_quotes SET status='rejected',updated_at=?1 WHERE rfq_id=?2 AND id<>?3 AND status IN ('sent','draft')").bind(now,quote.rfq_id,quote.id),db.prepare("UPDATE commerce_quotes SET status='accepted',updated_at=?1 WHERE id=?2 AND status='sent'").bind(now,quote.id),db.prepare("UPDATE commerce_rfqs SET status='quoted',updated_at=?2 WHERE id=?1 AND status IN ('matched','negotiating','quoted')").bind(quote.rfq_id,now)]);return getCustomerQuote(db,request,quote.id)}
