@@ -10,6 +10,7 @@ import { handleCheckout } from "./src/commerce/checkout-api.js";
 import { handleOrders } from "./src/commerce/order-api.js";
 import { handleB2BOrders } from "./src/commerce/b2b-order-api.js";
 import { siteResponse } from "./src/site/store-site-shell.js";
+import { productsSiteResponse } from "./src/site/products-live-response.js";
 import { supplierSiteResponse } from "./src/site/supplier-site-shell.js";
 import { rfqSiteResponse } from "./src/site/rfq-site-shell.js";
 import { cartSiteResponse } from "./src/site/cart-site-shell.js";
@@ -69,6 +70,7 @@ export default {
       try { const response = await handleB2BOrders(request, env, url.pathname); if (response) return response; }
       catch { return json({ ok: false, error: "b2b_order_service_unavailable" }, 503); }
     }
+    if (request.method === "GET" && (url.pathname === "/products" || /^\/products\/[^/]+$/.test(url.pathname))) return productsSiteResponse(url.pathname);
     if (request.method === "GET" && (url.pathname === "/suppliers" || url.pathname.startsWith("/suppliers/"))) return supplierSiteResponse(url.pathname);
     if (request.method === "GET" && (url.pathname === "/rfq" || url.pathname === "/rfq/review")) return rfqSiteResponse(url.pathname);
     if (request.method === "GET" && url.pathname === "/cart") return cartSiteResponse(url.pathname);
