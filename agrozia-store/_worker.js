@@ -1,6 +1,7 @@
 import { handleCustomerAuth } from "./src/auth/customer-auth.js";
 import { handleAdminAuth } from "./src/auth/admin-auth.js";
 import { handleStoreAdminProducts } from "./src/commerce/store-admin-product-api.js";
+import { handleStoreAdminSuppliers } from "./src/commerce/store-admin-supplier-api.js";
 import { handlePublicProducts } from "./src/commerce/product-api.js";
 import { handleStoreRfqs } from "./src/commerce/rfq-api.js";
 import { handleCart } from "./src/commerce/cart-api.js";
@@ -26,6 +27,8 @@ export default {
         if (authResponse) return authResponse;
         const productResponse = await handleStoreAdminProducts(request, env, url.pathname);
         if (productResponse) return productResponse;
+        const supplierResponse = await handleStoreAdminSuppliers(request, env, url.pathname);
+        if (supplierResponse) return supplierResponse;
       } catch { return json({ ok: false, error: "store_admin_service_unavailable" }, 503); }
     }
     if (url.pathname.startsWith("/api/customer/") && url.pathname !== "/api/customer/rfqs") {
