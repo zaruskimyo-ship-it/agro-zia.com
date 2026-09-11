@@ -4,6 +4,7 @@ import { handleStoreAdminProducts } from "./src/commerce/store-admin-product-api
 import { handleStoreAdminSuppliers } from "./src/commerce/store-admin-supplier-api.js";
 import { handleStoreAdminMatches } from "./src/commerce/store-admin-match-api.js";
 import { handlePublicProducts } from "./src/commerce/product-api.js";
+import { handlePublicSuppliers } from "./src/commerce/supplier-public-api.js";
 import { handleStoreRfqs } from "./src/commerce/rfq-api.js";
 import { handleCart } from "./src/commerce/cart-api.js";
 import { handleCheckout } from "./src/commerce/checkout-api.js";
@@ -49,6 +50,9 @@ export default {
     }
     if (url.pathname === "/api/products" || url.pathname.startsWith("/api/products/") || url.pathname === "/api/categories") {
       const response = await handlePublicProducts(request, env, url.pathname); if (response) return response;
+    }
+    if (url.pathname === "/api/suppliers" || url.pathname.startsWith("/api/suppliers/")) {
+      const response = await handlePublicSuppliers(request, env, url.pathname); if (response) return response;
     }
     if (url.pathname === "/api/rfqs" || url.pathname === "/api/customer/rfqs") {
       try { const response = await handleStoreRfqs(request, env, url.pathname); if (response) return response; }
