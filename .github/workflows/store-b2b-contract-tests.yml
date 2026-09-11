@@ -25,4 +25,4 @@ jobs:
           node-version: 22
 
       - name: Run Store contract tests
-        run: node --test tests/b2b-order-contract.test.js tests/admin-session-contract.test.js tests/admin-product-contract.test.js tests/admin-product-api-shape.test.js tests/admin-supplier-contract.test.js
+        run: node --test tests/b2b-order-contract.test.js tests/admin-session-contract.test.js tests/admin-product-contract.test.js tests/admin-product-api-shape.test.js tests/admin-supplier-contract.test.js tests/admin-supplier-repository-contract.test.js
