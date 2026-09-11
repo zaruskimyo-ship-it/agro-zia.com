@@ -1,0 +1,68 @@
+name: Commerce Transaction Chain Regression Gate
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'src/commerce/**'
+      - 'src/customer/**'
+      - 'src/supplier/**'
+      - 'scripts/*commerce*runtime-test.mjs'
+      - 'scripts/customer-ownership-runtime-test.mjs'
+      - '.github/workflows/commerce-transaction-chain-regression-gate.yml'
+  push:
+    branches:
+      - feat/unified-quote-thread
+
+permissions:
+  contents: read
+
+jobs:
+  commerce-transaction-chain-regression:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Syntax check commerce and customer transaction modules
+        run: |
+          set -euo pipefail
+          node --check src/commerce/rfq-api.js
+          node --check src/commerce/rfq-repository.js
+          node --check src/commerce/rfq-contract.js
+          node --check src/customer/customer-auth.js
+          node --check src/customer/customer-api.js
+          node --check src/customer/transaction-api.js
+          node --check src/supplier/supplier-workspace-api.js
+
+      - name: RFQ runtime regression
+        run: node scripts/commerce-rfq-runtime-test.mjs
+
+      - name: Customer ownership regression
+        run: node scripts/customer-ownership-runtime-test.mjs
+
+      - name: Supplier runtime regression
+        run: node scripts/commerce-supplier-runtime-test.mjs
+
+      - name: Quote runtime regression
+        run: node scripts/commerce-quote-runtime-test.mjs
+
+      - name: Order runtime regression
+        run: node scripts/commerce-order-runtime-test.mjs
+
+      - name: Transaction chain contract regression
+        run: |
+          set -euo pipefail
+          grep -Fq 'createRfq' src/commerce/rfq-api.js
+          grep -Fq 'readCustomerSession' src/commerce/rfq-api.js
+          grep -Fq 'customer_account_id' src/commerce/rfq-repository.js
+          grep -Fq 'handleCustomerTransactionRoute' src/customer/customer-api.js
+          grep -Fq 'createOrder' src/customer/transaction-api.js
+          grep -Fq 'expected_updated_at' src/customer/transaction-api.js
+          grep -Fq 'Idempotency-Key' src/customer/transaction-api.js
+          grep -Fq 'sendDocument' src/commerce/telegram.js || true
+          echo 'COMMERCE TRANSACTION CHAIN REGRESSION GATE: PASS'

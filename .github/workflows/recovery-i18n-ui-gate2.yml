@@ -1,0 +1,145 @@
+name: Recovery I18N UI Gate 2
+
+on:
+  push:
+    branches:
+      - feat/recovery-4fe4c1d8-i18n
+      - feat/recovery-i18n-country-clock
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  recovery-ui:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: JavaScript syntax
+        run: |
+          node --check assets/site-foundation.js
+          node --check assets/world-clock.js
+          node --check assets/public-pages-auto.js
+          node --check assets/about-auto.js
+          node --check assets/trade-auto.js
+          node --check assets/network-auto.js
+          node --check assets/zarus-language.js
+          node --check assets/zarus-product.js
+          node --check assets/zarus-supplier.js
+          node --check assets/zarus-rfq.js
+          node --check assets/zarus-marketplace.js
+          node --check assets/zarus-supplier-operations.js
+          node --check assets/floating-nav.js
+          node --check assets/bottom-actions.js
+          node --check locales/language-selector.js
+          node --check src/supplier/supplier-auth.js
+          node --check src/supplier/supplier-ownership.js
+      - name: Shared UI assets
+        run: |
+          test -s assets/floating-nav.css
+          test -s assets/floating-nav.js
+          test -s assets/bottom-actions.css
+          test -s assets/bottom-actions.js
+          test -s assets/world-clock.css
+          test -s assets/world-clock.js
+          grep -q 'z-index:1200' assets/floating-nav.css
+          grep -q 'Chat Online' assets/bottom-actions.js
+          grep -q 'Request Inquiry' assets/bottom-actions.js
+          grep -q 'گفتگوی آنلاین' assets/bottom-actions.js
+          grep -q 'درخواست استعلام' assets/bottom-actions.js
+      - name: Header clock integration
+        run: |
+          grep -q "loadStyle('/assets/world-clock.css')" assets/site-foundation.js
+          grep -q "load('/assets/world-clock.js')" assets/site-foundation.js
+          grep -q "nav.insertBefore(el, menu)" assets/world-clock.js
+          grep -q 'position:relative' assets/world-clock.css
+          grep -q 'order:3' assets/world-clock.css
+          grep -q "zone: 'Asia/Tehran'" assets/world-clock.js
+          grep -q "zone: 'Asia/Tashkent'" assets/world-clock.js
+          grep -q "zone: 'Europe/Istanbul'" assets/world-clock.js
+          grep -q "zone: 'Europe/Moscow'" assets/world-clock.js
+      - name: Public site integration
+        run: |
+          grep -q 'assets/floating-nav.css' assets/site-foundation.js
+          grep -q 'assets/bottom-actions.css' assets/site-foundation.js
+          grep -q 'assets/floating-nav.js' assets/site-foundation.js
+          grep -q 'assets/bottom-actions.js' assets/site-foundation.js
+          grep -q 'assets/world-clock.css' assets/site-foundation.js
+          grep -q 'assets/world-clock.js' assets/site-foundation.js
+          grep -q 'assets/site-foundation.js' index.html
+      - name: Legacy localized page integration
+        run: |
+          grep -q "loadCss('assets/floating-nav.css')" locales/language-selector.js
+          grep -q "loadCss('assets/bottom-actions.css')" locales/language-selector.js
+          grep -q "loadCss('assets/world-clock.css')" locales/language-selector.js
+          grep -q "loadJs('assets/floating-nav.js')" locales/language-selector.js
+          grep -q "loadJs('assets/bottom-actions.js')" locales/language-selector.js
+          grep -q "loadJs('assets/world-clock.js')" locales/language-selector.js
+          for page in products.html knowledge.html company.html services.html markets.html inquiry.html; do
+            grep -q 'locales/language-selector.js' "$page"
+          done
+      - name: Country language link contract
+        run: |
+          grep -q '/trade.html?lang=fa' index.html
+          grep -q '/trade.html?lang=ar' index.html
+          grep -q '/trade.html?lang=uz' index.html
+          grep -q '/trade.html?lang=tr' index.html
+          grep -q '/trade.html?lang=en' index.html
+          grep -Fq "link.closest('.markets')" assets/site-foundation.js
+      - name: ZARUS marketplace integration
+        run: |
+          for page in zarus.html zarus-product.html zarus-supplier.html zarus-rfq.html; do
+            grep -q 'assets/floating-nav.css' "$page"
+            grep -q 'assets/floating-nav.js' "$page"
+            grep -q 'assets/bottom-actions.css' "$page"
+            grep -q 'assets/bottom-actions.js' "$page"
+            grep -q 'assets/zarus-language.js' "$page"
+          done
+          grep -q 'class="z-language"' zarus.html
+      - name: Supplier workspace shared UI
+        run: |
+          grep -q 'assets/floating-nav.css' zarus-supplier-workspace.html
+          grep -q 'assets/floating-nav.js' zarus-supplier-workspace.html
+          grep -q 'assets/bottom-actions.css' zarus-supplier-workspace.html
+          grep -q 'assets/bottom-actions.js' zarus-supplier-workspace.html
+          grep -q 'assets/world-clock.css' zarus-supplier-workspace.html
+          grep -q 'assets/world-clock.js' zarus-supplier-workspace.html
+          grep -q 'assets/zarus-language.js' zarus-supplier-workspace.html
+          grep -q 'assets/zarus-supplier-operations.js' zarus-supplier-workspace.html
+      - name: Network translation contract
+        run: |
+          set -u
+          printf '%s\n' '--- Network translation gate diagnostics ---'
+          printf 'network.html sha: '; sha256sum network.html | cut -d' ' -f1
+          printf 'network-auto.js sha: '; sha256sum assets/network-auto.js | cut -d' ' -f1
+          grep -Fq 'const DICT=' assets/network-auto.js || { echo 'FAIL: const DICT= missing'; exit 1; }
+          grep -Fq '.hero h1' assets/network-auto.js || { echo 'FAIL: .hero h1 selector missing'; exit 1; }
+          grep -Fq "load('/assets/network-auto.js')" assets/site-foundation.js || { echo 'FAIL: network-auto.js loader missing'; exit 1; }
+          if grep -Fq 'network-i18n-patch.js' network.html; then
+            echo 'FAIL: obsolete network-i18n-patch.js reference remains in network.html'
+            exit 1
+          fi
+          echo 'PASS: all Network translation assertions'
+      - name: Supplier authentication foundation
+        run: |
+          test -s migrations/0011_supplier_accounts.sql
+          grep -Fq 'CREATE TABLE IF NOT EXISTS supplier_accounts' migrations/0011_supplier_accounts.sql
+          grep -Fq 'CREATE TABLE IF NOT EXISTS supplier_login_challenges' migrations/0011_supplier_accounts.sql
+          grep -Fq 'SUPPLIER_SESSION_SECRET' src/supplier/supplier-auth.js
+          grep -Fq 'agz_supplier_session' src/supplier/supplier-auth.js
+          grep -Fq 'HttpOnly; Secure; SameSite=Lax' src/supplier/supplier-auth.js
+          grep -Fq 'readSupplierSession' src/supplier/supplier-ownership.js
+          grep -Fq 'supplier_forbidden' src/supplier/supplier-ownership.js
+      - name: Language and RTL contract
+        run: |
+          grep -q 'supported = new Set.*en.*fa.*ar.*uz.*tr.*ru' assets/zarus-language.js
+          grep -q 'rtl = new Set.*fa.*ar' assets/zarus-language.js
+          grep -q 'document.documentElement.lang = lang' assets/zarus-language.js
+          grep -q 'document.documentElement.dir' assets/zarus-language.js
+          grep -q "searchParams.set('lang', next)" assets/zarus-language.js

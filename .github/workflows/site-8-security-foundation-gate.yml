@@ -1,0 +1,38 @@
+name: SITE-8 Security Foundation Gate
+
+on:
+  push:
+    branches: [feat/unified-quote-thread]
+    paths:
+      - 'tests/supplier-security-foundation.test.mjs'
+      - 'src/supplier/supplier-auth.js'
+      - 'src/supplier/supplier-ownership.js'
+      - 'src/supplier/supplier-messaging-api.js'
+      - 'src/customer/transaction-api.js'
+      - '.github/workflows/site-8-security-foundation-gate.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'tests/supplier-security-foundation.test.mjs'
+      - 'src/supplier/**'
+      - 'src/customer/transaction-api.js'
+      - '.github/workflows/site-8-security-foundation-gate.yml'
+
+jobs:
+  security:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: JavaScript syntax
+        run: |
+          node --check src/supplier/supplier-auth.js
+          node --check src/supplier/supplier-ownership.js
+          node --check src/supplier/supplier-messaging-api.js
+          node --check src/customer/transaction-api.js
+          node --check tests/supplier-security-foundation.test.mjs
+      - name: Security foundation tests
+        run: node --test tests/supplier-security-foundation.test.mjs

@@ -1,0 +1,87 @@
+name: Public Commercial Pages Gate
+
+on:
+  push:
+    branches:
+      - feat/unified-quote-thread
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'index.html'
+      - 'about.html'
+      - 'products.html'
+      - 'engineering.html'
+      - 'projects.html'
+      - 'trade.html'
+      - 'knowledge.html'
+      - 'contact.html'
+      - 'legal.html'
+      - 'zarus.html'
+      - 'zarus-marketplace.html'
+      - '.github/workflows/public-commercial-pages-gate.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  public-commercial-pages:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Required public pages
+        run: |
+          set -euo pipefail
+          for page in index.html about.html products.html engineering.html projects.html trade.html knowledge.html contact.html legal.html zarus.html inquiry.html suppliers.html; do
+            test -s "$page"
+          done
+
+      - name: Core commercial CTA contract
+        run: |
+          set -euo pipefail
+          grep -q 'href="/inquiry.html"' index.html
+          grep -q 'data-rfq-link' products.html
+          grep -q 'href="/contact.html"' engineering.html
+          grep -q 'href="/inquiry.html"' projects.html
+          grep -q 'href="/inquiry.html"' trade.html
+          grep -q 'href="/inquiry.html"' contact.html
+
+      - name: Current ZARUS marketplace alias contract
+        run: |
+          set -euo pipefail
+          grep -q 'rel="canonical" href="https://agro-zia.com/zarus.html"' zarus-marketplace.html
+          grep -q "location.replace('/zarus.html'" zarus-marketplace.html
+          grep -q 'noindex' zarus-marketplace.html
+
+      - name: Public navigation contract
+        run: |
+          set -euo pipefail
+          for page in index.html about.html products.html engineering.html projects.html trade.html knowledge.html contact.html; do
+            grep -q '<nav' "$page"
+            grep -Eq 'href="/' "$page"
+          done
+          grep -q 'href="/products.html"' index.html
+          grep -q 'href="/contact.html"' index.html
+          grep -q 'href="/zarus.html"' index.html
+
+      - name: Commercial page content contract
+        run: |
+          set -euo pipefail
+          grep -Fq 'Requirement' projects.html
+          grep -Fq 'Assessment' projects.html
+          grep -Fq 'Solution' projects.html
+          grep -Fq 'Delivery' projects.html
+          grep -Fq 'No invented success stories.' projects.html
+          grep -Fq 'Start with the requirement.' contact.html
+          grep -Fq 'Requirement' contact.html
+          grep -Fq 'Review' contact.html
+          grep -Fq 'Response' contact.html
+          grep -Fq 'WHAT HAPPENS NEXT' contact.html
+
+      - name: No accidental production deployment configuration
+        run: |
+          set -euo pipefail
+          test ! -f .dev.vars
+          ! grep -RIn --exclude-dir=.git --exclude='*.md' -E 'TELEGRAM_BOT_TOKEN_V2[[:space:]]*[:=][[:space:]]*[^$A-Z[:space:]]' . || true

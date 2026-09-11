@@ -1,0 +1,38 @@
+name: Cloudflare Preview Deploy Contract
+
+on:
+  push:
+    branches:
+      - feat/site-8-supplier-operations
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'scripts/cloudflare-preview-upload.sh'
+      - 'wrangler.jsonc'
+      - '.github/workflows/cloudflare-preview-deploy-contract.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Validate preview upload script
+        run: |
+          # Keep this contract on the same feature branch as the corrected
+          # Workers Builds preview command so the next Cloudflare build uses
+          # the current branch head rather than an older queued revision.
+          bash -n scripts/cloudflare-preview-upload.sh
+          grep -q '^npx wrangler versions upload$' scripts/cloudflare-preview-upload.sh
+          ! grep -q 'secrets-file' scripts/cloudflare-preview-upload.sh
+          ! grep -q 'ADMIN_PASSWORD:?ADMIN_PASSWORD build secret is required' scripts/cloudflare-preview-upload.sh
+          ! grep -q 'ADMIN_SESSION_SECRET:?ADMIN_SESSION_SECRET build secret is required' scripts/cloudflare-preview-upload.sh
+          ! grep -q '"required"' wrangler.jsonc
+          grep -q 'preview_urls.*true' wrangler.jsonc

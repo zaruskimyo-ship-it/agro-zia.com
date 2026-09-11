@@ -1,0 +1,76 @@
+-- First real ZARUS catalog product seed.
+-- Intentionally conservative: no supplier, price, MOQ, origin, capacity,
+-- certification, or lead-time claims are invented.
+
+INSERT OR IGNORE INTO commerce_categories (
+  id, parent_id, slug, name, status, created_at, updated_at
+) VALUES (
+  'cat-fertilizers-plant-nutrition',
+  NULL,
+  'fertilizers-plant-nutrition',
+  'Fertilizers & Plant Nutrition',
+  'published',
+  '2026-09-11T00:00:00Z',
+  '2026-09-11T00:00:00Z'
+);
+
+INSERT OR IGNORE INTO commerce_products (
+  id,
+  slug,
+  name,
+  brand,
+  category_id,
+  status,
+  origin_country,
+  moq,
+  unit,
+  availability_status,
+  lead_time,
+  price_visibility,
+  currency,
+  price_min,
+  price_max,
+  supply_capacity,
+  incoterms,
+  short_description,
+  description,
+  specifications_json,
+  packaging,
+  application,
+  supplier_id,
+  origin_statement,
+  verification_level,
+  verification_updated_at,
+  created_at,
+  updated_at,
+  published_at
+) VALUES (
+  'prod-fertilizer-npk-20-20-20',
+  'fertilizer-npk-20-20-20',
+  'Fertilizer NPK 20-20-20',
+  NULL,
+  'cat-fertilizers-plant-nutrition',
+  'published',
+  NULL,
+  NULL,
+  'MT',
+  NULL,
+  NULL,
+  'rfq',
+  NULL,
+  NULL,
+  NULL,
+  NULL,
+  'NPK fertilizer with a declared 20-20-20 grade.',
+  'Commercial specification: N:P:K = 20:20:20. Final commercial terms, supplier, origin, packaging, availability and delivery are subject to RFQ verification.',
+  '{"npk":"20-20-20","nitrogen":"20%","phosphorus":"20%","potassium":"20%"}',
+  NULL,
+  NULL,
+  NULL,
+  NULL,
+  'declared',
+  NULL,
+  '2026-09-11T00:00:00Z',
+  '2026-09-11T00:00:00Z',
+  '2026-09-11T00:00:00Z'
+);

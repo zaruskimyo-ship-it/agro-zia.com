@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow,noarchive">
+<title>ZARUS Supplier Workspace</title>
+<link rel="stylesheet" href="/assets/zarus-marketplace.css">
+<link rel="stylesheet" href="/assets/floating-nav.css">
+<link rel="stylesheet" href="/assets/bottom-actions.css">
+<link rel="stylesheet" href="/assets/world-clock.css">
+<style>.ops-wrap{max-width:1180px;margin:0 auto;padding:32px 18px}.ops-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}.ops-panel{background:#fff;border:1px solid #dfe7df;border-radius:16px;padding:20px;box-shadow:0 8px 24px rgba(20,50,30,.06)}.ops-card{border:1px solid #e4e9e4;border-radius:12px;padding:12px;margin-top:10px}.status-pill{display:inline-block;margin-top:7px;padding:4px 8px;border-radius:999px;background:#edf4ed;font-size:12px}.empty-state{color:#68756b;padding:14px 0}.ops-error{color:#a33;margin-top:10px}@media(max-width:800px){.ops-grid{grid-template-columns:1fr}}</style>
+</head>
+<body>
+<header class="z-header site-header"><div class="z-nav container">
+<a class="z-brand brand" href="/zarus.html?lang=en">ZARUS</a>
+<a class="z-home" href="/zarus.html?lang=en" data-z="home">Home</a>
+<button class="z-menu" type="button" aria-expanded="false">Menu</button>
+<nav class="z-links"><a href="/zarus.html?lang=en" data-z="marketplace">Marketplace</a><a href="/suppliers.html?lang=en" data-z="suppliers">Suppliers</a><a href="/zarus-workspace.html?lang=en" data-z="customerWorkspace">Customer Workspace</a></nav>
+<select class="z-language" aria-label="Select language"><option value="en">English</option><option value="fa">فارسی</option><option value="ar">العربية</option><option value="uz">O‘zbek</option><option value="tr">Türkçe</option><option value="ru">Русский</option></select>
+</div></header>
+<main class="ops-wrap">
+<p class="eyebrow">SUPPLIER OPERATIONS</p><h1 id="supplier-identity">Supplier Workspace</h1>
+<p>Manage incoming RFQs, quotations and downstream B2B orders from one operational workspace.</p>
+<div id="supplier-error" class="ops-error" role="alert"></div>
+<section class="ops-grid" aria-label="Supplier operations">
+<article class="ops-panel"><h2>RFQs</h2><div id="supplier-rfqs"><div class="empty-state">Loading RFQs…</div></div></article>
+<article class="ops-panel"><h2>Quotes</h2><div id="supplier-quotes"><div class="empty-state">Loading quotes…</div></div></article>
+<article class="ops-panel"><h2>Orders</h2><div id="supplier-orders"><div class="empty-state">Loading orders…</div></div></article>
+</section>
+<section class="ops-panel" style="margin-top:16px"><h2>Transaction flow</h2><p>RFQ → Review → Draft Quote → Send → Negotiation → Accepted/Rejected → Order → Proforma → Payment → Sourcing → QC → Shipping → Documents → Delivery</p></section>
+</main>
+<script src="/assets/zarus-language.js" defer></script>
+<script src="/assets/floating-nav.js" defer></script>
+<script src="/assets/bottom-actions.js" defer></script>
+<script src="/assets/world-clock.js" defer></script>
+<script type="module" src="/assets/zarus-supplier-operations.js"></script>
+</body></html>

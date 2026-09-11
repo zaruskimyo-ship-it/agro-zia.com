@@ -1,0 +1,62 @@
+name: Preview D1 Migration
+
+on:
+  workflow_dispatch:
+    inputs:
+      preview_database_name:
+        description: "Existing Cloudflare D1 database name dedicated to Preview (must not be agrozia-db11)"
+        required: true
+        type: string
+      migration_target:
+        description: "Migration target to apply"
+        required: true
+        default: "0013_seed_npk_20_20_20.sql"
+        type: choice
+        options:
+          - 0013_seed_npk_20_20_20.sql
+
+permissions:
+  contents: read
+
+jobs:
+  migrate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Validate Preview database boundary
+        env:
+          PREVIEW_DATABASE_NAME: ${{ inputs.preview_database_name }}
+        run: |
+          set -euo pipefail
+          test -n "$PREVIEW_DATABASE_NAME"
+          if [ "$PREVIEW_DATABASE_NAME" = "agrozia-db11" ]; then
+            echo "Refusing migration: agrozia-db11 is the Production database."
+            exit 1
+          fi
+          grep -Fq 'database_id": "e81f6625-99f4-4d52-a5a4-780cd82f4977"' wrangler.jsonc
+          test -f migrations/0013_seed_npk_20_20_20.sql
+
+      - name: Install Wrangler
+        run: npm install --no-save wrangler@4.131.0
+
+      - name: Apply selected migration to Preview D1 only
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          PREVIEW_DATABASE_NAME: ${{ inputs.preview_database_name }}
+          MIGRATION_TARGET: ${{ inputs.migration_target }}
+        run: |
+          set -euo pipefail
+          test -n "$CLOUDFLARE_API_TOKEN"
+          test -n "$CLOUDFLARE_ACCOUNT_ID"
+          case "$MIGRATION_TARGET" in
+            0013_seed_npk_20_20_20.sql) ;;
+            *) echo "Refusing unknown migration target: $MIGRATION_TARGET"; exit 1 ;;
+          esac
+          npx wrangler d1 migrations apply "$PREVIEW_DATABASE_NAME" --remote
