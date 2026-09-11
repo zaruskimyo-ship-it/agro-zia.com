@@ -16,6 +16,7 @@ import { cartSiteResponse } from "./src/site/cart-site-shell.js";
 import { checkoutSiteResponse } from "./src/site/checkout-site-shell.js";
 import { ordersSiteResponse } from "./src/site/orders-site-shell.js";
 import { accountSiteResponse } from "./src/site/account-site-shell.js";
+import { adminSiteResponse } from "./src/site/admin-site-shell.js";
 
 function json(data, status = 200) {
   return new Response(JSON.stringify(data), { status, headers: { "content-type": "application/json; charset=utf-8" } });
@@ -74,6 +75,7 @@ export default {
     if (request.method === "GET" && (url.pathname === "/checkout" || url.pathname === "/checkout/review" || url.pathname === "/checkout/confirmation")) return checkoutSiteResponse(url.pathname);
     if (request.method === "GET" && (url.pathname === "/orders" || url.pathname === "/orders/direct-001" || url.pathname === "/orders/b2b-001")) return ordersSiteResponse(url.pathname);
     if (request.method === "GET" && (url.pathname === "/account" || url.pathname.startsWith("/account/"))) return accountSiteResponse(url.pathname);
+    if (request.method === "GET" && (url.pathname === "/admin" || url.pathname.startsWith("/admin/"))) return adminSiteResponse(url.pathname);
     if (request.method === "GET" && !url.pathname.startsWith("/api/")) return siteResponse(url.pathname);
     return new Response("Not Found", { status: 404, headers: { "content-type": "text/plain; charset=utf-8" } });
   }
