@@ -14,6 +14,7 @@ import { siteResponse } from "./src/site/store-site-shell.js";
 import { productsSiteResponse } from "./src/site/products-live-response.js";
 import { suppliersLiveResponse } from "./src/site/suppliers-live-response.js";
 import { rfqLiveSiteResponse } from "./src/site/rfq-live-response.js";
+import { adminMatchesLiveResponse } from "./src/site/admin-matches-live-response.js";
 import { cartSiteResponse } from "./src/site/cart-site-shell.js";
 import { checkoutSiteResponse } from "./src/site/checkout-site-shell.js";
 import { ordersSiteResponse } from "./src/site/orders-site-shell.js";
@@ -77,6 +78,7 @@ export default {
     if (request.method === "GET" && (url.pathname === "/products" || /^\/products\/[^/]+$/.test(url.pathname))) return productsSiteResponse(url.pathname);
     if (request.method === "GET" && (url.pathname === "/suppliers" || url.pathname.startsWith("/suppliers/"))) return suppliersLiveResponse(url.pathname);
     if (request.method === "GET" && (url.pathname === "/rfq" || url.pathname === "/rfq/review")) return rfqLiveSiteResponse(url.pathname);
+    if (request.method === "GET" && url.pathname === "/admin/matches") return adminMatchesLiveResponse();
     if (request.method === "GET" && url.pathname === "/cart") return cartSiteResponse(url.pathname);
     if (request.method === "GET" && (url.pathname === "/checkout" || url.pathname === "/checkout/review" || url.pathname === "/checkout/confirmation")) return checkoutSiteResponse(url.pathname);
     if (request.method === "GET" && (url.pathname === "/orders" || url.pathname === "/orders/direct-001" || url.pathname === "/orders/b2b-001")) return ordersSiteResponse(url.pathname);
