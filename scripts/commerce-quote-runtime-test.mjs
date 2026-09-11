@@ -76,7 +76,6 @@ const payload = await response.json();
 assert.equal(payload.item.status, "draft");
 assert.notEqual(payload.item.quote_number, "CLIENT-FORGED");
 assert.equal(payload.item.product_name, "Canonical Product");
-assert.equal(payload.item.total_amount_minor, 140, false);
 assert.equal(payload.item.total_amount_minor, 1402600);
 assert.equal(payload.item.inflation_adjustment_minor, 10000);
 assert.equal(payload.item.inflation_adjustment_bps, 1000);
