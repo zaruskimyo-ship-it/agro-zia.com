@@ -1,4 +1,5 @@
 import { handleCustomerAuth } from "./src/auth/customer-auth.js";
+import { handleAdminAuth } from "./src/auth/admin-auth.js";
 import { handlePublicProducts } from "./src/commerce/product-api.js";
 import { handleStoreRfqs } from "./src/commerce/rfq-api.js";
 import { handleCart } from "./src/commerce/cart-api.js";
@@ -17,6 +18,12 @@ export default {
       let db = "not_checked";
       try { await env.STORE_DB.prepare("SELECT 1 AS ok").first(); db = "ok"; } catch { db = "unavailable"; }
       return json({ ok: true, service: "agrozia-store", environment: "foundation", database: db, timestamp: new Date().toISOString() });
+    }
+    if (url.pathname.startsWith("/api/store-admin/")) {
+      try {
+        const response = await handleAdminAuth(request, env, url.pathname);
+        if (response) return response;
+      } catch { return json({ ok: false, error: "store_admin_auth_unavailable" }, 503); }
     }
     if (url.pathname.startsWith("/api/customer/") && url.pathname !== "/api/customer/rfqs") {
       try {
