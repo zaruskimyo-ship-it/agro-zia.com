@@ -6,7 +6,7 @@ on:
       - feat/store-b2b-order
   pull_request:
     branches:
-      - feat/store-b2b-order
+      - main
 
 jobs:
   b2b-contract-tests:
