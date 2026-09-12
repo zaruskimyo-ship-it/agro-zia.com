@@ -5,7 +5,7 @@ import { handleCart } from "../src/commerce/cart-api.js";
 
 test("cart page is a live integration surface, not a structural mock", () => {
   const html = cartSiteShell("/cart");
-  assert.match(html, /fetch\('\/api\/cart'/);
+  assert.match(html, /request\('\/api\/cart'/);
   assert.match(html, /fetch\(url, \{ credentials:'same-origin'/);
   assert.match(html, /\/api\/cart\/items/);
   assert.doesNotMatch(html, /NPK Fertilizer — Structural Product/);
