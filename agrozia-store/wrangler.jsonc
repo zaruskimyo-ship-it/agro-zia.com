@@ -8,7 +8,7 @@
     {
       "binding": "STORE_DB",
       "database_name": "agrozia-store-db",
-      "database_id": "REPLACE_WITH_NEW_D1_DATABASE_ID"
+      "database_id": "8753bf49-838f-497f-b14c-84fd5cfd967d"
     }
   ],
   "r2_buckets": [
