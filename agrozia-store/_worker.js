@@ -21,6 +21,7 @@ import { accountQuotesLiveResponse } from "./src/site/account-quotes-live-respon
 import { cartSiteResponse } from "./src/site/cart-site-shell.js";
 import { checkoutSiteResponse } from "./src/site/checkout-site-shell.js";
 import { ordersLiveResponse } from "./src/site/orders-live-response.js";
+import { accountRfqsLiveResponse } from "./src/site/account-rfqs-live-response.js";
 import { accountSiteResponse } from "./src/site/account-site-shell.js";
 import { adminSiteResponse } from "./src/site/admin-site-shell.js";
 
@@ -65,6 +66,7 @@ export default {
     if (request.method === "GET" && (url.pathname === "/rfq" || url.pathname === "/rfq/review")) return rfqLiveSiteResponse(url.pathname);
     if (request.method === "GET" && url.pathname === "/admin/matches") return adminMatchesLiveResponse();
     if (request.method === "GET" && url.pathname === "/account/quotes") return accountQuotesLiveResponse();
+    if (request.method === "GET" && url.pathname === "/account/rfqs") return accountRfqsLiveResponse();
     if (request.method === "GET" && url.pathname === "/cart") return cartSiteResponse(url.pathname);
     if (request.method === "GET" && (url.pathname === "/checkout" || url.pathname === "/checkout/review" || url.pathname === "/checkout/confirmation")) return checkoutSiteResponse(url.pathname);
     if (request.method === "GET" && url.pathname === "/orders") return ordersLiveResponse();
