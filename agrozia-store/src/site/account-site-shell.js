@@ -27,7 +27,7 @@ export function accountSiteShell(pathname = "/account") {
   if (pathname === "/account/profile") return detail("Profile", "Profile", "Manage customer and company information used across commercial requests.", ["Company identity", "Contact information", "Business destination preferences"]);
   if (pathname === "/account/rfqs") return detail("RFQs", "RFQs", "Review business requests and their supplier-matching lifecycle.", ["Submitted RFQs", "Supplier match status", "Request details and timing"]);
   if (pathname === "/account/quotes") return detail("Quotes", "Quotes", "Review supplier quotations associated with accepted or pending RFQs.", ["Quote status", "Supplier reference", "Commercial terms and expiry"]);
-  if (pathname === "/account/orders") return detail("Orders", "Orders", "Review order history while preserving separate Direct Sale and B2B order paths.", ["Direct Sale orders", "B2B orders from accepted quotes", "Order status and timeline"]);
+  if (pathname === "/account/orders") return null;
   if (pathname === "/account/documents") return detail("Documents", "Documents", "A dedicated place for commercial and order-related documents.", ["RFQ documents", "Quotation documents", "Order documents"]);
   if (pathname === "/account/settings") return detail("Settings", "Settings", "Customer portal preferences and session controls.", ["Language preference", "Notification preferences", "Session and logout controls"]);
   return null;
@@ -36,5 +36,5 @@ export function accountSiteShell(pathname = "/account") {
 export function accountSiteResponse(pathname = "/account") {
   const html = accountSiteShell(pathname);
   if (!html) return new Response("Not Found", { status: 404, headers: { "content-type": "text/plain; charset=utf-8" } });
-  return new Response(html, { status: 200, headers: { "content-type": "text/html; charset=utf-8" } });
+  return new Response(html, { status: 200, headers: { "content-type": "text/html; charset=utf-8", "cache-control": "no-store" } });
 }
