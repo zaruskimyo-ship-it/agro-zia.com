@@ -68,6 +68,7 @@ export default {
     if (request.method === "GET" && url.pathname === "/cart") return cartSiteResponse(url.pathname);
     if (request.method === "GET" && (url.pathname === "/checkout" || url.pathname === "/checkout/review" || url.pathname === "/checkout/confirmation")) return checkoutSiteResponse(url.pathname);
     if (request.method === "GET" && url.pathname === "/orders") return ordersLiveResponse();
+    if (request.method === "GET" && url.pathname === "/account/orders") return ordersLiveResponse();
     if (request.method === "GET" && (url.pathname === "/account" || url.pathname.startsWith("/account/"))) return accountSiteResponse(url.pathname);
     if (request.method === "GET" && (url.pathname === "/admin" || url.pathname.startsWith("/admin/"))) return adminSiteResponse(url.pathname);
     if (request.method === "GET" && !url.pathname.startsWith("/api/")) return siteResponse(url.pathname);
