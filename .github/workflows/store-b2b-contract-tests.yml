@@ -25,4 +25,4 @@ jobs:
           node-version: 22
 
       - name: Run Store contract tests
-        run: node --test tests/b2b-order-contract.test.js tests/admin-session-contract.test.js tests/admin-product-contract.test.js tests/admin-product-api-shape.test.js tests/admin-supplier-contract.test.js tests/admin-supplier-repository-contract.test.js tests/cart-contract.test.js tests/cart-live-integration.test.js tests/checkout-contract.test.js tests/checkout-live-integration.test.js tests/direct-order-live-integration.test.js tests/account-orders-live-integration.test.js
+        run: node --test tests/b2b-order-contract.test.js tests/admin-session-contract.test.js tests/admin-product-contract.test.js tests/admin-product-api-shape.test.js tests/admin-supplier-contract.test.js tests/admin-supplier-repository-contract.test.js tests/cart-contract.test.js tests/cart-live-integration.test.js tests/checkout-contract.test.js tests/checkout-live-integration.test.js tests/direct-order-live-integration.test.js tests/account-orders-live-integration.test.js tests/account-profile-session-live.test.js
