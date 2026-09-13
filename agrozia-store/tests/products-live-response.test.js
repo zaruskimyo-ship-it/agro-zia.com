@@ -22,7 +22,8 @@ test("Product detail is wired to a published product slug", async () => {
 });
 
 test("Live integration keeps the Store API boundary explicit", async () => {
-  const html = await productsSiteResponse("/products").then((r) => r.text());
+  const response = productsSiteResponse("/products");
+  const html = await response.text();
   assert.match(html, /fetch\('\/api\/products\?limit=50'/);
   assert.doesNotMatch(html, /\/api\/inquiries|TELEGRAM_BOT_TOKEN_V2|agrozia-db11/);
 });

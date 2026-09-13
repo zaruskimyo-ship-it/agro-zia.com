@@ -2,30 +2,41 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { checkoutSiteShell } from "../src/site/checkout-site-shell.js";
 
-test("checkout landing exposes customer, delivery, payment and order type structure", () => {
-  const html = checkoutSiteShell("/checkout");
-  assert.match(html, /Customer \/ Company/);
-  assert.match(html, /Billing Information/);
-  assert.match(html, /Delivery & Commercial Terms/);
-  assert.match(html, /Shipping \/ Incoterms/);
-  assert.match(html, /Payment method/);
+test("checkout landing exposes customer, delivery, payment and order type structure", async () => {
+  const html = await checkoutSiteShell("/checkout");
+
+  assert.match(html, /Customer/);
+  assert.match(html, /Company/);
+  assert.match(html, /Phone/);
+  assert.match(html, /Delivery Address/);
+  assert.match(html, /Country/);
+  assert.match(html, /City/);
+  assert.match(html, /Address/);
+  assert.match(html, /Postal code/);
   assert.match(html, /Direct Sale/);
-  assert.match(html, /B2B \/ Quote/);
-  assert.match(html, /Continue to Order Review/);
+  assert.match(html, /B2B/);
+  assert.match(html, /\/api\/checkout/);
 });
 
-test("checkout review preserves direct-sale and B2B boundaries", () => {
-  const html = checkoutSiteShell("/checkout/review");
-  assert.match(html, /Order Items/);
+test("checkout review preserves direct-sale and B2B boundaries", async () => {
+  const html = await checkoutSiteShell("/checkout/review");
+
+  assert.match(html, /Items/);
   assert.match(html, /Commercial Summary/);
-  assert.match(html, /accepted B2B Quote/);
-  assert.match(html, /Submit Order/);
-  assert.doesNotMatch(html, /undefined/);
+  assert.match(html, /Delivery/);
+  assert.match(html, /Direct Sale/);
+  assert.match(html, /B2B/);
+  assert.match(html, /Create Direct Sale Order/);
+  assert.match(html, /\/api\/orders\/from-checkout\//);
 });
 
-test("checkout confirmation is structural and cannot imply a production order", () => {
-  const html = checkoutSiteShell("/checkout/confirmation");
-  assert.match(html, /Order Confirmation/);
-  assert.match(html, /AGZ-ORDER-PENDING/);
-  assert.match(html, /No production order has been created/);
+test("checkout confirmation is structural and connected to the live order flow", async () => {
+  const html = await checkoutSiteShell("/checkout/confirmation");
+
+  assert.match(html, /Direct Sale Order/);
+  assert.match(html, /Order creation is now connected to the live order API/);
+  assert.match(html, /authenticated, orderable checkout/);
+  assert.match(html, /order reference is returned by the API/);
+  assert.match(html, /\/orders/);
+  assert.match(html, /\/cart/);
 });

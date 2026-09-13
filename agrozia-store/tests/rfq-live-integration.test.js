@@ -5,6 +5,7 @@ import fs from "node:fs";
 const live = fs.readFileSync(new URL("../src/site/rfq-live-response.js", import.meta.url), "utf8");
 const api = fs.readFileSync(new URL("../src/commerce/rfq-api.js", import.meta.url), "utf8");
 const contract = fs.readFileSync(new URL("../src/commerce/rfq-contract.js", import.meta.url), "utf8");
+const repository = fs.readFileSync(new URL("../src/commerce/rfq-repository.js", import.meta.url), "utf8");
 const worker = fs.readFileSync(new URL("../_worker.js", import.meta.url), "utf8");
 
 test("RFQ live shell uses the authenticated RFQ API", () => {
@@ -40,7 +41,8 @@ test("RFQ API remains customer-authenticated and ownership-scoped", () => {
 });
 
 test("RFQ contract keeps published-product validation and attachment-count bounds", () => {
-  assert.match(contract, /resolvePublishedProduct|published/);
+  assert.match(repository, /resolvePublishedProduct/);
+  assert.match(repository, /status = 'published'/);
   assert.match(contract, /MAX_ATTACHMENTS = 10/);
   assert.match(contract, /attachmentCount > MAX_ATTACHMENTS/);
 });

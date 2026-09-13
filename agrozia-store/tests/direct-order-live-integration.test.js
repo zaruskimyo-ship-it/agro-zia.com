@@ -6,7 +6,7 @@ import { handleOrders } from "../src/commerce/order-api.js";
 
 test("checkout review creates a Direct Sale Order through the dedicated order endpoint", async () => {
   const html = await checkoutSiteShell("/checkout/review");
-  assert.match(html, /fetch\('\/api\/orders\/from-checkout\/'+encodeURIComponent\(id\)/);
+  assert.match(html, /fetch\('\/api\/orders\/from-checkout\/'\+encodeURIComponent\(id\),/);
   assert.match(html, /Create Direct Sale Order/);
   assert.match(html, /credentials:'same-origin'/);
   assert.doesNotMatch(html, /AGZ-ORDER-PENDING/);
@@ -15,7 +15,7 @@ test("checkout review creates a Direct Sale Order through the dedicated order en
 test("Orders page reads authenticated live order data", async () => {
   const response = ordersLiveResponse();
   const html = await response.text();
-  assert.match(html, /fetch\('\/api\/orders\/'+encodeURIComponent\(id\)/);
+  assert.match(html, /fetch\('\/api\/orders\/'\+encodeURIComponent\(id\),/);
   assert.match(html, /Direct Sale/);
   assert.match(html, /B2B orders remain/);
   assert.doesNotMatch(html, /AGZ-ORDER-PENDING/);

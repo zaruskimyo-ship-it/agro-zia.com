@@ -9,12 +9,12 @@ const clientScript = `<script>
   const money = (value, currency) => {
     const n = Number(value);
     if (!Number.isFinite(n) || !currency) return 'Price validated at checkout';
-    try { return new Intl.NumberFormat(undefined, { style:'currency', currency }).format(n); } catch { return `${esc(currency)} ${n}`; }
+    try { return new Intl.NumberFormat(undefined, { style:'currency', currency }).format(n); } catch { return esc(currency) + ' ' + n; }
   };
   const state = { cart: null, loading: true, error: null, busy: false };
   function render() {
     if (state.loading) { root.innerHTML = '<div class="state">Loading your cart…</div>'; return; }
-    if (state.error) { root.innerHTML = `<div class="state error"><strong>Cart service unavailable.</strong><p>${esc(state.error)}</p><a class="btn secondary" href="/products">Continue Shopping</a></div>`; return; }
+    if (state.error) { root.innerHTML = '<div class="state error"><strong>Cart service unavailable.</strong><p>' + esc(state.error) + '</p><a class="btn secondary" href="/products">Continue Shopping</a></div>'; return; }
     const cart = state.cart || { items: [] };
     if (!Array.isArray(cart.items) || cart.items.length === 0) {
       root.innerHTML = '<div class="state"><h2>Your cart is empty</h2><p class="lead">Add a published direct-sale product to continue.</p><a class="btn primary" href="/products">Browse Products</a></div>';
@@ -24,9 +24,9 @@ const clientScript = `<script>
     const items = cart.items.map(item => {
       const fixed = item.price_min != null && item.price_max != null && Number(item.price_min) === Number(item.price_max);
       const unitPrice = fixed ? money(item.price_min, item.currency || currency) : 'Price validated at checkout';
-      return `<article class="item"><div><h3>${esc(item.name || 'Product')}</h3><p class="muted">${esc(item.brand || '')}${item.unit ? ` · Unit: ${esc(item.unit)}` : ''}</p><span class="price">${unitPrice}</span></div><div><label class="small" for="qty-${esc(item.product_id)}">Quantity</label><input id="qty-${esc(item.product_id)}" class="qty" data-qty="${esc(item.product_id)}" value="${esc(item.quantity)}" inputmode="decimal"><div class="actions"><button class="btn secondary" data-update="${esc(item.product_id)}">Update</button><button class="btn danger" data-remove="${esc(item.product_id)}">Remove</button></div></div></article>`;
+      return '<article class="item"><div><h3>' +esc(item.name || 'Product') +'</h3><p class="muted">' +esc(item.brand || '') +(item.unit ? ' · Unit: ' + esc(item.unit) : '') +'</p><span class="price">' +unitPrice +'</span></div><div><label class="small" for="qty-' +esc(item.product_id) +'">Quantity</label><input id="qty-' +esc(item.product_id) +' class="qty" data-qty="' +esc(item.product_id) +'" value="' +esc(item.quantity) +'" inputmode="decimal"><div class="actions"><button class="btn secondary" data-update="' +esc(item.product_id) +'">Update</button><button class="btn danger" data-remove="' +esc(item.product_id) +'">Remove</button></div></div></article>';
     }).join('');
-    root.innerHTML = `<div class="grid"><section class="card"><h2>Cart Items</h2>${items}<div class="actions"><a class="btn secondary" href="/products">Continue Shopping</a><a class="btn secondary" href="/rfq">Request a Quote Instead</a><button class="btn danger" data-clear>Clear Cart</button></div></section><aside class="card"><h2>Order Summary</h2><div class="summary-row"><span>Items</span><strong>${cart.items.length}</strong></div><div class="summary-row"><span>Currency</span><strong>${esc(currency || 'Pending')}</strong></div><div class="summary-total">Direct-sale terms validated by commerce API</div><div class="actions"><a class="btn primary" href="/checkout">Proceed to Checkout</a></div><p class="small">Only published products with final fixed pricing can enter this cart. B2B/RFQ-only products remain on the quotation path.</p></aside></div>`;
+    root.innerHTML = '<div class="grid"><section class="card"><h2>Cart Items</h2>' +items +'<div class="actions"><a class="btn secondary" href="/products">Continue Shopping</a><a class="btn secondary" href="/rfq">Request a Quote Instead</a><button class="btn danger" data-clear>Clear Cart</button></div></section><aside class="card"><h2>Order Summary</h2><div class="summary-row"><span>Items</span><strong>' +cart.items.length +'</strong></div><div class="summary-row"><span>Currency</span><strong>' +esc(currency || 'Pending') +'</strong></div><div class="summary-total">Direct-sale terms validated by commerce API</div><div class="actions"><a class="btn primary" href="/checkout">Proceed to Checkout</a></div><p class="small">Only published products with final fixed pricing can enter this cart. B2B/RFQ-only products remain on the quotation path.</p></aside></div>';
   }
   async function request(url, options = {}) {
     const response = await fetch(url, { credentials:'same-origin', ...options, headers:{ 'content-type':'application/json', ...(options.headers || {}) } });
@@ -54,7 +54,7 @@ const clientScript = `<script>
     const clear = event.target.closest('[data-clear]');
     if (update) {
       const id = update.dataset.update;
-      const input = root.querySelector(`[data-qty="${CSS.escape(id)}"]`);
+      const input = Array.from(root.querySelectorAll('[data-qty]')).find(el => el.getAttribute('data-qty') === id);
       mutate(() => request('/api/cart/items', { method:'POST', body:JSON.stringify({ product_id:id, quantity:input?.value }) }));
     } else if (remove) {
       mutate(() => request('/api/cart/items', { method:'DELETE', body:JSON.stringify({ product_id:remove.dataset.remove }) }));

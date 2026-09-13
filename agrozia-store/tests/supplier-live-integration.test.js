@@ -4,7 +4,20 @@ import { suppliersLiveShell } from "../src/site/suppliers-live-response.js";
 import { handlePublicSuppliers } from "../src/commerce/supplier-public-api.js";
 
 function mockDb(rows = []) {
-  return { prepare() { return { all: async () => ({ results: rows }), first: async () => rows[0] ?? null }; } };
+  return {
+    prepare() {
+      return {
+        bind() {
+          return {
+            all: async () => ({ results: rows }),
+            first: async () => rows[0] ?? null
+          };
+        },
+        all: async () => ({ results: rows }),
+        first: async () => rows[0] ?? null
+      };
+    }
+  };
 }
 
 test("public supplier repository shape is limited to published supplier fields", async () => {

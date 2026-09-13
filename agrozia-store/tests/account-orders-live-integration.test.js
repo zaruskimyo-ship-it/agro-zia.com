@@ -10,7 +10,7 @@ test("account orders is no longer a structural placeholder", () => {
 test("live orders response reads the authenticated order API", async () => {
   const response = ordersLiveResponse();
   const html = await response.text();
-  assert.match(html, /fetch\('\/api\/orders\/'+encodeURIComponent\(id\)/);
+  assert.match(html, /fetch\('\/api\/orders\/'\+encodeURIComponent\(id\),/);
   assert.match(html, /credentials:'same-origin'/);
   assert.doesNotMatch(html, /AGZ-ORDER-PENDING/);
 });

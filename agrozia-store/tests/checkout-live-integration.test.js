@@ -13,7 +13,7 @@ test("checkout landing is connected to the live checkout API", async () => {
 
 test("checkout review reads the real checkout resource", async () => {
   const html = await checkoutSiteShell("/checkout/review");
-  assert.match(html, /fetch\('\/api\/checkout\/'+encodeURIComponent\(id\)/);
+  assert.match(html, /fetch\('\/api\/checkout\/'\+encodeURIComponent\(id\),/);
   assert.match(html, /Live Checkout Review/);
   assert.doesNotMatch(html, /Structural checkout review/);
 });
@@ -24,8 +24,15 @@ test("checkout API remains authentication-gated", async () => {
   assert.deepEqual(await response.json(), { ok: false, error: "authentication_required" });
 });
 
-test("checkout confirmation does not invent an order reference", async () => {
+test("checkout confirmation is connected to the live order flow", async () => {
   const html = await checkoutSiteShell("/checkout/confirmation");
-  assert.match(html, /does not create a final order/);
+
+  assert.match(html, /Direct Sale Order/);
+  assert.match(html, /Order creation is now connected to the live order API/);
+  assert.match(html, /authenticated, orderable checkout/);
+  assert.match(html, /order reference is returned by the API/);
+  assert.match(html, /\/orders/);
+  assert.match(html, /\/cart/);
+
   assert.doesNotMatch(html, /AGZ-ORDER-PENDING/);
 });
