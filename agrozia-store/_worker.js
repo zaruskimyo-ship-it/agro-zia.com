@@ -72,7 +72,7 @@ export default {
     if (request.method === "GET" && url.pathname === "/orders") return ordersLiveResponse();
     if (request.method === "GET" && url.pathname === "/account/orders") return ordersLiveResponse();
     if (request.method === "GET" && (url.pathname === "/account" || url.pathname.startsWith("/account/"))) return accountSiteResponse(url.pathname);
-    if (request.method === "GET" && (url.pathname === "/admin" || url.pathname.startsWith("/admin/"))) return adminSiteResponse(url.pathname);
+    if (request.method === "GET" && (url.pathname === "/admin" || url.pathname.startsWith("/admin/"))) return adminSiteResponse(url.pathname, request, env);
     if (request.method === "GET" && !url.pathname.startsWith("/api/")) return siteResponse(url.pathname);
     return new Response("Not Found", { status: 404, headers: { "content-type": "text/plain; charset=utf-8" } });
   }

@@ -1,3 +1,5 @@
+import { requireAdmin } from "../auth/admin-repository.js";
+
 const NAV = [
   ["/admin", "Dashboard"],
   ["/admin/products", "Products"],
@@ -37,11 +39,15 @@ export function adminSiteShell(pathname = "/admin") {
   if (map[pathname]) return resourcePage(map[pathname], pathname);
   const match = pathname.match(/^\/admin\/(products|suppliers|rfqs|matches|quotes|orders|customers)\/[^/]+$/);
   if (match) return detailPage(map[`/admin/${match[1]}`], pathname);
-  if (pathname === "/admin/login") return layout("Admin Login", `<div class="hero"><div><div class="eyebrow">Agro-Zia Store</div><h1>Admin Login</h1><p class="muted">Secure administration session entry.</p></div></div><div class="card"><p>Login form structure will be connected to the existing Store Admin authentication API during the integration phase.</p><a class="button" href="/admin">Continue to Admin Shell</a></div>`, "/admin");
+   if (pathname === "/admin/login") return layout("Admin Login", `<div class="hero"><div><div class="eyebrow">Agro-Zia Store</div><h1>Admin Login</h1><p class="muted">Secure administration session entry.</p></div></div><div class="card"><form id="admin-login-form"><label for="admin-email">Email</label><input id="admin-email" name="email" type="email" autocomplete="username" required placeholder="admin@example.com"><label for="admin-password">Password</label><input id="admin-password" name="password" type="password" autocomplete="current-password" required minlength="12" placeholder="Password"><button class="button" type="submit">Sign in</button><p id="admin-login-error" class="muted" role="alert" hidden>Unable to sign in. Please check your credentials.</p></form></div><script>document.getElementById("admin-login-form")?.addEventListener("submit",async(e)=>{e.preventDefault();const f=e.currentTarget,b=f.querySelector("button"),m=document.getElementById("admin-login-error");m.hidden=true;b.disabled=true;try{const r=await fetch("/api/store-admin/login",{method:"POST",credentials:"same-origin",headers:{"content-type":"application/json"},body:JSON.stringify({email:f.email.value,password:f.password.value})});if(!r.ok)throw new Error("login_failed");location.assign("/admin")}catch{m.hidden=false}finally{b.disabled=false}});</script>`, "/admin"); return layout("Admin Login", `<div class="hero"><div><div class="eyebrow">Agro-Zia Store</div><h1>Admin Login</h1><p class="muted">Secure administration session entry.</p></div></div><div class="card"><p>Login form structure will be connected to the existing Store Admin authentication API during the integration phase.</p><a class="button" href="/admin">Continue to Admin Shell</a></div>`, "/admin");
   return null;
 }
 
-export function adminSiteResponse(pathname = "/admin") {
+export async function adminSiteResponse(pathname = "/admin", request, env) {
+  if (pathname !== "/admin/login") {
+    const auth = await requireAdmin(env.STORE_DB, request);
+    if (!auth.ok) return Response.redirect(new URL("/admin/login", request.url), 302);
+  }
   const html = adminSiteShell(pathname);
   if (!html) return new Response("Not Found", { status: 404, headers: { "content-type": "text/plain; charset=utf-8" } });
   return new Response(html, { status: 200, headers: { "content-type": "text/html; charset=utf-8" } });
