@@ -40,10 +40,18 @@ test("unknown admin route is safe", () => {
   assert.equal(adminSiteShell("/admin/unknown"), null);
 });
 
-test("response returns html for known route and 404 for unknown route", async () => {
-  const ok = adminSiteResponse("/admin");
+test("response returns html for public login, redirects protected admin, and 404s unknown routes", async () => {
+  const request = new Request("https://store.test/admin/login");
+  const ok = await adminSiteResponse("/admin/login", request, { STORE_DB: {} });
   assert.equal(ok.status, 200);
   assert.match(ok.headers.get("content-type"), /text\/html/);
-  const missing = adminSiteResponse("/admin/unknown");
+
+  const protectedRequest = new Request("https://store.test/admin");
+  const protectedResponse = await adminSiteResponse("/admin", protectedRequest, { STORE_DB: {} });
+  assert.equal(protectedResponse.status, 302);
+  assert.equal(protectedResponse.headers.get("location"), "https://store.test/admin/login");
+
+  const missingRequest = new Request("https://store.test/admin/unknown");
+  const missing = await adminSiteResponse("/admin/unknown", missingRequest, { STORE_DB: {} });
   assert.equal(missing.status, 404);
 });

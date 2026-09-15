@@ -7,7 +7,7 @@ test("Products listing is wired to the live Store Product API", async () => {
   assert.equal(response.status, 200);
   const html = await response.text();
   assert.match(html, /data-live-products/);
-  assert.match(html, /\/api\/products\?limit=50/);
+  assert.match(html, /const endpoint='\/api\/products\?limit='\+limit/);
   assert.match(html, /Source: Store Product API/);
   assert.match(html, /No sample catalog data is presented as live inventory/);
 });
@@ -24,6 +24,6 @@ test("Product detail is wired to a published product slug", async () => {
 test("Live integration keeps the Store API boundary explicit", async () => {
   const response = productsSiteResponse("/products");
   const html = await response.text();
-  assert.match(html, /fetch\('\/api\/products\?limit=50'/);
+  assert.match(html, /fetch\(endpoint,/);
   assert.doesNotMatch(html, /\/api\/inquiries|TELEGRAM_BOT_TOKEN_V2|agrozia-db11/);
 });

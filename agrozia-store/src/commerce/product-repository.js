@@ -26,12 +26,17 @@ export async function listPublicProducts(db, params = {}) {
   const offsetRaw = Number.parseInt(String(params.offset || "0"), 10);
   const offset = Number.isFinite(offsetRaw) ? Math.min(10000, Math.max(0, offsetRaw)) : 0;
   const search = cleanSearch(params.search);
+const category = String(params.category || "").trim().slice(0, 120);
   const conditions = ["status = 'published'"];
   const values = [];
   if (search) {
     conditions.push("(name LIKE ? OR brand LIKE ? OR short_description LIKE ?)");
     const pattern = `%${search}%`;
     values.push(pattern, pattern, pattern);
+  }
+  if (category) {
+    conditions.push("category_id = ?");
+    values.push(category);
   }
   const where = ` WHERE ${conditions.join(" AND ")}`;
   const count = await db.prepare(`SELECT COUNT(*) AS total FROM commerce_products${where}`).bind(...values).first();

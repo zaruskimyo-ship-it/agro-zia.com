@@ -18,7 +18,8 @@ export async function handlePublicProducts(request, env, pathname) {
     if (pathname === "/api/products") {
       const url = new URL(request.url);
       const result = await listPublicProducts(env.STORE_DB, {
-        limit: url.searchParams.get("limit"), offset: url.searchParams.get("offset"), search: url.searchParams.get("search")
+        limit: url.searchParams.get("limit"), offset: url.searchParams.get("offset"), search: url.searchParams.get("search"),
+category: url.searchParams.get("category")
       });
       return json({ ok: true, ...result });
     }
