@@ -3,13 +3,27 @@ import { handleAdminAuth } from "./src/auth/admin-auth.js";
 import { handleStoreAdminProducts } from "./src/commerce/store-admin-product-api.js";
 import { handleStoreAdminSuppliers } from "./src/commerce/store-admin-supplier-api.js";
 import { handleStoreAdminMatches } from "./src/commerce/store-admin-match-api.js";
+import { handleStoreAdminQuotes } from "./src/commerce/store-admin-quote-api.js";
+import { handleCustomerQuotes } from "./src/commerce/customer-quote-api.js";
 import { handlePublicProducts } from "./src/commerce/product-api.js";
+import { handlePublicSuppliers } from "./src/commerce/supplier-public-api.js";
 import { handleStoreRfqs } from "./src/commerce/rfq-api.js";
 import { handleCart } from "./src/commerce/cart-api.js";
 import { handleCheckout } from "./src/commerce/checkout-api.js";
 import { handleOrders } from "./src/commerce/order-api.js";
 import { handleB2BOrders } from "./src/commerce/b2b-order-api.js";
 import { siteResponse } from "./src/site/store-site-shell.js";
+import { productsSiteResponse } from "./src/site/products-live-response.js";
+import { suppliersLiveResponse } from "./src/site/suppliers-live-response.js";
+import { rfqLiveSiteResponse } from "./src/site/rfq-live-response.js";
+import { adminMatchesLiveResponse } from "./src/site/admin-matches-live-response.js";
+import { accountQuotesLiveResponse } from "./src/site/account-quotes-live-response.js";
+import { cartSiteResponse } from "./src/site/cart-site-shell.js";
+import { checkoutSiteResponse } from "./src/site/checkout-site-shell.js";
+import { ordersLiveResponse } from "./src/site/orders-live-response.js";
+import { accountRfqsLiveResponse } from "./src/site/account-rfqs-live-response.js";
+import { accountSiteResponse } from "./src/site/account-site-shell.js";
+import { adminSiteResponse } from "./src/site/admin-site-shell.js";
 
 function json(data, status = 200) {
   return new Response(JSON.stringify(data), { status, headers: { "content-type": "application/json; charset=utf-8" } });
@@ -25,56 +39,41 @@ export default {
     }
     if (url.pathname.startsWith("/api/store-admin/")) {
       try {
-        const authResponse = await handleAdminAuth(request, env, url.pathname);
-        if (authResponse) return authResponse;
-        const productResponse = await handleStoreAdminProducts(request, env, url.pathname);
-        if (productResponse) return productResponse;
-        const supplierResponse = await handleStoreAdminSuppliers(request, env, url.pathname);
-        if (supplierResponse) return supplierResponse;
-        const matchResponse = await handleStoreAdminMatches(request, env, url.pathname);
-        if (matchResponse) return matchResponse;
+        const authResponse = await handleAdminAuth(request, env, url.pathname); if (authResponse) return authResponse;
+        const productResponse = await handleStoreAdminProducts(request, env, url.pathname); if (productResponse) return productResponse;
+        const supplierResponse = await handleStoreAdminSuppliers(request, env, url.pathname); if (supplierResponse) return supplierResponse;
+        const matchResponse = await handleStoreAdminMatches(request, env, url.pathname); if (matchResponse) return matchResponse;
+        const quoteResponse = await handleStoreAdminQuotes(request, env, url.pathname); if (quoteResponse) return quoteResponse;
       } catch { return json({ ok: false, error: "store_admin_service_unavailable" }, 503); }
     }
-    if (url.pathname.startsWith("/api/customer/") && url.pathname !== "/api/customer/rfqs") {
-      try {
-        const response = await handleCustomerAuth(request, env, url.pathname);
-        if (response) return response;
-      } catch { return json({ ok: false, error: "customer_auth_unavailable" }, 503); }
+    if (url.pathname.startsWith("/api/customer/") && url.pathname !== "/api/customer/rfqs" && !url.pathname.startsWith("/api/customer/quotes")) {
+      try { const response = await handleCustomerAuth(request, env, url.pathname); if (response) return response; }
+      catch { return json({ ok: false, error: "customer_auth_unavailable" }, 503); }
     }
-    if (url.pathname === "/api/products" || url.pathname.startsWith("/api/products/") || url.pathname === "/api/categories") {
-      const response = await handlePublicProducts(request, env, url.pathname);
-      if (response) return response;
+    if (url.pathname === "/api/customer/quotes" || url.pathname.startsWith("/api/customer/quotes/")) {
+      try { const response = await handleCustomerQuotes(request, env, url.pathname); if (response) return response; }
+      catch { return json({ ok: false, error: "customer_quote_service_unavailable" }, 503); }
     }
-    if (url.pathname === "/api/rfqs" || url.pathname === "/api/customer/rfqs") {
-      try {
-        const response = await handleStoreRfqs(request, env, url.pathname);
-        if (response) return response;
-      } catch { return json({ ok: false, error: "rfq_service_unavailable" }, 503); }
-    }
-    if (url.pathname === "/api/cart" || url.pathname === "/api/cart/items") {
-      try {
-        const response = await handleCart(request, env, url.pathname);
-        if (response) return response;
-      } catch { return json({ ok: false, error: "cart_service_unavailable" }, 503); }
-    }
-    if (url.pathname === "/api/checkout" || url.pathname.startsWith("/api/checkout/")) {
-      try {
-        const response = await handleCheckout(request, env, url.pathname);
-        if (response) return response;
-      } catch { return json({ ok: false, error: "checkout_service_unavailable" }, 503); }
-    }
-    if (url.pathname.startsWith("/api/orders/")) {
-      try {
-        const response = await handleOrders(request, env, url.pathname);
-        if (response) return response;
-      } catch { return json({ ok: false, error: "order_service_unavailable" }, 503); }
-    }
-    if (url.pathname.startsWith("/api/b2b-orders/")) {
-      try {
-        const response = await handleB2BOrders(request, env, url.pathname);
-        if (response) return response;
-      } catch { return json({ ok: false, error: "b2b_order_service_unavailable" }, 503); }
-    }
-    return siteResponse(url.pathname);
+    if (url.pathname === "/api/products" || url.pathname.startsWith("/api/products/") || url.pathname === "/api/categories") { const response = await handlePublicProducts(request, env, url.pathname); if (response) return response; }
+    if (url.pathname === "/api/suppliers" || url.pathname.startsWith("/api/suppliers/")) { const response = await handlePublicSuppliers(request, env, url.pathname); if (response) return response; }
+    if (url.pathname === "/api/rfqs" || url.pathname === "/api/customer/rfqs") { try { const response = await handleStoreRfqs(request, env, url.pathname); if (response) return response; } catch { return json({ ok: false, error: "rfq_service_unavailable" }, 503); } }
+    if (url.pathname === "/api/cart" || url.pathname === "/api/cart/items") { try { const response = await handleCart(request, env, url.pathname); if (response) return response; } catch { return json({ ok: false, error: "cart_service_unavailable" }, 503); } }
+    if (url.pathname === "/api/checkout" || url.pathname.startsWith("/api/checkout/")) { try { const response = await handleCheckout(request, env, url.pathname); if (response) return response; } catch { return json({ ok: false, error: "checkout_service_unavailable" }, 503); } }
+    if (url.pathname.startsWith("/api/orders/")) { try { const response = await handleOrders(request, env, url.pathname); if (response) return response; } catch { return json({ ok: false, error: "order_service_unavailable" }, 503); } }
+    if (url.pathname.startsWith("/api/b2b-orders/")) { try { const response = await handleB2BOrders(request, env, url.pathname); if (response) return response; } catch { return json({ ok: false, error: "b2b_order_service_unavailable" }, 503); } }
+    if (request.method === "GET" && (url.pathname === "/products" || /^\/products\/[^/]+$/.test(url.pathname))) return productsSiteResponse(url.pathname);
+    if (request.method === "GET" && (url.pathname === "/suppliers" || url.pathname.startsWith("/suppliers/"))) return suppliersLiveResponse(url.pathname);
+    if (request.method === "GET" && (url.pathname === "/rfq" || url.pathname === "/rfq/review")) return rfqLiveSiteResponse(url.pathname);
+    if (request.method === "GET" && url.pathname === "/admin/matches") return adminMatchesLiveResponse();
+    if (request.method === "GET" && url.pathname === "/account/quotes") return accountQuotesLiveResponse();
+    if (request.method === "GET" && url.pathname === "/account/rfqs") return accountRfqsLiveResponse();
+    if (request.method === "GET" && url.pathname === "/cart") return cartSiteResponse(url.pathname);
+    if (request.method === "GET" && (url.pathname === "/checkout" || url.pathname === "/checkout/review" || url.pathname === "/checkout/confirmation")) return checkoutSiteResponse(url.pathname);
+    if (request.method === "GET" && url.pathname === "/orders") return ordersLiveResponse();
+    if (request.method === "GET" && url.pathname === "/account/orders") return ordersLiveResponse();
+    if (request.method === "GET" && (url.pathname === "/account" || url.pathname.startsWith("/account/"))) return accountSiteResponse(url.pathname);
+    if (request.method === "GET" && (url.pathname === "/admin" || url.pathname.startsWith("/admin/"))) return adminSiteResponse(url.pathname, request, env);
+    if (request.method === "GET" && !url.pathname.startsWith("/api/")) return siteResponse(url.pathname);
+    return new Response("Not Found", { status: 404, headers: { "content-type": "text/plain; charset=utf-8" } });
   }
 };
