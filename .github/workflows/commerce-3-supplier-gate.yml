@@ -1,0 +1,32 @@
+name: Commerce-3 Supplier Gate
+
+on:
+  push:
+    branches:
+      - feat/commerce-3-supplier-profiles
+  pull_request:
+    branches:
+      - main
+    paths:
+      - "src/commerce/supplier-*.js"
+      - "migrations/0005_commerce_suppliers.sql"
+      - "scripts/commerce-supplier-*.mjs"
+      - "docs/commerce-3-supplier-profiles.md"
+      - ".github/workflows/commerce-3-supplier-gate.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  supplier-contract-security:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Supplier contract and security gate
+        run: node scripts/commerce-supplier-contract-test.mjs

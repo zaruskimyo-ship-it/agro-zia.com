@@ -1,0 +1,25 @@
+name: Commerce-4 Quotation Gate
+
+on:
+  push:
+    branches:
+      - feat/commerce-4-quotation
+  pull_request:
+    branches:
+      - main
+      - feat/commerce-4-quotation
+
+jobs:
+  quotation-runtime-security:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Quotation contract and security gate
+        run: node scripts/commerce-quote-contract-test.mjs
+      - name: Quotation mock-D1 runtime gate
+        run: node scripts/commerce-quote-runtime-test.mjs

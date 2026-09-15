@@ -1,0 +1,170 @@
+name: SITE Foundation Gate
+
+on:
+  push:
+    branches: [feat/site-8-supplier-operations]
+  pull_request:
+    branches: [main]
+    paths:
+      - 'index.html'
+      - 'about.html'
+      - 'trade.html'
+      - 'network.html'
+      - 'zarus.html'
+      - 'inquiry.html'
+      - 'assets/site-foundation.css'
+      - 'assets/site-foundation.js'
+      - 'assets/about-auto.js'
+      - 'assets/home-auto.js'
+      - 'assets/home-nav-auto.js'
+      - 'assets/trade-auto.js'
+      - 'assets/network-auto.js'
+      - 'assets/zarus-marketplace.css'
+      - 'assets/zarus-marketplace.js'
+      - 'locales/language-selector.css'
+      - 'docs/SITE-9-LONGITUDINAL-SITE-ARCHITECTURE.md'
+      - '.github/workflows/site-foundation-gate.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  foundation:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Syntax check foundation JavaScript
+        run: node --check assets/site-foundation.js
+      - name: Structural assertions
+        run: |
+          grep -q 'id="about"' index.html
+          grep -q 'id="products"' index.html
+          grep -q 'id="engineering"' index.html
+          grep -q 'id="projects"' index.html
+          grep -q 'id="trade"' index.html
+          grep -q 'id="zarus"' index.html
+          grep -q 'id="knowledge"' index.html
+          grep -q 'id="contact"' index.html
+          grep -q 'site-foundation.css' index.html
+          grep -q 'site-foundation.js' index.html
+          grep -q 'Customer Workspace' docs/SITE-9-LONGITUDINAL-SITE-ARCHITECTURE.md
+          grep -q 'Supplier Workspace' docs/SITE-9-LONGITUDINAL-SITE-ARCHITECTURE.md
+      - name: Localization header assertions
+        run: |
+          grep -q 'data-language-switcher' assets/site-foundation.js
+          grep -q 'languageBound' assets/site-foundation.js
+          grep -q 'languagePersistBound' assets/site-foundation.js
+          grep -q 'searchParams.set.*lang' assets/site-foundation.js
+          grep -q 'addEventListener.*change' assets/site-foundation.js
+          grep -q 'labels =' assets/site-foundation.js
+          grep -q "fa: 'فارسی'" assets/site-foundation.js
+          grep -q "ar: 'العربية'" assets/site-foundation.js
+          grep -q "uz: 'O‘zbek'" assets/site-foundation.js
+          grep -q "tr: 'Türkçe'" assets/site-foundation.js
+          grep -q "ru: 'Русский'" assets/site-foundation.js
+          grep -q 'language-switcher' assets/site-foundation.css
+          grep -q 'language-select' assets/site-foundation.css
+          grep -q 'locales/language-selector.css' assets/site-foundation.css
+          grep -q 'searchParams.get.*lang' assets/site-foundation.js
+      - name: Homepage localization assertions
+        run: |
+          test -s assets/home-auto.js
+          test -s assets/home-nav-auto.js
+          node --check assets/home-auto.js
+          node --check assets/home-nav-auto.js
+          grep -q "fa:" assets/home-auto.js
+          grep -q "ar:" assets/home-auto.js
+          grep -q "uz:" assets/home-auto.js
+          grep -q "tr:" assets/home-auto.js
+          grep -q "ru:" assets/home-auto.js
+          grep -q "fa:" assets/home-nav-auto.js
+          grep -q "ar:" assets/home-nav-auto.js
+          grep -q "uz:" assets/home-nav-auto.js
+          grep -q "tr:" assets/home-nav-auto.js
+          grep -q "ru:" assets/home-nav-auto.js
+          grep -q "home-auto.js" assets/site-foundation.js
+          grep -q "home-nav-auto.js" assets/site-foundation.js
+      - name: About localization assertions
+        run: |
+          test -s assets/about-auto.js
+          node --check assets/about-auto.js
+          grep -q "fa:" assets/about-auto.js
+          grep -q "ar:" assets/about-auto.js
+          grep -q "uz:" assets/about-auto.js
+          grep -q "tr:" assets/about-auto.js
+          grep -q "ru:" assets/about-auto.js
+          grep -q "about-auto.js" assets/site-foundation.js
+          grep -q 'searchParams.get.*lang' assets/about-auto.js
+          grep -q 'document.documentElement.lang' assets/about-auto.js
+          grep -q 'document.documentElement.dir' assets/about-auto.js
+      - name: Network localization assertions
+        run: |
+          test -s assets/network-auto.js
+          node --check assets/network-auto.js
+          grep -q "fa:" assets/network-auto.js
+          grep -q "ar:" assets/network-auto.js
+          grep -q "uz:" assets/network-auto.js
+          grep -q "tr:" assets/network-auto.js
+          grep -q "ru:" assets/network-auto.js
+          grep -q "network-auto.js" assets/site-foundation.js
+          grep -q 'document.documentElement.lang' assets/network-auto.js
+          grep -q 'document.documentElement.dir' assets/network-auto.js
+      - name: ZARUS localization assertions
+        run: |
+          test -s assets/zarus-marketplace.js
+          node --check assets/zarus-marketplace.js
+          grep -q "ar:" assets/zarus-marketplace.js
+          grep -q "uz:" assets/zarus-marketplace.js
+          grep -q "tr:" assets/zarus-marketplace.js
+          grep -q "ru:" assets/zarus-marketplace.js
+          grep -q 'z-home' zarus.html
+          grep -q 'z-menu' zarus.html
+          grep -q 'z-language' zarus.html
+          grep -q 'Vazirmatn' assets/zarus-marketplace.css
+      - name: Navigation regression assertions
+        run: |
+          grep -q 'data-home-link' assets/site-foundation.js
+          grep -q 'DOMContentLoaded' assets/site-foundation.js
+          grep -q 'aria-expanded' assets/site-foundation.js
+          grep -q 'href="/"' about.html
+          grep -q 'href="/inquiry.html"' trade.html
+          grep -q 'Iran · فارسی' trade.html
+          grep -q 'Iraq · العربية' trade.html
+          grep -q 'Uzbekistan · O‘zbek' trade.html
+          grep -q 'Türkiye · Türkçe' trade.html
+          grep -q 'INTERNATIONAL TRADE · English' trade.html
+          grep -q 'data-inquiry-home' inquiry.html
+          grep -q 'data-inquiry-menu' inquiry.html
+          grep -q 'href="/?lang=en"' inquiry.html
+      - name: Trade localization assertions
+        run: |
+          test -s assets/trade-auto.js
+          node --check assets/trade-auto.js
+          grep -q "fa:" assets/trade-auto.js
+          grep -q "ar:" assets/trade-auto.js
+          grep -q "uz:" assets/trade-auto.js
+          grep -q "tr:" assets/trade-auto.js
+          grep -q "ru:" assets/trade-auto.js
+          grep -q "document.documentElement.lang" assets/trade-auto.js
+          grep -q "document.documentElement.dir" assets/trade-auto.js
+      - name: Typography assertions
+        run: |
+          grep -q 'Vazirmatn' locales/language-selector.css
+          grep -q 'html\[lang="fa"\]' locales/language-selector.css
+          grep -q 'html\[lang="ar"\]' locales/language-selector.css
+          grep -q 'font-family:"Vazirmatn"' locales/language-selector.css
+      - name: Page JavaScript syntax assertions
+        run: |
+          node --check assets/site-foundation.js
+          node --check assets/home-auto.js
+          node --check assets/home-nav-auto.js
+          node --check assets/about-auto.js
+          node --check assets/trade-auto.js
+          node --check assets/network-auto.js
+          node --check assets/zarus-marketplace.js
+          node --check inquiry-ux.js
+          node --check locales/language-selector.js
