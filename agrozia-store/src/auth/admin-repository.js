@@ -1,6 +1,6 @@
 import { adminTokenFromRequest, randomHex, sha256Hex } from "./admin-session.js";
 
-const PBKDF2_ITERATIONS = 100000;
+const PBKDF2_ITERATIONS = 310000;
 const encoder = new TextEncoder();
 
 function nowIso() { return new Date().toISOString(); }
