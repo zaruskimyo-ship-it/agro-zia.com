@@ -1,6 +1,6 @@
 import { getCustomerFromSession } from "../auth/customer-repository.js";
 import { CUSTOMER_SESSION_COOKIE } from "../auth/customer-contract.js";
-import { createDirectOrder, getOrder } from "./order-repository.js";
+import { createDirectOrder, getOrder, listOrders } from "./order-repository.js";
 
 function json(data, status = 200) {
   return new Response(JSON.stringify(data), { status, headers: {
@@ -29,6 +29,14 @@ export async function handleOrders(request, env, pathname) {
   if (!customerRecord) return json({ ok: false, error: "authentication_required" }, 401);
 
   try {
+    if (method === "GET" && pathname === "/api/orders") {
+      const url = new URL(request.url);
+      const result = await listOrders(env.STORE_DB, customerRecord, {
+        limit: url.searchParams.get("limit"),
+        offset: url.searchParams.get("offset")
+      });
+      return json({ ok: true, ...result });
+    }
     if (method === "POST" && pathname.startsWith("/api/orders/from-checkout/")) {
       const checkoutId = pathname.slice("/api/orders/from-checkout/".length);
       const order = await createDirectOrder(env.STORE_DB, customerRecord, checkoutId);
