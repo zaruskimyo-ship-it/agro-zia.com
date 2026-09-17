@@ -34,6 +34,23 @@ async function readOrder(db, order) {
   return publicOrder(order, result?.results || []);
 }
 
+export async function listOrders(db, customer, { limit = 20, offset = 0 } = {}) {
+  requireCustomer(customer);
+  const safeLimit = Math.min(Math.max(Number(limit) || 20, 1), 100);
+  const safeOffset = Math.max(Number(offset) || 0, 0);
+  const rows = await db.prepare(`SELECT id, order_number, customer_id, checkout_id, status, currency, subtotal, total,
+      customer_name, customer_email, customer_phone, shipping_name, shipping_phone,
+      shipping_country, shipping_city, shipping_address, shipping_postal_code, created_at, updated_at
+    FROM commerce_orders
+    WHERE customer_id = ?1
+    ORDER BY created_at DESC, id DESC
+    LIMIT ?2 OFFSET ?3`).bind(customer.id, safeLimit + 1, safeOffset).all();
+  const records = rows?.results || [];
+  const hasMore = records.length > safeLimit;
+  const orders = await Promise.all(records.slice(0, safeLimit).map((order) => readOrder(db, order)));
+  return { orders, pagination: { limit: safeLimit, offset: safeOffset, has_more: hasMore } };
+}
+
 function validOrderableCheckout(checkout) {
   if (!checkout) throw new Error("checkout_not_found");
   if (checkout.status === "expired") throw new Error("checkout_expired");
