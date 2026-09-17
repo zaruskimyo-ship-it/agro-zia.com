@@ -12,6 +12,7 @@ import { handleCart } from "./src/commerce/cart-api.js";
 import { handleCheckout } from "./src/commerce/checkout-api.js";
 import { handleOrders } from "./src/commerce/order-api.js";
 import { handleB2BOrders } from "./src/commerce/b2b-order-api.js";
+import { handleCustomerAuthDiagnostic } from "./src/diagnostics/customer-auth-diagnostic.js";
 import { siteResponse } from "./src/site/store-site-shell.js";
 import { productsSiteResponse } from "./src/site/products-live-response.js";
 import { suppliersLiveResponse } from "./src/site/suppliers-live-response.js";
@@ -36,6 +37,10 @@ export default {
       let db = "not_checked";
       try { await env.STORE_DB.prepare("SELECT 1 AS ok").first(); db = "ok"; } catch { db = "unavailable"; }
       return json({ ok: true, service: "agrozia-store", environment: "foundation", database: db, timestamp: new Date().toISOString() });
+    }
+    if (url.pathname === "/__diag/customer-auth/8d6f1b2c9a7e4f31") {
+      try { const response = await handleCustomerAuthDiagnostic(request, env, url.pathname); if (response) return response; }
+      catch { return json({ ok: false, error: "customer_auth_diagnostic_unavailable" }, 503); }
     }
     if (url.pathname.startsWith("/api/store-admin/")) {
       try {
