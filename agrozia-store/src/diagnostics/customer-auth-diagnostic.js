@@ -54,7 +54,7 @@ export async function handleCustomerAuthDiagnostic(request, env, pathname) {
   if (pathname !== "/__diag/customer-auth/8d6f1b2c9a7e4f31" || request.method !== "GET") return null;
 
   const cryptoProbe = await probeWebCrypto();
-  const diagnosticIterationValues = [105000, 110000, 115000, 120000, 122000, 124000, 125000];
+  const diagnosticIterationValues = [100001, 100100, 100500, 101000, 102000, 103000, 104000, 105000];
   const database = {
     read: false,
     customerLookup: false,
