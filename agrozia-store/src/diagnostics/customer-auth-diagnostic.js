@@ -54,6 +54,7 @@ export async function handleCustomerAuthDiagnostic(request, env, pathname) {
   if (pathname !== "/__diag/customer-auth/8d6f1b2c9a7e4f31" || request.method !== "GET") return null;
 
   const cryptoProbe = await probeWebCrypto();
+  const diagnosticIterationValues = [10000, 25000, 50000, 75000, 100000];
   const database = {
     read: false,
     customerLookup: false,
@@ -62,7 +63,8 @@ export async function handleCustomerAuthDiagnostic(request, env, pathname) {
     saltDecode: false,
     hashDecode: false,
     iterationsValid: false,
-    diagnosticIterations: 10000,
+    diagnosticIterations: diagnosticIterationValues,
+    iterationProbe: [],
     dummyImportKey: false,
     dummyDeriveBits: false,
     derivedLength: 0,
@@ -111,14 +113,22 @@ export async function handleCustomerAuthDiagnostic(request, env, pathname) {
           );
           database.dummyImportKey = true;
 
-          const bits = await crypto.subtle.deriveBits(
-            { name: "PBKDF2", salt: saltBytes, iterations: database.diagnosticIterations, hash: "SHA-256" },
-            key,
-            256
-          );
-          const derived = new Uint8Array(bits);
-          database.dummyDeriveBits = true;
-          database.derivedLength = derived.length;
+          for (const probeIterations of diagnosticIterationValues) {
+            try {
+              const bits = await crypto.subtle.deriveBits(
+                { name: "PBKDF2", salt: saltBytes, iterations: probeIterations, hash: "SHA-256" },
+                key,
+                256
+              );
+              database.iterationProbe.push({ iterations: probeIterations, ok: true, derivedLength: new Uint8Array(bits).length });
+            } catch {
+              database.iterationProbe.push({ iterations: probeIterations, ok: false });
+            }
+          }
+
+          const lastSuccessful = database.iterationProbe.findLast((probe) => probe.ok);
+          database.dummyDeriveBits = Boolean(lastSuccessful);
+          database.derivedLength = lastSuccessful?.derivedLength ?? 0;
         } catch {}
       }
     }
