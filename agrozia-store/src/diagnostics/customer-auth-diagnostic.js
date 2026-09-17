@@ -7,6 +7,40 @@ function json(data, status = 200) {
   });
 }
 
+function bytesToBase64(bytes) {
+  let binary = "";
+  for (const byte of bytes) binary += String.fromCharCode(byte);
+  return btoa(binary);
+}
+
+function base64ToBytes(value) {
+  const binary = atob(value);
+  return Uint8Array.from(binary, (char) => char.charCodeAt(0));
+}
+
+async function derivePassword(password, saltBytes, iterations) {
+  const key = await crypto.subtle.importKey(
+    "raw",
+    encoder.encode(password),
+    "PBKDF2",
+    false,
+    ["deriveBits"]
+  );
+  const bits = await crypto.subtle.deriveBits(
+    { name: "PBKDF2", salt: saltBytes, iterations, hash: "SHA-256" },
+    key,
+    256
+  );
+  return new Uint8Array(bits);
+}
+
+function equalBytes(left, right) {
+  if (left.length !== right.length) return false;
+  let diff = 0;
+  for (let i = 0; i < left.length; i++) diff |= left[i] ^ right[i];
+  return diff === 0;
+}
+
 async function probeWebCrypto() {
   const result = {
     randomUUID: false,
@@ -49,32 +83,50 @@ export async function handleCustomerAuthDiagnostic(request, env, pathname) {
   if (pathname !== "/__diag/customer-auth/8d6f1b2c9a7e4f31" || request.method !== "GET") return null;
 
   const cryptoProbe = await probeWebCrypto();
-  let dbRead = false;
-  let customerLookup = false;
-  let sessionTableRead = false;
+  const database = {
+    read: false,
+    customerLookup: false,
+    sessionTableRead: false,
+    passwordVerification: false,
+    passwordVerificationError: false
+  };
 
   try {
     await env.STORE_DB.prepare("SELECT 1 AS ok").first();
-    dbRead = true;
+    database.read = true;
   } catch {}
 
   try {
     const row = await env.STORE_DB.prepare(
-      "SELECT id, status, password_iterations, length(password_hash) AS hash_len, length(password_salt) AS salt_len FROM customers WHERE email = ?1 LIMIT 1"
+      "SELECT id, status, password_hash, password_salt, password_iterations FROM customers WHERE email = ?1 LIMIT 1"
     ).bind("agrozia.store.test@example.com").first();
-    customerLookup = Boolean(row);
+    database.customerLookup = Boolean(row);
+
+    if (row?.password_hash && row?.password_salt && row?.password_iterations) {
+      try {
+        const actual = await derivePassword(
+          "AgroZiaStore-Test-2026!",
+          base64ToBytes(row.password_salt),
+          Number(row.password_iterations)
+        );
+        const expected = base64ToBytes(row.password_hash);
+        database.passwordVerification = equalBytes(actual, expected);
+      } catch {
+        database.passwordVerificationError = true;
+      }
+    }
   } catch {}
 
   try {
     await env.STORE_DB.prepare("SELECT COUNT(*) AS count FROM customer_sessions").first();
-    sessionTableRead = true;
+    database.sessionTableRead = true;
   } catch {}
 
   return json({
     ok: true,
     diagnostic: "customer-auth-runtime",
     crypto: cryptoProbe,
-    database: { read: dbRead, customerLookup, sessionTableRead },
+    database,
     note: "No passwords, hashes, salts, session tokens, or customer PII are returned."
   });
 }
