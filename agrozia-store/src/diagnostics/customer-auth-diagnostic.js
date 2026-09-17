@@ -62,6 +62,7 @@ export async function handleCustomerAuthDiagnostic(request, env, pathname) {
     saltDecode: false,
     hashDecode: false,
     iterationsValid: false,
+    diagnosticIterations: 10000,
     dummyImportKey: false,
     dummyDeriveBits: false,
     derivedLength: 0,
@@ -99,7 +100,7 @@ export async function handleCustomerAuthDiagnostic(request, env, pathname) {
       const iterations = Number(row.password_iterations);
       database.iterationsValid = Number.isInteger(iterations) && iterations > 0;
 
-      if (database.saltDecode && database.iterationsValid) {
+      if (database.saltDecode) {
         try {
           const key = await crypto.subtle.importKey(
             "raw",
@@ -111,7 +112,7 @@ export async function handleCustomerAuthDiagnostic(request, env, pathname) {
           database.dummyImportKey = true;
 
           const bits = await crypto.subtle.deriveBits(
-            { name: "PBKDF2", salt: saltBytes, iterations, hash: "SHA-256" },
+            { name: "PBKDF2", salt: saltBytes, iterations: database.diagnosticIterations, hash: "SHA-256" },
             key,
             256
           );
