@@ -7,38 +7,9 @@ function json(data, status = 200) {
   });
 }
 
-function bytesToBase64(bytes) {
-  let binary = "";
-  for (const byte of bytes) binary += String.fromCharCode(byte);
-  return btoa(binary);
-}
-
 function base64ToBytes(value) {
   const binary = atob(value);
   return Uint8Array.from(binary, (char) => char.charCodeAt(0));
-}
-
-async function derivePassword(password, saltBytes, iterations) {
-  const key = await crypto.subtle.importKey(
-    "raw",
-    encoder.encode(password),
-    "PBKDF2",
-    false,
-    ["deriveBits"]
-  );
-  const bits = await crypto.subtle.deriveBits(
-    { name: "PBKDF2", salt: saltBytes, iterations, hash: "SHA-256" },
-    key,
-    256
-  );
-  return new Uint8Array(bits);
-}
-
-function equalBytes(left, right) {
-  if (left.length !== right.length) return false;
-  let diff = 0;
-  for (let i = 0; i < left.length; i++) diff |= left[i] ^ right[i];
-  return diff === 0;
 }
 
 async function probeWebCrypto() {
@@ -87,8 +58,14 @@ export async function handleCustomerAuthDiagnostic(request, env, pathname) {
     read: false,
     customerLookup: false,
     sessionTableRead: false,
-    passwordVerification: false,
-    passwordVerificationError: false
+    passwordFields: false,
+    saltDecode: false,
+    hashDecode: false,
+    iterationsValid: false,
+    dummyImportKey: false,
+    dummyDeriveBits: false,
+    derivedLength: 0,
+    expectedHashLength: 0
   };
 
   try {
@@ -98,21 +75,50 @@ export async function handleCustomerAuthDiagnostic(request, env, pathname) {
 
   try {
     const row = await env.STORE_DB.prepare(
-      "SELECT id, status, password_hash, password_salt, password_iterations FROM customers WHERE email = ?1 LIMIT 1"
+      "SELECT password_hash, password_salt, password_iterations FROM customers WHERE email = ?1 LIMIT 1"
     ).bind("agrozia.store.test@example.com").first();
     database.customerLookup = Boolean(row);
 
-    if (row?.password_hash && row?.password_salt && row?.password_iterations) {
+    if (row) {
+      database.passwordFields = Boolean(row.password_hash && row.password_salt && row.password_iterations);
+
+      let saltBytes = null;
+      let expectedHash = null;
+
       try {
-        const actual = await derivePassword(
-          "AgroZiaStore-Test-2026!",
-          base64ToBytes(row.password_salt),
-          Number(row.password_iterations)
-        );
-        const expected = base64ToBytes(row.password_hash);
-        database.passwordVerification = equalBytes(actual, expected);
-      } catch {
-        database.passwordVerificationError = true;
+        saltBytes = base64ToBytes(row.password_salt);
+        database.saltDecode = saltBytes.length > 0;
+      } catch {}
+
+      try {
+        expectedHash = base64ToBytes(row.password_hash);
+        database.hashDecode = expectedHash.length > 0;
+        database.expectedHashLength = expectedHash.length;
+      } catch {}
+
+      const iterations = Number(row.password_iterations);
+      database.iterationsValid = Number.isInteger(iterations) && iterations > 0;
+
+      if (database.saltDecode && database.iterationsValid) {
+        try {
+          const key = await crypto.subtle.importKey(
+            "raw",
+            encoder.encode("agrozia-diagnostic-dummy-password"),
+            "PBKDF2",
+            false,
+            ["deriveBits"]
+          );
+          database.dummyImportKey = true;
+
+          const bits = await crypto.subtle.deriveBits(
+            { name: "PBKDF2", salt: saltBytes, iterations, hash: "SHA-256" },
+            key,
+            256
+          );
+          const derived = new Uint8Array(bits);
+          database.dummyDeriveBits = true;
+          database.derivedLength = derived.length;
+        } catch {}
       }
     }
   } catch {}
@@ -124,7 +130,7 @@ export async function handleCustomerAuthDiagnostic(request, env, pathname) {
 
   return json({
     ok: true,
-    diagnostic: "customer-auth-runtime",
+    diagnostic: "customer-auth-runtime-isolated",
     crypto: cryptoProbe,
     database,
     note: "No passwords, hashes, salts, session tokens, or customer PII are returned."
