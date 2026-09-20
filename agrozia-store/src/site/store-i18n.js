@@ -11,6 +11,15 @@ export const SUPPORTED_STORE_LANGUAGES = Object.freeze({
 });
 
 const EN = Object.freeze({
+  "nav.home": "Home",
+  "nav.products": "Products",
+  "nav.suppliers": "Suppliers",
+  "nav.rfq": "RFQ / Request",
+  "nav.orders": "Orders",
+  "nav.about": "About",
+  "nav.contact": "Contact",
+  "nav.cart": "Cart",
+  "nav.account": "Customer / Login",
   "common.explore": "Explore",
   "common.requestQuote": "Request a Quote",
   "common.submitRfq": "Submit an RFQ",
