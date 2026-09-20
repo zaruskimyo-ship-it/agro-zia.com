@@ -82,6 +82,12 @@ function interpolate(template, params = {}) {
   ));
 }
 
+export function getStoreI18nData(keys = null) {
+  if (!Array.isArray(keys)) return Object.freeze({ languages: SUPPORTED_STORE_LANGUAGES, dictionaries: DICTIONARIES, storageKey: STORE_LANGUAGE_STORAGE_KEY });
+  const selected = Object.fromEntries(Object.entries(DICTIONARIES).map(([language, dictionary]) => [language, Object.fromEntries(keys.map((key) => [key, dictionary[key] ?? EN[key] ?? key]))]));
+  return Object.freeze({ languages: SUPPORTED_STORE_LANGUAGES, dictionaries: selected, storageKey: STORE_LANGUAGE_STORAGE_KEY });
+}
+
 export function t(key, params = {}, language = getStoreLanguage()) {
   const requested = dictionaryFor(language);
   const template = requested[key] ?? EN[key] ?? key;
