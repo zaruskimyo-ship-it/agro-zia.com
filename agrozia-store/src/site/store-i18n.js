@@ -141,7 +141,11 @@ const FLOW_DICTIONARIES = Object.freeze({en:FLOW_EN,fa:FLOW_FA,ar:Object.freeze(
 const DICTIONARIES = Object.freeze(Object.fromEntries(Object.entries({ en: EN, fa: FA, ar: AR, tr: TR, ru: RU, uz: UZ, ckb: CKB }).map(([lang,dict]) => [lang, Object.freeze({...dict, ...FLOW_DICTIONARIES[lang]})])));
 
 function normalizeLanguage(language) {
-  return Object.prototype.hasOwnProperty.call(SUPPORTED_STORE_LANGUAGES, language) ? language : "en";
+  if (typeof language !== "string") return "en";
+  const candidate = language.trim().toLowerCase().replace(/_/g, "-").split(",")[0].split(";")[0].trim();
+  if (Object.prototype.hasOwnProperty.call(SUPPORTED_STORE_LANGUAGES, candidate)) return candidate;
+  const base = candidate.split("-")[0];
+  return Object.prototype.hasOwnProperty.call(SUPPORTED_STORE_LANGUAGES, base) ? base : "en";
 }
 
 function readStoredLanguage() {
@@ -169,8 +173,7 @@ export function resolveStoreLanguage(value) {
     }
   }
   if (typeof value === "string") {
-    const candidate = value.split(",")[0].trim().split("-")[0];
-    return normalizeLanguage(candidate);
+    return normalizeLanguage(value);
   }
   return "en";
 }
