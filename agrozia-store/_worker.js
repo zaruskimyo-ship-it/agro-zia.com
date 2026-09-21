@@ -69,12 +69,12 @@ export default {
     if (url.pathname.startsWith("/api/b2b-orders/")) { try { const response = await handleB2BOrders(request, env, url.pathname); if (response) return response; } catch { return json({ ok: false, error: "b2b_order_service_unavailable" }, 503); } }
     if (request.method === "GET" && (url.pathname === "/products" || /^\/products\/[^/]+$/.test(url.pathname))) return productsSiteResponse(url.pathname, resolveStoreLanguage(url.searchParams.get("lang") || request.headers.get("accept-language")));
     if (request.method === "GET" && (url.pathname === "/suppliers" || url.pathname.startsWith("/suppliers/"))) return suppliersLiveResponse(url.pathname, resolveStoreLanguage(url.searchParams.get("lang") || request.headers.get("accept-language")));
-    if (request.method === "GET" && (url.pathname === "/rfq" || url.pathname === "/rfq/review")) return rfqLiveSiteResponse(url.pathname);
+    if (request.method === "GET" && (url.pathname === "/rfq" || url.pathname === "/rfq/review")) return rfqLiveSiteResponse(url.pathname, resolveStoreLanguage(url.searchParams.get("lang") || request.headers.get("accept-language")));
     if (request.method === "GET" && url.pathname === "/admin/matches") return adminMatchesLiveResponse();
     if (request.method === "GET" && url.pathname === "/account/quotes") return accountQuotesLiveResponse();
     if (request.method === "GET" && url.pathname === "/account/rfqs") return accountRfqsLiveResponse();
-    if (request.method === "GET" && url.pathname === "/cart") return cartSiteResponse(url.pathname);
-    if (request.method === "GET" && (url.pathname === "/checkout" || url.pathname === "/checkout/review" || url.pathname === "/checkout/confirmation")) return checkoutSiteResponse(url.pathname);
+    if (request.method === "GET" && url.pathname === "/cart") return cartSiteResponse(url.pathname, resolveStoreLanguage(url.searchParams.get("lang") || request.headers.get("accept-language")));
+    if (request.method === "GET" && (url.pathname === "/checkout" || url.pathname === "/checkout/review" || url.pathname === "/checkout/confirmation")) return checkoutSiteResponse(url.pathname, resolveStoreLanguage(url.searchParams.get("lang") || request.headers.get("accept-language")));
     if (request.method === "GET" && url.pathname === "/orders") return ordersLiveResponse(url.pathname, resolveStoreLanguage(url.searchParams.get("lang") || request.headers.get("accept-language")));
     if (request.method === "GET" && url.pathname === "/account/orders") return ordersLiveResponse(url.pathname, resolveStoreLanguage(url.searchParams.get("lang") || request.headers.get("accept-language")));
     if (request.method === "GET" && (url.pathname === "/account" || url.pathname.startsWith("/account/"))) return accountSiteResponse(url.pathname);
