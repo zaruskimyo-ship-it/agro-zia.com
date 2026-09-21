@@ -14,6 +14,7 @@ import { handleOrders } from "./src/commerce/order-api.js";
 import { handleB2BOrders } from "./src/commerce/b2b-order-api.js";
 import { handleCustomerAuthDiagnostic } from "./src/diagnostics/customer-auth-diagnostic.js";
 import { siteResponse } from "./src/site/store-site-shell.js";
+import { resolveStoreLanguage } from "./src/site/store-i18n.js";
 import { productsSiteResponse } from "./src/site/products-live-response.js";
 import { suppliersLiveResponse } from "./src/site/suppliers-live-response.js";
 import { rfqLiveSiteResponse } from "./src/site/rfq-live-response.js";
@@ -67,7 +68,7 @@ export default {
     if (url.pathname === "/api/checkout" || url.pathname.startsWith("/api/checkout/")) { try { const response = await handleCheckout(request, env, url.pathname); if (response) return response; } catch { return json({ ok: false, error: "checkout_service_unavailable" }, 503); } }
     if (url.pathname.startsWith("/api/orders/")) { try { const response = await handleOrders(request, env, url.pathname); if (response) return response; } catch { return json({ ok: false, error: "order_service_unavailable" }, 503); } }
     if (url.pathname.startsWith("/api/b2b-orders/")) { try { const response = await handleB2BOrders(request, env, url.pathname); if (response) return response; } catch { return json({ ok: false, error: "b2b_order_service_unavailable" }, 503); } }
-    if (request.method === "GET" && (url.pathname === "/products" || /^\/products\/[^/]+$/.test(url.pathname))) return productsSiteResponse(url.pathname);
+    if (request.method === "GET" && (url.pathname === "/products" || /^\/products\/[^/]+$/.test(url.pathname))) return productsSiteResponse(url.pathname, resolveStoreLanguage(url.searchParams.get("lang") || request.headers.get("accept-language")));
     if (request.method === "GET" && (url.pathname === "/suppliers" || url.pathname.startsWith("/suppliers/"))) return suppliersLiveResponse(url.pathname, resolveStoreLanguage(url.searchParams.get("lang") || request.headers.get("accept-language")));
     if (request.method === "GET" && (url.pathname === "/rfq" || url.pathname === "/rfq/review")) return rfqLiveSiteResponse(url.pathname);
     if (request.method === "GET" && url.pathname === "/admin/matches") return adminMatchesLiveResponse();
@@ -79,7 +80,7 @@ export default {
     if (request.method === "GET" && url.pathname === "/account/orders") return ordersLiveResponse(url.pathname, resolveStoreLanguage(url.searchParams.get("lang") || request.headers.get("accept-language")));
     if (request.method === "GET" && (url.pathname === "/account" || url.pathname.startsWith("/account/"))) return accountSiteResponse(url.pathname);
     if (request.method === "GET" && (url.pathname === "/admin" || url.pathname.startsWith("/admin/"))) return adminSiteResponse(url.pathname, request, env);
-    if (request.method === "GET" && !url.pathname.startsWith("/api/")) return siteResponse(url.pathname);
+    if (request.method === "GET" && !url.pathname.startsWith("/api/")) return siteResponse(url.pathname, resolveStoreLanguage(url.searchParams.get("lang") || request.headers.get("accept-language")));
     return new Response("Not Found", { status: 404, headers: { "content-type": "text/plain; charset=utf-8" } });
   }
 };

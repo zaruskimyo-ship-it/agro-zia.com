@@ -427,9 +427,9 @@ function detailScript() {
   })();`;
 }
 
-export function productsSiteResponse(pathname) {
+export function productsSiteResponse(pathname, language = "en") {
   const detail=/^\/products\/[^/]+$/.test(pathname);
-  const html=storeSiteShell(pathname);
+  const html=storeSiteShell(pathname, language);
 
   const headers={
     "content-type":"text/html; charset=utf-8",
