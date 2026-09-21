@@ -15,18 +15,18 @@ const clientScript = (clientI18n) => `<script>\nconst i18n=${clientI18n};\nconst
   };
   const state = { cart: null, loading: true, error: null, busy: false };
   function render() {
-    if (state.loading) { root.innerHTML = '<div class="state">${l["flow.loadingCart"]}</div>'; return; }
-    if (state.error) { root.innerHTML = '<div class="state error"><strong>Cart service unavailable.</strong><p>' + esc(state.error) + '</p><a class="btn secondary" href="/products">Continue Shopping</a></div>'; return; }
+    if (state.loading) { root.innerHTML = '<div class="state">'+tr('flow.loadingCart')+'</div>'; return; }
+    if (state.error) { root.innerHTML = '<div class="state error"><strong>'+tr('flow.cartUnavailable')+'</strong><p>' + esc(state.error) + '</p><a class="btn secondary" href="/products">Continue Shopping</a></div>'; return; }
     const cart = state.cart || { items: [] };
     if (!Array.isArray(cart.items) || cart.items.length === 0) {
-      root.innerHTML = '<div class="state"><h2>Your cart is empty</h2><p class="lead">Add a published direct-sale product to continue.</p><a class="btn primary" href="/products">Browse Products</a></div>';
+      root.innerHTML = '<div class="state"><h2>'+tr('flow.emptyCart')+'</h2><p class="lead">'+tr('flow.emptyCartLead')+'</p><a class="btn primary" href="/products">'+tr('flow.browseProducts')+'</a></div>';
       return;
     }
     const currency = cart.currency || cart.items[0]?.currency || null;
     const items = cart.items.map(item => {
       const fixed = item.price_min != null && item.price_max != null && Number(item.price_min) === Number(item.price_max);
       const unitPrice = fixed ? money(item.price_min, item.currency || currency) : tr('flow.priceValidated');
-      return '<article class="item"><div><h3>' +esc(item.name || tr('flow.product')) +'</h3><p class="muted">' +esc(item.brand || '') +(item.unit ? ' · Unit: ' + esc(item.unit) : '') +'</p><span class="price">' +unitPrice +'</span></div><div><label class="small" for="qty-' +esc(item.product_id) +'">Quantity</label><input id="qty-' +esc(item.product_id) +' class="qty" data-qty="' +esc(item.product_id) +'" value="' +esc(item.quantity) +'" inputmode="decimal"><div class="actions"><button class="btn secondary" data-update="' +esc(item.product_id) +'">Update</button><button class="btn danger" data-remove="' +esc(item.product_id) +'">Remove</button></div></div></article>';
+      return '<article class="item"><div><h3>' +esc(item.name || tr('flow.product')) +'</h3><p class="muted">' +esc(item.brand || '') +(item.unit ? ' · '+tr('flow.unit')+': ' + esc(item.unit) : '') +'</p><span class="price">' +unitPrice +'</span></div><div><label class="small" for="qty-' +esc(item.product_id) +'">Quantity</label><input id="qty-' +esc(item.product_id) +' class="qty" data-qty="' +esc(item.product_id) +'" value="' +esc(item.quantity) +'" inputmode="decimal"><div class="actions"><button class="btn secondary" data-update="' +esc(item.product_id) +'">Update</button><button class="btn danger" data-remove="' +esc(item.product_id) +'">Remove</button></div></div></article>';
     }).join('');
     root.innerHTML = '<div class="grid"><section class="card"><h2>Cart Items</h2>' +items +'<div class="actions"><a class="btn secondary" href="/products">Continue Shopping</a><a class="btn secondary" href="/rfq">Request a Quote Instead</a><button class="btn danger" data-clear>Clear Cart</button></div></section><aside class="card"><h2>Order Summary</h2><div class="summary-row"><span>Items</span><strong>' +cart.items.length +'</strong></div><div class="summary-row"><span>Currency</span><strong>' +esc(currency || tr('flow.pending')) +'</strong></div><div class="summary-total">Direct-sale terms validated by commerce API</div><div class="actions"><a class="btn primary" href="/checkout">Proceed to Checkout</a></div><p class="small">Only published products with final fixed pricing can enter this cart. B2B/RFQ-only products remain on the quotation path.</p></aside></div>';
   }
@@ -69,7 +69,7 @@ const clientScript = (clientI18n) => `<script>\nconst i18n=${clientI18n};\nconst
 </script>`;
 
 export function cartSiteShell(pathname = "/cart", language = "en") {const resolvedLanguage=resolveStoreLanguage(language);const l=getStoreI18nData().dictionaries[resolvedLanguage];const dir=resolvedLanguage==="fa"||resolvedLanguage==="ar"||resolvedLanguage==="ckb"?"rtl":"ltr";const clientI18n=JSON.stringify(l).replace(/</g,"\\u003c");
-  return `<!doctype html><html lang="${resolvedLanguage}" dir="${dir}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${l["flow.cartEyebrow"]} — AGRO-ZIA</title>${styles}</head><body>${header(l)}<main class="wrap"><section class="hero"><div class="eyebrow">${l["flow.cartEyebrow"]}</div><h1>${l["flow.cartTitle"]}</h1><p class="lead">${l["flow.cartLead"]}</p></section><div id="cart-app" aria-live="polite"><div class="state">Loading your cart…</div></div></main><footer><strong>AGRO-ZIA</strong><p>Agricultural Solutions Beyond Borders.</p></footer>${clientScript(clientI18n)}</body></html>`;
+  return `<!doctype html><html lang="${resolvedLanguage}" dir="${dir}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${l["flow.cartEyebrow"]} — AGRO-ZIA</title>${styles}</head><body>${header(l)}<main class="wrap"><section class="hero"><div class="eyebrow">${l["flow.cartEyebrow"]}</div><h1>${l["flow.cartTitle"]}</h1><p class="lead">${l["flow.cartLead"]}</p></section><div id="cart-app" aria-live="polite"><div class="state">${l["flow.loadingCart"]}</div></div></main><footer><strong>AGRO-ZIA</strong><p>Agricultural Solutions Beyond Borders.</p></footer>${clientScript(clientI18n)}</body></html>`;
 }
 
 export function cartSiteResponse(pathname = "/cart", language = "en") { return new Response(cartSiteShell(pathname, language), {headers:{"content-type":"text/html; charset=utf-8","cache-control":"no-store"}}); }
