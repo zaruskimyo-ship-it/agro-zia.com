@@ -26,7 +26,6 @@ import { ordersLiveResponse } from "./src/site/orders-live-response.js";
 import { accountRfqsLiveResponse } from "./src/site/account-rfqs-live-response.js";
 import { accountSiteResponse } from "./src/site/account-site-shell.js";
 import { adminSiteResponse } from "./src/site/admin-site-shell.js";
-import { resolveStoreLanguage } from "./src/site/store-i18n.js";
 
 function json(data, status = 200) {
   return new Response(JSON.stringify(data), { status, headers: { "content-type": "application/json; charset=utf-8" } });
