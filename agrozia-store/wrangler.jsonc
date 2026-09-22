@@ -4,17 +4,18 @@
   "main": "_worker.js",
   "compatibility_date": "2026-09-10",
   "workers_dev": true,
+  "preview_urls": true,
   "d1_databases": [
     {
       "binding": "STORE_DB",
-      "database_name": "agrozia-store-db",
+      "database_name": "agro-zia-store-db",
       "database_id": "8753bf49-838f-497f-b14c-84fd5cfd967d"
     }
   ],
   "r2_buckets": [
     {
       "binding": "STORE_ATTACHMENTS",
-      "bucket_name": "agrozia-store-attachments"
+      "bucket_name": "agro-zia-store-attachments"
     }
   ]
 }
