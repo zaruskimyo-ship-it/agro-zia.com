@@ -1,4 +1,5 @@
 import { SUPPORTED_STORE_LANGUAGES, getStoreDirection, getStoreI18nData, resolveStoreLanguage, t } from "./store-i18n.js";
+import { shellT } from "./store-site-shell-i18n.js";
 
 const pages = {
   "/": { title: "Agricultural commerce beyond borders", eyebrow: "AGRO-ZIA STORE", body: "A structured marketplace for agricultural products, suppliers, technical requests and commercial orders." },
@@ -25,11 +26,11 @@ function languageOptions() { return Object.entries(SUPPORTED_STORE_LANGUAGES).ma
 
 const esc = (v) => String(v).replace(/[&<>\"']/g, (c) => ({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]));
 
-function shellCard(title, body, href = "/products", label = "EXPLORE") {
-  return `<article class="card"><span class="status">${label}</span><h3>${esc(title)}</h3><p>${esc(body)}</p><a href="${href}">Explore â†’</a></article>`;
+function shellCard(title, body, href = "/products", label = "EXPLORE", language = "en") {
+  return `<article class="card"><span class="status">${esc(label)}</span><h3>${esc(title)}</h3><p>${esc(body)}</p><a href="${href}">${shellT(language,"common.explore")} →</a></article>`;
 }
 
-function productCatalog() {
+function productCatalog(language = "en") {
   const categories = [
     ["cat-fertilizers-crop-nutrition", "Fertilizers & Crop Nutrition", "NPK, micronutrients and crop nutrition solutions."],
     ["cat-crop-protection", "Crop Protection", "Agricultural inputs for crop health and protection."],
@@ -38,10 +39,10 @@ function productCatalog() {
     ["Technical & Engineering", "Engineering, consulting and agricultural project services."],
     ["International Trade", "Cross-border sourcing and supply coordination."]
   ];
-  return `<section class="section"><div class="section-head"><div><p class="eyebrow">PRODUCT CATALOG</p><h2>Solutions organized around agricultural needs.</h2></div><p>Catalog structure is ready for connection to the existing Products API.</p></div><div class="grid three">${categories.map(([id,t,b],i)=>`<article class="card category-card"><span class="card-index">0${i+1}</span><h3>${esc(t)}</h3><p>${esc(b)}</p><a href="/products?category=${encodeURIComponent(id)}">Browse category â†’</a></article>`).join("")}</div></section>`;
+  return `<section class="section"><div class="section-head"><div><p class="eyebrow">${shellT(language,"catalog")}</p><h2>${shellT(language,"catalogTitle")}</h2></div><p>${shellT(language,"catalogBody")}</p></div><div class="grid three">${categories.map(([id,t,b],i)=>`<article class="card category-card"><span class="card-index">0${i+1}</span><h3>${esc(t)}</h3><p>${esc(b)}</p><a href="/products?category=${encodeURIComponent(id)}">${shellT(language,"browse")}</a></article>`).join("")}</div></section>`;
 }
 
-function productListing() {
+function productListing(language = "en") {
   const products = [
     ["NPK Fertilizer", "Crop Nutrition", "Bulk / B2B"],
     ["Micronutrient Blend", "Crop Nutrition", "Technical Request"],
@@ -50,7 +51,7 @@ function productListing() {
     ["Farm Equipment", "Equipment", "Commercial Offer"],
     ["Engineering Service", "Services", "RFQ"]
   ];
-  return `<section class="section"><div class="section-head"><div><p class="eyebrow">PRODUCTS</p><h2>Browse the Agro-Zia catalog.</h2></div><a class="button primary" href="/rfq">Need a specific product?</a></div><div class="catalog-toolbar"><span>All categories</span><span>Commercial & technical products</span></div><div class="grid three">${products.map(([t,c,b],i)=>`<article class="product-card"><div class="product-media">AGZ / 0${i+1}</div><div class="product-body"><span class="status">${esc(b)}</span><p class="product-category">${esc(c)}</p><h3>${esc(t)}</h3><p>Product details, specification, supplier availability and commercial conditions.</p><a class="button secondary" href="/products/${i+1}">View product â†’</a></div></article>`).join("")}</div></section>`;
+  return `<section class="section"><div class="section-head"><div><p class="eyebrow">${shellT(language,"products")}</p><h2>${shellT(language,"catalogTitle")}</h2></div><a class="button primary" href="/rfq">${shellT(language,"common.requestQuote")}</a></div><div class="catalog-toolbar"><span>${shellT(language,"all")}</span><span>${shellT(language,"commercial")}</span></div><div class="grid three">${products.map(([t,c,b],i)=>`<article class="product-card"><div class="product-media">AGZ / 0${i+1}</div><div class="product-body"><span class="status">${esc(b)}</span><p class="product-category">${esc(c)}</p><h3>${esc(t)}</h3><p>${shellT(language,"details")}</p><a class="button secondary" href="/products/${i+1}">${shellT(language,"view")}</a></div></article>`).join("")}</div></section>`;
 }
 
 function productDetail(id) {
@@ -61,21 +62,22 @@ function productDetail(id) {
 
 export function storeSiteShell(pathname = "/", language = "en") {
   const resolvedLanguage = resolveStoreLanguage(language);
+  const st = (key) => shellT(resolvedLanguage, key);
   const productMatch = pathname.match(/^\/products\/([^/]+)$/);
-  const page = pages[pathname] ?? (productMatch ? { title: "Product Detail", eyebrow: "PRODUCT", body: "Agricultural product detail." } : { title: "Agro-Zia", eyebrow: "STORE", body: "This page is part of the Agro-Zia commerce platform." });
+  const page = pages[pathname] ?? (productMatch ? { title: st("view"), eyebrow: st("products"), body: st("details") } : { title: "Agro-Zia", eyebrow: st("products"), body: st("details") });
   const links = nav.map(([href, key]) => `<a class="nav-link ${pathname === href ? "active" : ""}" href="${href}" data-i18n="${key}">${t(key, {}, language)}</a>`).join("");
   const isHome = pathname === "/";
   let content;
   if (isHome) {
-    content = `<section class="hero"><div class="hero-copy"><p class="eyebrow">AGRICULTURE â€¢ ENGINEERING â€¢ INTERNATIONAL TRADE</p><h1>Agricultural Solutions <span>Beyond Borders.</span></h1><p class="lead">A practical B2B platform connecting agricultural products, technical expertise, suppliers and international commercial opportunities.</p><div class="actions"><a class="button primary" href="/products" data-i18n="common.explore">Explore Products</a><a class="button secondary" href="/rfq" data-i18n="common.submitRfq">Submit an RFQ</a></div></div><div class="hero-panel"><div class="panel-label">AGRO-ZIA / AGZ</div><div class="growth-mark"><i></i><i></i><i></i></div><p>Technical thinking behind commercial opportunities.</p></div></section><section class="section"><div class="section-head"><div><p class="eyebrow">OUR PLATFORM</p><h2>One structure. Multiple commercial paths.</h2></div><p>Built to grow from a clean site shell into a complete commerce workflow.</p></div><div class="grid three">${shellCard("Products","Catalog, product details, availability and commercial conditions.","/products","PRODUCTS")}${shellCard("Suppliers","Supplier discovery, matching and commercial coordination.","/suppliers","SUPPLIERS")}${shellCard("RFQ","Structured requests for technical and bulk agricultural requirements.","/rfq","RFQ")}</div></section>${productCatalog()}<section class="cta"><div><p class="eyebrow">READY TO START?</p><h2>From requirement to reliable supply.</h2><p>Use the RFQ path for technical, bulk or international requirements.</p></div><a class="button light" href="/rfq" data-i18n="common.requestQuote">Request a Quote â†’</a></section>`;
+    content = `<section class="hero"><div class="hero-copy"><p class="eyebrow">${st("heroEyebrow")}</p><h1>${st("heroTitle")} <span>${st("heroTitle2")}</span></h1><p class="lead">${st("heroLead")}</p><div class="actions"><a class="button primary" href="/products" data-i18n="common.explore">Explore Products</a><a class="button secondary" href="/rfq" data-i18n="common.submitRfq">Submit an RFQ</a></div></div><div class="hero-panel"><div class="panel-label">AGRO-ZIA / AGZ</div><div class="growth-mark"><i></i><i></i><i></i></div><p>${st("panel")}</p></div></section><section class="section"><div class="section-head"><div><p class="eyebrow">${st("platform")}</p><h2>${st("platformTitle")}</h2></div><p>${st("platformBody")}</p></div><div class="grid three">${shellCard(st("products"),st("details"),"/products",st("products"),resolvedLanguage)}${shellCard(st("suppliers"),st("details"),"/suppliers",st("suppliers"),resolvedLanguage)}${shellCard(st("rfq"),st("readyBody"),"/rfq",st("rfq"),resolvedLanguage)}</div></section>${productCatalog(resolvedLanguage)}<section class="cta"><div><p class="eyebrow">${st("ready")}</p><h2>${st("readyTitle")}</h2><p>${st("readyBody")}</p></div><a class="button light" href="/rfq" data-i18n="common.requestQuote">Request a Quote â†’</a></section>`;
   } else if (pathname === "/products") {
-    content = `<section class="page-hero"><p class="eyebrow">PRODUCTS</p><h1>Agricultural Products</h1><p class="lead">Browse products and categories by commercial need.</p></section>${productListing()}`;
+    content = `<section class="page-hero"><p class="eyebrow">${st("products")}</p><h1>${t("products.title",{},resolvedLanguage)}</h1><p class="lead">${st("details")}</p></section>${productListing(resolvedLanguage)}`;
   } else if (productMatch) {
     content = productDetail(productMatch[1]);
   } else {
-    content = `<section class="page-hero"><p class="eyebrow">${esc(page.eyebrow)}</p><h1>${esc(page.title)}</h1><p class="lead">${esc(page.body)}</p></section><section class="section"><div class="grid three">${shellCard("Core interface","Shared navigation, responsive layout and consistent design language are established.",pathname,"STRUCTURE READY")}${shellCard("Commerce API","The existing commerce services remain separated and can be connected incrementally.","/products","NEXT CONNECTION")}${shellCard("Production protected","This shell is being built on the feature branch without changing main or Production.","/","SAFE MODE")}</div></section>`;
+    content = `<section class="page-hero"><p class="eyebrow">${esc(page.eyebrow)}</p><h1>${esc(page.title)}</h1><p class="lead">${esc(page.body)}</p></section><section class="section"><div class="grid three">${shellCard(st("core"),st("coreBody"),pathname,st("structure"),resolvedLanguage)}${shellCard(st("api"),st("apiBody"),"/products",st("next"),resolvedLanguage)}${shellCard(st("safe"),st("safeBody"),"/",st("safe"),resolvedLanguage)}</div></section>`;
   }
-  return `<!doctype html><html lang="${esc(language)}" dir="${getStoreDirection(resolvedLanguage)}" data-store-language="${esc(language)}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="Agro-Zia agricultural commerce platform"><title>${esc(page.title)} | Agro-Zia</title><style>${css}</style></head><body><header class="site-header"><a class="brand" href="/"><strong>AGRO-ZIA</strong><small>AGRICULTURE â€¢ ENGINEERING â€¢ TRADE</small></a><button class="menu" aria-label="Open menu" aria-expanded="false">â˜°</button><nav>${links}</nav><div class="header-actions"><a class="icon-link" href="/cart" data-i18n="nav.cart">${t("nav.cart", {}, language)}</a><a class="account" href="/account" data-i18n="nav.account">${t("nav.account", {}, language)}</a><label class="language-control"><span class="sr-only">Language</span><select id="store-language" aria-label="Language">${languageOptions()}</select></label></div></header><main>${content}</main><footer><div><strong>AGRO-ZIA</strong><p>Agricultural Solutions Beyond Borders.</p></div><div class="footer-links"><a href="/products">Products</a><a href="/suppliers">Suppliers</a><a href="/rfq">RFQ</a><a href="/knowledge">Knowledge</a><a href="/contact">Contact</a></div><small>Â© 2026 Agro-Zia. Agriculture â€¢ Engineering â€¢ International Trade.</small></footer><script>${js}</script></body></html>`;
+  return `<!doctype html><html lang="${esc(language)}" dir="${getStoreDirection(resolvedLanguage)}" data-store-language="${esc(language)}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="Agro-Zia agricultural commerce platform"><title>${esc(page.title)} | Agro-Zia</title><style>${css}</style></head><body><header class="site-header"><a class="brand" href="/"><strong>AGRO-ZIA</strong><small>AGRICULTURE â€¢ ENGINEERING â€¢ TRADE</small></a><button class="menu" aria-label="${st("open")}" aria-expanded="false">â˜°</button><nav>${links}</nav><div class="header-actions"><a class="icon-link" href="/cart" data-i18n="nav.cart">${t("nav.cart", {}, language)}</a><a class="account" href="/account" data-i18n="nav.account">${t("nav.account", {}, language)}</a><label class="language-control"><span class="sr-only">${st("language")}</span><select id="store-language" aria-label="${st("language")}">${languageOptions()}</select></label></div></header><main>${content}</main><footer><div><strong>AGRO-ZIA</strong><p>${st("footer")}</p></div><div class="footer-links"><a href="/products">${st("products")}</a><a href="/suppliers">${st("suppliers")}</a><a href="/rfq">${st("rfq")}</a><a href="/knowledge">${st("knowledge")}</a><a href="/contact">${t("nav.contact",{},resolvedLanguage)}</a></div><small>${st("copyright")}</small></footer><script>${js}</script></body></html>`;
 }
 
 export function siteResponse(pathname, language = "en") { return new Response(storeSiteShell(pathname, language), { headers: { "content-type": "text/html; charset=utf-8", "cache-control": "no-store" } }); }
