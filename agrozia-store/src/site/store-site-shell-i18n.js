@@ -35,8 +35,8 @@ const SHELL_I18N = {
     "api": "Commerce API",
     "apiBody": "The existing commerce services remain separated and can be connected incrementally.",
     "safeBody": "This shell is being built on the feature branch without changing main or Production.",
-    "common.explore": "Products",
-    "common.requestQuote": "From requirement to reliable supply."
+    "common.explore": "Explore",
+    "common.requestQuote": "Request a Quote"
   },
   "fa": {
     "heroEyebrow": "کشاورزی • مهندسی • تجارت بین‌الملل",
@@ -74,8 +74,8 @@ const SHELL_I18N = {
     "api": "API تجارت",
     "apiBody": "سرویس‌های تجاری موجود جدا نگه داشته شده‌اند و می‌توانند به‌صورت مرحله‌ای متصل شوند.",
     "safeBody": "این پوسته در شاخه توسعه ساخته می‌شود و Main یا Production را تغییر نمی‌دهد.",
-    "common.explore": "محصولات",
-    "common.requestQuote": "از نیاز تا تأمین قابل اعتماد."
+    "common.explore": "مشاهده",
+    "common.requestQuote": "درخواست قیمت"
   },
   "ar": {
     "heroEyebrow": "الزراعة • الهندسة • التجارة الدولية",
@@ -113,8 +113,8 @@ const SHELL_I18N = {
     "api": "واجهة التجارة",
     "apiBody": "تبقى خدمات التجارة الحالية منفصلة ويمكن ربطها تدريجياً.",
     "safeBody": "يتم بناء هذه الواجهة على فرع المزايا دون تغيير Main أو Production.",
-    "common.explore": "المنتجات",
-    "common.requestQuote": "من المتطلبات إلى توريد موثوق."
+    "common.explore": "استكشف",
+    "common.requestQuote": "طلب عرض سعر"
   },
   "tr": {
     "heroEyebrow": "TARIM • MÜHENDİSLİK • ULUSLARARASI TİCARET",
@@ -152,8 +152,8 @@ const SHELL_I18N = {
     "api": "Ticaret API",
     "apiBody": "Mevcut ticaret servisleri ayrı tutuluyor ve kademeli olarak bağlanabilir.",
     "safeBody": "Bu kabuk özellik dalında oluşturuluyor; main veya Production değiştirilmiyor.",
-    "common.explore": "Ürünler",
-    "common.requestQuote": "Gereksinimden güvenilir tedarike."
+    "common.explore": "İncele",
+    "common.requestQuote": "Teklif İste"
   },
   "ru": {
     "heroEyebrow": "СЕЛЬСКОЕ ХОЗЯЙСТВО • ИНЖИНИРИНГ • МЕЖДУНАРОДНАЯ ТОРГОВЛЯ",
@@ -191,8 +191,8 @@ const SHELL_I18N = {
     "api": "Торговый API",
     "apiBody": "Существующие торговые сервисы остаются изолированными и могут подключаться поэтапно.",
     "safeBody": "Интерфейс создаётся в feature-ветке без изменения main или Production.",
-    "common.explore": "Продукция",
-    "common.requestQuote": "От требования к надёжной поставке."
+    "common.explore": "Просмотреть",
+    "common.requestQuote": "Запросить предложение"
   },
   "uz": {
     "heroEyebrow": "QISHLOQ XO‘JALIGI • MUHANDISLIK • XALQARO SAVDO",
@@ -230,8 +230,8 @@ const SHELL_I18N = {
     "api": "Savdo API",
     "apiBody": "Mavjud savdo xizmatlari alohida saqlanadi va bosqichma-bosqich ulanadi.",
     "safeBody": "Ushbu qobiq feature branchda yaratilmoqda; main yoki Production o‘zgartirilmaydi.",
-    "common.explore": "Mahsulotlar",
-    "common.requestQuote": "Talabdan ishonchli ta’minotgacha."
+    "common.explore": "Ko‘rish",
+    "common.requestQuote": "Narx so‘rash"
   },
   "ckb": {
     "heroEyebrow": "کشتوکاڵ • ئەندازیاری • بازرگانی نێودەوڵەتی",
@@ -269,8 +269,8 @@ const SHELL_I18N = {
     "api": "API ـی بازرگانی",
     "apiBody": "خزمەتگوزارییە بازرگانییەکانی ئێستا جیا هێڵراونەتەوە و دەتوانرێت بە هەنگاو پەیوەست بکرێن.",
     "safeBody": "ئەم پووستە لە feature branch دروست دەکرێت و main یان Production ناگۆڕێت.",
-    "common.explore": "بەرهەمەکان",
-    "common.requestQuote": "لە پێداویستییەوە بۆ دابینکردنی متمانەپێکراو."
+    "common.explore": "بینین",
+    "common.requestQuote": "داواکاریی نرخ"
   }
 };
 export function shellT(language,key){const lang=Object.prototype.hasOwnProperty.call(SHELL_I18N,language)?language:"en";return SHELL_I18N[lang][key]??SHELL_I18N.en[key]??key;}
