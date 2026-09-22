@@ -34,7 +34,9 @@ const SHELL_I18N = {
     "coreBody": "Shared navigation, responsive layout and consistent design language are established.",
     "api": "Commerce API",
     "apiBody": "The existing commerce services remain separated and can be connected incrementally.",
-    "safeBody": "This shell is being built on the feature branch without changing main or Production."
+    "safeBody": "This shell is being built on the feature branch without changing main or Production.",
+    "common.explore": "Products",
+    "common.requestQuote": "From requirement to reliable supply."
   },
   "fa": {
     "heroEyebrow": "کشاورزی • مهندسی • تجارت بین‌الملل",
@@ -71,7 +73,9 @@ const SHELL_I18N = {
     "coreBody": "ناوبری مشترک، چیدمان واکنش‌گرا و زبان طراحی یکپارچه ایجاد شده است.",
     "api": "API تجارت",
     "apiBody": "سرویس‌های تجاری موجود جدا نگه داشته شده‌اند و می‌توانند به‌صورت مرحله‌ای متصل شوند.",
-    "safeBody": "این پوسته در شاخه توسعه ساخته می‌شود و Main یا Production را تغییر نمی‌دهد."
+    "safeBody": "این پوسته در شاخه توسعه ساخته می‌شود و Main یا Production را تغییر نمی‌دهد.",
+    "common.explore": "محصولات",
+    "common.requestQuote": "از نیاز تا تأمین قابل اعتماد."
   },
   "ar": {
     "heroEyebrow": "الزراعة • الهندسة • التجارة الدولية",
@@ -108,7 +112,9 @@ const SHELL_I18N = {
     "coreBody": "تم إعداد التنقل المشترك والتخطيط المتجاوب ولغة التصميم الموحدة.",
     "api": "واجهة التجارة",
     "apiBody": "تبقى خدمات التجارة الحالية منفصلة ويمكن ربطها تدريجياً.",
-    "safeBody": "يتم بناء هذه الواجهة على فرع المزايا دون تغيير Main أو Production."
+    "safeBody": "يتم بناء هذه الواجهة على فرع المزايا دون تغيير Main أو Production.",
+    "common.explore": "المنتجات",
+    "common.requestQuote": "من المتطلبات إلى توريد موثوق."
   },
   "tr": {
     "heroEyebrow": "TARIM • MÜHENDİSLİK • ULUSLARARASI TİCARET",
@@ -145,7 +151,9 @@ const SHELL_I18N = {
     "coreBody": "Ortak gezinme, duyarlı düzen ve tutarlı tasarım dili oluşturuldu.",
     "api": "Ticaret API",
     "apiBody": "Mevcut ticaret servisleri ayrı tutuluyor ve kademeli olarak bağlanabilir.",
-    "safeBody": "Bu kabuk özellik dalında oluşturuluyor; main veya Production değiştirilmiyor."
+    "safeBody": "Bu kabuk özellik dalında oluşturuluyor; main veya Production değiştirilmiyor.",
+    "common.explore": "Ürünler",
+    "common.requestQuote": "Gereksinimden güvenilir tedarike."
   },
   "ru": {
     "heroEyebrow": "СЕЛЬСКОЕ ХОЗЯЙСТВО • ИНЖИНИРИНГ • МЕЖДУНАРОДНАЯ ТОРГОВЛЯ",
@@ -182,7 +190,9 @@ const SHELL_I18N = {
     "coreBody": "Общая навигация, адаптивная разметка и единый язык дизайна готовы.",
     "api": "Торговый API",
     "apiBody": "Существующие торговые сервисы остаются изолированными и могут подключаться поэтапно.",
-    "safeBody": "Интерфейс создаётся в feature-ветке без изменения main или Production."
+    "safeBody": "Интерфейс создаётся в feature-ветке без изменения main или Production.",
+    "common.explore": "Продукция",
+    "common.requestQuote": "От требования к надёжной поставке."
   },
   "uz": {
     "heroEyebrow": "QISHLOQ XO‘JALIGI • MUHANDISLIK • XALQARO SAVDO",
@@ -219,7 +229,9 @@ const SHELL_I18N = {
     "coreBody": "Umumiy navigatsiya, moslashuvchan maket va yagona dizayn tili yaratildi.",
     "api": "Savdo API",
     "apiBody": "Mavjud savdo xizmatlari alohida saqlanadi va bosqichma-bosqich ulanadi.",
-    "safeBody": "Ushbu qobiq feature branchda yaratilmoqda; main yoki Production o‘zgartirilmaydi."
+    "safeBody": "Ushbu qobiq feature branchda yaratilmoqda; main yoki Production o‘zgartirilmaydi.",
+    "common.explore": "Mahsulotlar",
+    "common.requestQuote": "Talabdan ishonchli ta’minotgacha."
   },
   "ckb": {
     "heroEyebrow": "کشتوکاڵ • ئەندازیاری • بازرگانی نێودەوڵەتی",
@@ -256,7 +268,9 @@ const SHELL_I18N = {
     "coreBody": "ڕێنوێنی هاوبەش، دیزاینی وەڵامدەرەوە و زمانی دیزاینی یەکگرتوو ئامادە کراوە.",
     "api": "API ـی بازرگانی",
     "apiBody": "خزمەتگوزارییە بازرگانییەکانی ئێستا جیا هێڵراونەتەوە و دەتوانرێت بە هەنگاو پەیوەست بکرێن.",
-    "safeBody": "ئەم پووستە لە feature branch دروست دەکرێت و main یان Production ناگۆڕێت."
+    "safeBody": "ئەم پووستە لە feature branch دروست دەکرێت و main یان Production ناگۆڕێت.",
+    "common.explore": "بەرهەمەکان",
+    "common.requestQuote": "لە پێداویستییەوە بۆ دابینکردنی متمانەپێکراو."
   }
 };
 export function shellT(language,key){const lang=Object.prototype.hasOwnProperty.call(SHELL_I18N,language)?language:"en";return SHELL_I18N[lang][key]??SHELL_I18N.en[key]??key;}
