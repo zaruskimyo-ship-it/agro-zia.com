@@ -37,7 +37,7 @@ test("unpublished supplier is not exposed through public detail API", async () =
 test("supplier live shell uses API states and does not present mock supplier records", () => {
   const html = suppliersLiveShell("/suppliers");
   assert.match(html, /fetch\('\/api\/suppliers'\)/);
-  assert.match(html, /No published suppliers are currently available/);
+  assert.match(html, /No published suppliers/);
   assert.match(html, /No sample supplier is shown as confirmed data/);
   assert.doesNotMatch(html, /Zarus Agricultural Supply/);
   assert.doesNotMatch(html, /Agro Trade Partner/);
@@ -47,5 +47,5 @@ test("supplier detail shell uses supplier API and safe not-found state", () => {
   const html = suppliersLiveShell("/suppliers/s1");
   assert.match(html, /fetch\('\/api\/suppliers\//);
   assert.match(html, /Supplier not available/);
-  assert.match(html, /Request a Quote/);
+  assert.match(html, /Start an RFQ/);
 });

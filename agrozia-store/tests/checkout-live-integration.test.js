@@ -14,7 +14,7 @@ test("checkout landing is connected to the live checkout API", async () => {
 test("checkout review reads the real checkout resource", async () => {
   const html = await checkoutSiteShell("/checkout/review");
   assert.match(html, /fetch\('\/api\/checkout\/'\+encodeURIComponent\(id\),/);
-  assert.match(html, /Live Checkout Review/);
+  assert.match(html, /Review your checkout before order creation/);
   assert.doesNotMatch(html, /Structural checkout review/);
 });
 

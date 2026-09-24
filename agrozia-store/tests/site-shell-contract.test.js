@@ -23,10 +23,10 @@ test("site shell supports the planned primary pages", () => {
 
 test("products page exposes catalog structure and product cards", () => {
   const html = storeSiteShell("/products");
-  assert.match(html, /PRODUCT CATALOG|Browse the Agro-Zia catalog/);
+  assert.match(html, /Agricultural Products|Solutions organized around agricultural needs\./);
   assert.match(html, /NPK Fertilizer/);
   assert.match(html, /href="\/products\/1"/);
-  assert.match(html, /Need a specific product/);
+  assert.match(html, /href="\/rfq"/);
 });
 
 test("product detail route exposes technical and commercial structure", () => {

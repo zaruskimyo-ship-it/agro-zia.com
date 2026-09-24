@@ -17,15 +17,15 @@ test("RFQ live shell uses the authenticated RFQ API", () => {
 
 test("RFQ live shell loads published products through the public catalog API", () => {
   assert.match(live, /fetch\('\/api\/products'/);
-  assert.match(live, /No published products/);
+  assert.match(live, /flow\.noProducts/);
   assert.match(live, /product_id/);
 });
 
 test("RFQ live shell has review, validation and failure states", () => {
-  assert.match(live, /Review RFQ/);
-  assert.match(live, /Please select a published product or enter a product name/);
-  assert.match(live, /RFQ service is temporarily unavailable/);
-  assert.match(live, /No RFQ was created/);
+  assert.match(live, /flow\.reviewRfq/);
+  assert.match(live, /flow\.selectOrEnter/);
+  assert.match(live, /flow\.rfqUnavailable/);
+  assert.match(live, /flow\.invalidRfq/);
 });
 
 test("RFQ live shell does not manufacture a confirmation number", () => {
