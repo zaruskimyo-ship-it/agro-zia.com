@@ -26,6 +26,7 @@ import { checkoutSiteResponse } from "./src/site/checkout-site-shell.js";
 import { ordersLiveResponse } from "./src/site/orders-live-response.js";
 import { accountRfqsLiveResponse } from "./src/site/account-rfqs-live-response.js";
 import { accountSiteResponse } from "./src/site/account-site-shell.js";
+import { customerAuthSiteResponse } from "./src/site/customer-auth-site-response.js";
 import { adminSiteResponse } from "./src/site/admin-site-shell.js";
 
 function json(data, status = 200) {
@@ -73,6 +74,7 @@ export default {
     if (request.method === "GET" && (url.pathname === "/rfq" || url.pathname === "/rfq/review")) return withStoreLanguageRuntime(rfqLiveSiteResponse(url.pathname, resolveStoreLanguage(url.searchParams.get("lang") || request.headers.get("accept-language"))));
     if (request.method === "GET" && url.pathname === "/admin/matches") return adminMatchesLiveResponse();
     if (request.method === "GET" && url.pathname === "/account/quotes") return accountQuotesLiveResponse();
+    if (request.method === "GET" && (url.pathname === "/account/login" || url.pathname === "/account/register")) return withStoreLanguageRuntime(customerAuthSiteResponse(url.pathname, resolveStoreLanguage(url.searchParams.get("lang") || request.headers.get("accept-language"))));
     if (request.method === "GET" && url.pathname === "/account/rfqs") return accountRfqsLiveResponse();
     if (request.method === "GET" && url.pathname === "/cart") return withStoreLanguageRuntime(cartSiteResponse(url.pathname, resolveStoreLanguage(url.searchParams.get("lang") || request.headers.get("accept-language"))));
     if (request.method === "GET" && (url.pathname === "/checkout" || url.pathname === "/checkout/review" || url.pathname === "/checkout/confirmation")) return withStoreLanguageRuntime(checkoutSiteResponse(url.pathname, resolveStoreLanguage(url.searchParams.get("lang") || request.headers.get("accept-language"))));
