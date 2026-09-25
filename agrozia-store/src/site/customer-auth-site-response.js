@@ -11,7 +11,7 @@ const COPY = Object.freeze({
 });
 
 function esc(value) {
-  return String(value ?? "").replace(/[&<>"]/g, c => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", """:"&quot;" }[c]));
+  return String(value ?? "").replace(/[&<>"]/g, c => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", "\"":"&quot;" }[c]));
 }
 
 function shell(title, body, lang, script = "") {
